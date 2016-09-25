@@ -41,16 +41,15 @@ var query3 = db.Blogs.Where(b => b.Posts.Any(p => p.Content != null));
 ```
 ### translated sql
 ```sql
-select                                                                                                               
-    b.*                                                                                                              
-from Blogs b                                                                                                         
-left outer join (                                                                                                    
-    select                                                                                                           
-        p.*                                                                                                          
-    from Posts p                                                                                                     
-    where p.'Content' != null                                                                                        
-) x0 on b.'BlogId' = x0.'BlogId'                                                                                     
-where x0.'PostId' != null                                                                                            
+select b.*                                                                                                                                         
+from Blogs b                                                                                                                                       
+left outer join (                                                                                                                                  
+    select p.'BlogId'                                                                                                                              
+    from Posts p                                                                                                                                   
+    where p.'Content' != null                                                                                                                      
+    group by p.'BlogId'                                                                                                                            
+) x0 on b.'BlogId' = x0.'BlogId'                                                                                                                   
+where x0.'BlogId' != null                                                                                           
 ```
 
 ## filter on basic column value from multiple deep relation                                                     
@@ -61,15 +60,14 @@ var query4 = db.Blogs.Where(b => b.User.Comments.Any(c => c.Post.Content != null
 ```
 ### translated sql
 ```sql
-select                                                                                                               
-    b.*                                                                                                              
-from Blogs b                                                                                                         
-inner join Users u0 on b.'UserId' = u0.'UserId'left outer join (                                                     
-    select                                                                                                           
-        c.*                                                                                                          
-    from Comments c                                                                                                  
-    inner join Posts p0 on c.'PostId' = p0.'PostId'                                                                  
-    where p0.'Content' != null                                                                                       
-) x0 on u0.'UserId' = x0.'UserId'                                                                                    
-where x0.'CommentId' != null             
+select b.*                                                                                                                                         
+from Blogs b                                                                                                                                       
+inner join Users u0 on b.'UserId' = u0.'UserId'left outer join (                                                                                   
+    select c.'UserId'                                                                                                                              
+    from Comments c                                                                                                                                
+    inner join Posts p0 on c.'PostId' = p0.'PostId'                                                                                                
+    where p0.'Content' != null                                                                                                                     
+    group by c.'UserId'                                                                                                                            
+) x0 on u0.'UserId' = x0.'UserId'                                                                                                                  
+where x0.'UserId' != null             
 ```

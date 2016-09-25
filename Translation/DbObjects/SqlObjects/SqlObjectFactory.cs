@@ -24,8 +24,6 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
             
             dbSelect.Targets.Add(dbReference);
-            //dbReference.OwnerSelect = dbSelect;
-
             return dbSelect;
         }
 
@@ -96,7 +94,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
         }
 
-        public IDbJoin BuildJoin(DbReference joinTo, IDbBinary condition, JoinType joinType = JoinType.Inner)
+        public IDbJoin BuildJoin(DbReference joinTo, IDbBinary condition = null, JoinType joinType = JoinType.Inner)
         {
             return new SqlJoin
             {

@@ -32,6 +32,11 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
     public class SqlSelectable : IDbSelectable 
     {
         public string Alias { get; set; }
+
+        public virtual string ToSelectionString()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class SqlColumn : SqlSelectable, IDbColumn
@@ -49,10 +54,12 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
             sb.Append($"'{Name}'");
 
-            if (!string.IsNullOrEmpty(Alias))
-                sb.Append($" as {Alias}");
-
             return sb.ToString();
+        }
+
+        public override string ToSelectionString()
+        {
+            return !string.IsNullOrEmpty(Alias) ? $"{this} as {Alias}" : $"{this}";
         }
     }
 
@@ -100,19 +107,25 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 sb.Append($"where {Where}");
             }
 
+            if (GroupBys.Count > 0)
+            {
+                sb.AppendLine();
+                sb.Append($"group by {string.Join(", ", GroupBys)}");
+            }
+
             return sb.ToString();
         }
 
         public void AppendSelection(StringBuilder sb)
         {
-            sb.AppendLine();
+            var columns = Selection.Select(c => c.ToSelectionString());
+            sb.Append($" {string.Join(", ", columns)}");
         }
 
         public void AppendTargetSelections(StringBuilder sb)
         {
-            sb.AppendLine();
             var targetSelectCol = Targets.Select(t => t.ToSelectionString());
-            sb.Append($"    {string.Join(", ", targetSelectCol)}");
+            sb.Append($" {string.Join(", ", targetSelectCol)}");
         }
     }
 
@@ -121,6 +134,10 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         public DbReference To { get; set; }
 
         public IDbBinary Condition { get; set; }
+
+        public IList<IDbColumn> FromKeys { get; set; } = new List<IDbColumn>();
+
+        public IList<IDbColumn> ToKeys { get; set; } = new List<IDbColumn>();
 
         public JoinType Type { get; set; }
 

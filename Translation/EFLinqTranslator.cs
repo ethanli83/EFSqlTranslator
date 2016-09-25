@@ -146,6 +146,8 @@ namespace EFSqlTranslator.Translation
                 var dbTable = _dbFactory.BuildTable(toEntity);
 
                 DbReference joinTo;
+                DbReference childRef = null;
+                IDbSelect childSelect = null;
                 if (!relation.IsChildRelation)
                 {
                     var tableAlias = GetUniqueAliasName(dbSelect, dbTable.TableName);
@@ -153,15 +155,17 @@ namespace EFSqlTranslator.Translation
                 }
                 else
                 {
-                    var dbRef = _dbFactory.BuildRef(dbTable);
-                    var childSelect = _dbFactory.BuildSelect(dbRef);
-                    dbRef.Alias = GetUniqueAliasName(childSelect, dbTable.TableName);
+                    childRef = _dbFactory.BuildRef(dbTable);
+                    childSelect = _dbFactory.BuildSelect(childRef);
+                    childRef.Alias = GetUniqueAliasName(childSelect, dbTable.TableName);
 
                     var tableAlias = GetUniqueAliasName(dbSelect, "x");
                     joinTo = _dbFactory.BuildRef(childSelect, tableAlias);
                 }
 
                 // build join condition
+                var dbJoin = _dbFactory.BuildJoin(joinTo);
+
                 IDbBinary condition = null;
                 for (var i = 0; i < relation.FromKeys.Count; i++)
                 {
@@ -171,14 +175,24 @@ namespace EFSqlTranslator.Translation
                     var fromColumn = _dbFactory.BuildColumn(fromRef, fromKey.Name, fromKey.ValType);
                     var toColumn = _dbFactory.BuildColumn(joinTo, toKey.Name, toKey.ValType);
 
+                    dbJoin.FromKeys.Add(fromColumn);
+                    dbJoin.ToKeys.Add(toColumn);
+
+                    if (childRef != null && childSelect != null)
+                    {
+                        var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType);
+                        childSelect.Selection.Add(childColumn);
+                        childSelect.GroupBys.Add(childColumn);
+                    }
+
                     var binary = _dbFactory.BuildBinary(fromColumn, DbOperator.Equal, toColumn);
                     condition = condition != null 
                         ? _dbFactory.BuildBinary(condition, DbOperator.And, binary)
                         : binary;
                 }
 
-                var dbJoin = _dbFactory.BuildJoin(
-                    joinTo, condition, !relation.IsChildRelation ? JoinType.Inner : JoinType.LeftOuter);
+                dbJoin.Condition = condition;
+                dbJoin.Type = !relation.IsChildRelation ? JoinType.Inner : JoinType.LeftOuter;
 
                 dbSelect.Joins.Add(dbJoin);
                 _createdJoins[tupleKey] = dbJoin;
@@ -241,11 +255,10 @@ namespace EFSqlTranslator.Translation
             var dbSelect = (IDbSelect)_resultStack.Peek();
             var dbJoin = dbSelect.Joins.Single(j => j.To.Referee == childSelect);
 
-            var childEntity = _infoProvider.FindEntityInfo(caller.Type);
             IDbBinary whereClause = null;
-            foreach(var pk in childEntity.Keys)
+            foreach(var joinKey in dbJoin.ToKeys)
             {
-                var pkColumn = _dbFactory.BuildColumn(dbJoin.To, pk.Name, pk.ValType);
+                var pkColumn = _dbFactory.BuildColumn(dbJoin.To, joinKey.Name, joinKey.ValType.DotNetType, joinKey.Alias);
                 var binary = _dbFactory.BuildBinary(pkColumn, DbOperator.NotEqual, _dbFactory.BuildConstant(null));
                 whereClause = whereClause != null 
                     ? _dbFactory.BuildBinary(whereClause, DbOperator.And, binary)

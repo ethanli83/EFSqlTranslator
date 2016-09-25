@@ -18,6 +18,8 @@ namespace EFSqlTranslator.Translation
     public interface IDbSelectable : IDbObject
     {
         string Alias { get; set; }
+
+        string ToSelectionString();
     }
 
     public interface IDbColumn : IDbSelectable
@@ -52,6 +54,10 @@ namespace EFSqlTranslator.Translation
         DbReference To { get; set; }
 
         IDbBinary Condition { get; set; }
+
+        IList<IDbColumn> FromKeys { get; set; }
+
+        IList<IDbColumn> ToKeys { get; set; }
 
         JoinType Type { get; set; }
     }

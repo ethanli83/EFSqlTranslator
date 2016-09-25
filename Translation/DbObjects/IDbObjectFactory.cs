@@ -8,7 +8,7 @@ namespace EFSqlTranslator.Translation.DbObjects
         DbReference BuildRef(IDbObject dbObj, string alias = null);
         IDbSelect BuildSelect(DbReference dbReference);
         IDbSelect BuildSelect(IDbTable dbTable);
-        IDbJoin BuildJoin(DbReference joinTo, IDbBinary condition, JoinType joinType = JoinType.Inner);
+        IDbJoin BuildJoin(DbReference joinTo, IDbBinary condition = null, JoinType joinType = JoinType.Inner);
         IDbColumn BuildColumn(DbReference dbRef, string colName, Type type, string alias = "");
         IDbList<T> BuildList<T>() where T : IDbObject;
         IDbList<T> BuildList<T>(params T[] objs) where T : IDbObject;
