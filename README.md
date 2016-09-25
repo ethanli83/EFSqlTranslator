@@ -60,7 +60,8 @@ var query4 = db.Blogs.Where(b => b.User.Comments.Any(c => c.Post.Content != null
 ```sql
 select b.*                                                                                                                                         
 from Blogs b                                                                                                                                       
-inner join Users u0 on b.'UserId' = u0.'UserId'left outer join (                                                                                   
+inner join Users u0 on b.'UserId' = u0.'UserId'
+left outer join (                                                                                   
     select c.'UserId'                                                                                                                              
     from Comments c                                                                                                                                
     inner join Posts p0 on c.'PostId' = p0.'PostId'                                                                                                

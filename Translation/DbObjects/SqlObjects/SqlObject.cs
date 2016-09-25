@@ -97,8 +97,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (Joins.Count > 0)
             {
                 sb.AppendLine();
-                foreach(var dbJoin in Joins)
-                    sb.Append($"{dbJoin}");
+                sb.Append($"{string.Join(Environment.NewLine, Joins)}");
             }
 
             if (Where != null)
