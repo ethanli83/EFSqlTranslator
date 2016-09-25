@@ -87,6 +87,29 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             return new SqlScript();
         }
+
+        public DbReference BuildRef(IDbObject dbObj, string alias = null)
+        {
+            return new DbReference(dbObj)
+            {
+                Alias = alias
+            };
+        }
+
+        public IDbJoin BuildJoin(DbReference joinTo, IDbBinary condition, JoinType joinType = JoinType.Inner)
+        {
+            return new SqlJoin
+            {
+                To = joinTo,
+                Condition = condition,
+                Type = joinType
+            };
+        }
+
+        public IDbList<T> BuildList<T>(params T[] objs) where T : IDbObject
+        {
+            return new SqlList<T>(objs);
+        }
     }
 
     public class SqlTypeConvertor

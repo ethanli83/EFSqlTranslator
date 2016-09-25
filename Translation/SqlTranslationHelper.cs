@@ -56,6 +56,10 @@ namespace EFSqlTranslator.Translation
                     return "*";
                 case DbOperator.Divide:
                     return "/";
+                case DbOperator.Is:
+                    return "is";
+                case DbOperator.IsNot:
+                    return "is not";
                 case DbOperator.Equal:
                     return "=";
                 case DbOperator.NotEqual:

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace EFSqlTranslator.Translation
 {
@@ -30,11 +31,29 @@ namespace EFSqlTranslator.Translation
     {
         // columns or expression that the query return as result columns
         IList<IDbSelectable> Selection { get; set; }
+        
         // queryable entities that referred by columns or expressions in Selection
         // such as x in select x.col from xtable x 
         IList<DbReference> Targets { get; set; }
+        
         DbReference From { get; set; }
+        
         IDbObject Where { get; set; }
+
+        IList<IDbJoin> Joins { get; set; }
+
+        IList<IDbSelectable> OrderBys { get; set; }
+        
+        IList<IDbSelectable> GroupBys { get; set; }
+    }
+
+    public interface IDbJoin : IDbObject
+    {
+        DbReference To { get; set; }
+
+        IDbBinary Condition { get; set; }
+
+        JoinType Type { get; set; }
     }
 
     public interface IDbScript : IDbObject
@@ -77,7 +96,21 @@ namespace EFSqlTranslator.Translation
 
         public override string ToString()
         {
-            return $"{Referee} {Alias}";
+            if (Referee is IDbTable)
+                return $"{Referee} {Alias}";
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine("(");
+
+            var refStr = Referee.ToString();
+            var lines = refStr.Split(new [] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            refStr = string.Join("\n    ", lines);
+
+            sb.AppendLine($"    {refStr}");
+            sb.Append($") {Alias}");
+
+            return sb.ToString();
         }
 
         internal string ToSelectionString()
@@ -109,6 +142,17 @@ namespace EFSqlTranslator.Translation
         GreaterThan,
         GreaterThanOrEqual,
         LessThan,
-        LessThanOrEqual
+        LessThanOrEqual,
+        IsNot
+    }
+
+    public enum JoinType
+    {
+        Inner,
+        Outer,
+        LeftInner,
+        LeftOuter,
+        RightInner,
+        RightOuter
     }
 }

@@ -59,8 +59,13 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
     public class SqlSelect : IDbSelect
     {
         public IList<IDbSelectable> Selection { get; set; } = new List<IDbSelectable>();
+        
         public DbReference From { get; set; }
+        
         public IDbObject Where { get; set; }
+
+        public IList<IDbJoin> Joins { get; set; } = new List<IDbJoin>();
+
         public IList<IDbSelectable> OrderBys { get; set; } = new List<IDbSelectable>();
         public IList<IDbSelectable> GroupBys { get; set; } = new List<IDbSelectable>();
         public IList<DbReference> Targets { get; set; } = new List<DbReference>();
@@ -82,6 +87,13 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 sb.Append($"from {From}");
             }
 
+            if (Joins.Count > 0)
+            {
+                sb.AppendLine();
+                foreach(var dbJoin in Joins)
+                    sb.Append($"{dbJoin}");
+            }
+
             if (Where != null)
             {
                 sb.AppendLine();
@@ -100,7 +112,46 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             sb.AppendLine();
             var targetSelectCol = Targets.Select(t => t.ToSelectionString());
-            sb.Append($"\t{string.Join(", ", targetSelectCol)}");
+            sb.Append($"    {string.Join(", ", targetSelectCol)}");
+        }
+    }
+
+    public class SqlJoin : IDbJoin
+    {
+        public DbReference To { get; set; }
+
+        public IDbBinary Condition { get; set; }
+
+        public JoinType Type { get; set; }
+
+        public override string ToString()
+        {
+            string typeStr;
+            switch (Type)
+            {
+                case JoinType.Inner:
+                    typeStr = "inner";
+                    break;
+                case JoinType.Outer:
+                    typeStr = "outer";
+                    break;
+                case JoinType.LeftInner:
+                    typeStr = "left inner";
+                    break;
+                case JoinType.LeftOuter:
+                    typeStr = "left outer";
+                    break;
+                case JoinType.RightInner:
+                    typeStr = "right inner";
+                    break;
+                case JoinType.RightOuter:
+                    typeStr = "right outer";
+                    break;
+                default:
+                    typeStr = "inner";
+                    break;
+            }
+            return $"{typeStr} join {To} on {Condition}";
         }
     }
 
@@ -155,6 +206,11 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
     {
         private readonly IList<T> _items = new List<T>();
 
+        public SqlList(IEnumerable<T> items = null)
+        {
+            AddRange(items);
+        }
+
         public T this[int index]
         {
             get { return _items[index]; }
@@ -170,6 +226,15 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         public void Add(T item)
         {
             _items.Add(item);
+        }
+
+        public void AddRange(IEnumerable<T> items)
+        {
+            if (items == null)
+                return;
+
+            foreach(var i in items)
+                Add(i);
         }
 
         public void Clear()

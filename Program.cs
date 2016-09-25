@@ -4,6 +4,10 @@ using Dapper;
 using System.Linq;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
+using System.Data.Common;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace EFSqlTranslator
 {
@@ -17,7 +21,8 @@ namespace EFSqlTranslator
             {
                 if (!db.Blogs.Any())
                 {
-                    db.Blogs.Add(new Blog { Url = "http://blogs.msdn.com/adonet" });
+                    var user = db.Users.Add(new User { UserName = "Ethan" });
+                    db.Blogs.Add(new Blog { Url = "http://blogs.msdn.com/adonet", UserId = user.Entity.UserId });
                     var count = db.SaveChanges();
                     Console.WriteLine("{0} records saved to database", count);
                     Console.WriteLine();
@@ -31,18 +36,47 @@ namespace EFSqlTranslator
             }
 
             using (var db = new BloggingContext())
-            using (var connection = new SqliteConnection(BloggingContext.ConnectionString))
             {
                 var query = db.Blogs.Where(b => b.Url != null);
+                var blogs = db.Query(query);
+
+                var query2 = db.Posts.Where(p => p.Blog.Url != null);
+                var posts = db.Query(query2);
+
+                var query3 = db.Blogs.Where(b => b.Posts.Any(p => p.Content != null));
+                var r3 = db.Query(query3);
+
+                var query4 = db.Blogs.Where(b => b.User.Comments.Any(c => c.Post.Content != null));
+                var r4 = db.Query(query4);
+            }
+        }
+    }
+
+    public static class DbContextExtensions
+    {
+        public static IEnumerable<T> Query<T>(this DbContext db, IQueryable<T> query)
+        {
+            using (var connection = new SqliteConnection(BloggingContext.ConnectionString))
+            {
                 var script = EFLinqTranslator.Translate(query.Expression, new ModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
-                var blogs = connection.Query<Blog>(sql);
-                
-                foreach (var blog in blogs)
-                {
-                    Console.WriteLine(" - {0}", blog.Url);
-                }
+                Console.WriteLine(sql);
+                return connection.Query<T>(sql);
             }
+        }
+    }
+
+    public static class QueryableExtensions
+    {
+        public static IQueryable<TResult> Join<TOuter, TInner, TKey, TResult>(
+            this IQueryable<TOuter> outer,
+            IQueryable<TInner> inner,
+            Expression<Func<TOuter, TInner, TResult>> joinCondition,
+            Expression<Func<TOuter, TInner, TResult>> resultSelector,
+            JoinType joinType = JoinType.Inner
+        )
+        {   
+            return outer.Provider.CreateQuery(resultSelector) as IQueryable<TResult>;
         }
     }
 }

@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace EFSqlTranslator.Translation
 {
@@ -13,8 +16,25 @@ namespace EFSqlTranslator.Translation
             return new EntityInfo 
             {
                 Namespace = "",
-                EntityName = annotation.Value.ToString()
+                EntityName = annotation.Value.ToString(),
+                Type = et.ClrType
             };
+        }
+
+        public static EntityFieldInfo ToEntityFieldInfo(this IProperty p, EntityInfo e, bool isPk = false)
+        {
+            return new EntityFieldInfo 
+            {
+                Name = p.Name,
+                ValType = p.ClrType,
+                IsPrimaryKey = isPk,
+                Entity = e
+            };
+        }
+
+        public static List<EntityFieldInfo> ToEntityFieldInfo(this IKey k, EntityInfo e)
+        {
+            return k.Properties.Select(p => p.ToEntityFieldInfo(e, true)).ToList();
         }
     }
 }
