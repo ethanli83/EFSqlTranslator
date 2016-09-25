@@ -12,8 +12,7 @@ var query = db.Blogs.Where(b => b.Url != null);
 ```
 ### translated sql
 ```sql
-select                                                                                                               
-    b.*                                                                                                              
+select b.*                                                                                                              
 from Blogs b                                                                                                         
 where b.'Url' != null                                                                                                
 ```
@@ -26,8 +25,7 @@ var query2 = db.Posts.Where(p => p.Blog.Url != null);
 ```
 ### translated sql
 ```sql
-select                                                                                                               
-    p.*                                                                                                              
+select p.*                                                                                                              
 from Posts p                                                                                                         
 inner join Blogs b0 on p.'BlogId' = b0.'BlogId'                                                                      
 where b0.'Url' != null                                                                                               
