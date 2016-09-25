@@ -7,7 +7,7 @@ Currently supported queries:
 ## filter on basic column value
 
 ### linq expression
-```
+```c#
 var query = db.Blogs.Where(b => b.Url != null);
 ```
 ### translated sql
@@ -20,7 +20,7 @@ where b.'Url' != null
 ## filter on basic column value from a parent relation
 
 ### linq expression
-```
+```c#
 var query2 = db.Posts.Where(p => p.Blog.Url != null);
 ```
 ### translated sql
@@ -34,7 +34,7 @@ where b0.'Url' != null
 ## filter on basic column value from a child relation
 
 ### linq expression
-```
+```c#
 var query3 = db.Blogs.Where(b => b.Posts.Any(p => p.Content != null));
 ```
 ### translated sql
@@ -53,7 +53,7 @@ where x0.'BlogId' != null
 ## filter on basic column value from multiple deep relation                                                     
 
 ### linq expression
-```
+```c#
 var query4 = db.Blogs.Where(b => b.User.Comments.Any(c => c.Post.Content != null));
 ```
 ### translated sql
