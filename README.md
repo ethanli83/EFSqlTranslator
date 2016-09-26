@@ -2,7 +2,7 @@
 
 A standalone linq to sql translator that can be used with EF and Dapper.
 
-Currently supported queries:
+# Currently supported queries:
 
 ## filter on basic column value
 
