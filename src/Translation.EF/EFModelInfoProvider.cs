@@ -4,13 +4,15 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore;
 using System;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Collections.Concurrent;
 
 namespace Translation.EF
 {
     public class EFModelInfoProvider : IModelInfoProvider
     {
         private readonly DbContext _ctx;
-        private readonly Dictionary<Type, EntityInfo> _entityInfos = new Dictionary<Type, EntityInfo>();
+        private readonly ConcurrentDictionary<Type, EntityInfo> _entityInfos = 
+            new ConcurrentDictionary<Type, EntityInfo>();
 
         public EFModelInfoProvider(DbContext context)
         {

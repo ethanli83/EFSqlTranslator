@@ -4,27 +4,43 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Translation.DbObjects;
+using Translation.MethodTranslators;
 
 namespace Translation
 {
     public class LinqTranslator : ExpressionVisitor
     {
-        private readonly Stack<IDbObject> _resultStack = new Stack<IDbObject>();
-        
-        private readonly Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> _createdJoins = 
-            new Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin>();
-
-        private readonly Dictionary<IDbSelect, Dictionary<string, int>> _uniqueAliasNames = 
-            new Dictionary<IDbSelect, Dictionary<string, int>>();
-        
         private readonly IModelInfoProvider _infoProvider;
         
         private readonly IDbObjectFactory _dbFactory;
 
-        public LinqTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
+        private readonly TranslationState _state;
+
+        private readonly UniqueNameGenerator _nameGenerator = new UniqueNameGenerator();
+
+        private readonly TranslationPlugIns _plugIns = new TranslationPlugIns();
+
+        public LinqTranslator(
+            IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, 
+            TranslationState state = null, IEnumerable<AbstractMethodTranslator> methodTranslators = null)
         {
             _infoProvider = infoProvider;
             _dbFactory = dbFactory;
+            _state = state ?? new TranslationState();
+
+            RegisterDefaultPlugIns();
+
+            if (methodTranslators != null)
+            {
+                foreach(var translator in methodTranslators)
+                    translator.Register(_plugIns);
+            }
+        }
+
+        private void RegisterDefaultPlugIns()
+        {
+            new WhereMethodTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new AnyMethodTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
@@ -36,7 +52,7 @@ namespace Translation
 
         internal IDbScript GetResult()
         {
-            var dbSelect = _resultStack.Pop();
+            var dbSelect = _state.ResultStack.Pop();
             var script = _dbFactory.BuildScript();
             script.Scripts.Add(dbSelect);
             return script;
@@ -56,14 +72,14 @@ namespace Translation
                 var dbRef = _dbFactory.BuildRef(dbTable);
 
                 var dbSelect = _dbFactory.BuildSelect(dbRef);
-                dbRef.Alias = GetUniqueAliasName(dbSelect, dbTable.TableName);
+                dbRef.Alias = _nameGenerator.GetAlias(dbSelect, dbTable.TableName);
                 
-                _resultStack.Push(dbSelect);
+                _state.ResultStack.Push(dbSelect);
             }
             else
             {
                 var dbConstant = _dbFactory.BuildConstant(c.Value);
-                _resultStack.Push(dbConstant);
+                _state.ResultStack.Push(dbConstant);
             }
 
             return c;
@@ -71,20 +87,20 @@ namespace Translation
 
         protected override Expression VisitParameter(ParameterExpression p)
         {
-            var dbObject = _resultStack.Pop();
+            var dbObject = _state.ResultStack.Pop();
             
             var dbSelect = dbObject as IDbSelect;
             if (dbSelect != null)
             {
-                _resultStack.Push(dbObject);
-                _resultStack.Push(dbSelect.Targets.First());
+                _state.ResultStack.Push(dbObject);
+                _state.ResultStack.Push(dbSelect.Targets.First());
                 return p;
             }
             
             var dbRefs = (IDbList<DbReference>)dbObject;
             var dbRef = dbRefs.First(r => r.Alias == p.Name);
 
-            _resultStack.Push(dbRef);
+            _state.ResultStack.Push(dbRef);
             return p;
         }
 
@@ -100,15 +116,15 @@ namespace Translation
                 var e = m.Expression;
                 Visit(e);
 
-                var fromRef = (DbReference)_resultStack.Pop();
+                var fromRef = (DbReference)_state.ResultStack.Pop();
                 var fromEntity = _infoProvider.FindEntityInfo(e.Type);
                 var relation = fromEntity.GetRelation(m.Member.Name);
 
                 var dbJoin = GetOrCreateJoin(relation, fromRef);
                 if(relation.IsChildRelation)
-                    _resultStack.Push(dbJoin.To.Referee);
+                    _state.ResultStack.Push(dbJoin.To.Referee);
                 else
-                    _resultStack.Push(dbJoin.To);
+                    _state.ResultStack.Push(dbJoin.To);
 
                 return m;                     
             }
@@ -118,10 +134,10 @@ namespace Translation
                 // build a column expression for
                 Visit(m.Expression);
 
-                var dbRef = (DbReference)_resultStack.Pop();
+                var dbRef = (DbReference)_state.ResultStack.Pop();
                 var col = _dbFactory.BuildColumn(dbRef, m.Member.Name, m.Type);
                 
-                _resultStack.Push(col);
+                _state.ResultStack.Push(col);
                 return m;
             }
 
@@ -137,10 +153,10 @@ namespace Translation
 
         private IDbJoin GetOrCreateJoin(EntityRelation relation, DbReference fromRef)
         {
-            var dbSelect = (IDbSelect)_resultStack.Peek();
+            var dbSelect = (IDbSelect)_state.ResultStack.Peek();
             var tupleKey = Tuple.Create(dbSelect, relation);
 
-            if (!_createdJoins.ContainsKey(tupleKey))
+            if (!_state.CreatedJoins.ContainsKey(tupleKey))
             {
                 var toEntity = relation.ToEntity;
                 var dbTable = _dbFactory.BuildTable(toEntity);
@@ -150,16 +166,16 @@ namespace Translation
                 IDbSelect childSelect = null;
                 if (!relation.IsChildRelation)
                 {
-                    var tableAlias = GetUniqueAliasName(dbSelect, dbTable.TableName);
+                    var tableAlias = _nameGenerator.GetAlias(dbSelect, dbTable.TableName);
                     joinTo = _dbFactory.BuildRef(dbTable, tableAlias);
                 }
                 else
                 {
                     childRef = _dbFactory.BuildRef(dbTable);
                     childSelect = _dbFactory.BuildSelect(childRef);
-                    childRef.Alias = GetUniqueAliasName(childSelect, dbTable.TableName);
+                    childRef.Alias = _nameGenerator.GetAlias(childSelect, dbTable.TableName);
 
-                    var tableAlias = GetUniqueAliasName(dbSelect, "x");
+                    var tableAlias = _nameGenerator.GetAlias(dbSelect, "x");
                     joinTo = _dbFactory.BuildRef(childSelect, tableAlias);
                 }
 
@@ -195,23 +211,10 @@ namespace Translation
                 dbJoin.Type = !relation.IsChildRelation ? JoinType.Inner : JoinType.LeftOuter;
 
                 dbSelect.Joins.Add(dbJoin);
-                _createdJoins[tupleKey] = dbJoin;
+                _state.CreatedJoins[tupleKey] = dbJoin;
             }
             
-            return _createdJoins[tupleKey];
-        }
-
-        private string GetUniqueAliasName(IDbSelect dbSelect, string tableName)
-        {
-            var uniqueNames = _uniqueAliasNames.ContainsKey(dbSelect)
-                ? _uniqueAliasNames[dbSelect]
-                : _uniqueAliasNames[dbSelect] = new Dictionary<string, int>();
-
-            var count = uniqueNames.ContainsKey(tableName)
-                ? ++uniqueNames[tableName]
-                : uniqueNames[tableName] = 0;
-            
-            return $"{tableName.Substring(0, 1).ToLower()}{count}";
+            return _state.CreatedJoins[tupleKey];
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
@@ -222,50 +225,10 @@ namespace Translation
             Visit(caller);
             VistMethodArguments(args);
 
-            switch(m.Method.Name)
-            {
-                case "Where":
-                    TranslateWhereMethod();
-                    break;
-
-                case "Any":
-                    TranslateAnyMethod(caller);
-                    break;
-            }
+            if (!_plugIns.TranslateMethodCall(m, _state, _nameGenerator))
+                throw new NotSupportedException();
 
             return m;
-        }
-
-        private void TranslateWhereMethod()
-        {
-            var whereClause = (IDbBinary)_resultStack.Pop();
-            var dbSelect = (IDbSelect)_resultStack.Peek();
-            
-            dbSelect.Where = dbSelect.Where != null 
-                ? _dbFactory.BuildBinary(dbSelect.Where, DbOperator.And, whereClause)
-                : whereClause;
-        }
-
-        private void TranslateAnyMethod(Expression caller)
-        {
-            var condition = _resultStack.Pop();
-            var childSelect = (IDbSelect)_resultStack.Pop();
-            childSelect.Where = condition;
-
-            var dbSelect = (IDbSelect)_resultStack.Peek();
-            var dbJoin = dbSelect.Joins.Single(j => j.To.Referee == childSelect);
-
-            IDbBinary whereClause = null;
-            foreach(var joinKey in dbJoin.ToKeys)
-            {
-                var pkColumn = _dbFactory.BuildColumn(dbJoin.To, joinKey.Name, joinKey.ValType.DotNetType, joinKey.Alias);
-                var binary = _dbFactory.BuildBinary(pkColumn, DbOperator.NotEqual, _dbFactory.BuildConstant(null));
-                whereClause = whereClause != null 
-                    ? _dbFactory.BuildBinary(whereClause, DbOperator.And, binary)
-                    : binary;
-            }
-
-            _resultStack.Push(whereClause);
         }
 
         private void VistMethodArguments(Expression[] args)
@@ -286,13 +249,13 @@ namespace Translation
             foreach(var p in l.Parameters.Reverse())
             {
                 Visit(p);
-                var dbRef = (DbReference)_resultStack.Pop();
+                var dbRef = (DbReference)_state.ResultStack.Pop();
                 // todo: make a hash set of referred name istead of using alias name 
                 // as a ref can be referred by different parameter, the alias name may be overriden
                 dbRef.Alias = p.Name; 
                 pList.Add(dbRef);
             }
-            _resultStack.Push(pList);
+            _state.ResultStack.Push(pList);
 
             Visit(l.Body);
             return l;
@@ -301,16 +264,70 @@ namespace Translation
         protected override Expression VisitBinary(BinaryExpression b)
         {
             Visit(b.Left);
-            var left = _resultStack.Pop();
+            var left = _state.ResultStack.Pop();
 
             Visit(b.Right);
-            var right = _resultStack.Pop();
+            var right = _state.ResultStack.Pop();
 
             var dbOptr = SqlTranslationHelper.GetDbOperator(b.NodeType);
             var dbBinary = _dbFactory.BuildBinary(left, dbOptr, right);
 
-            _resultStack.Push(dbBinary);
+            _state.ResultStack.Push(dbBinary);
             return b;
+        }
+    }
+
+    public class TranslationState
+    {
+        private readonly Stack<IDbObject> _resultStack = new Stack<IDbObject>();
+        
+        private readonly Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> _createdJoins = 
+            new Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin>();
+
+        public Stack<IDbObject> ResultStack => _resultStack;
+
+        public Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> CreatedJoins => _createdJoins;
+    }
+
+    public class UniqueNameGenerator
+    {
+        private readonly Dictionary<IDbSelect, Dictionary<string, int>> _uniqueAliasNames = 
+            new Dictionary<IDbSelect, Dictionary<string, int>>();
+
+        public string GetAlias(IDbSelect dbSelect, string tableName)
+        {
+            var uniqueNames = _uniqueAliasNames.ContainsKey(dbSelect)
+                ? _uniqueAliasNames[dbSelect]
+                : _uniqueAliasNames[dbSelect] = new Dictionary<string, int>();
+
+            var count = uniqueNames.ContainsKey(tableName)
+                ? ++uniqueNames[tableName]
+                : uniqueNames[tableName] = 0;
+            
+            return $"{tableName.Substring(0, 1).ToLower()}{count}";
+        }
+    }
+
+    public class TranslationPlugIns
+    {
+        private Dictionary<string, AbstractMethodTranslator> _methodTranslators = 
+            new Dictionary<string, AbstractMethodTranslator>(StringComparer.CurrentCultureIgnoreCase); 
+
+        public void RegisterMethodTranslator(string methodName, AbstractMethodTranslator translator)
+        {
+            _methodTranslators[methodName] = translator;
+        }
+
+        internal bool TranslateMethodCall(
+            MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator)
+        {
+            var method = m.Method;
+            if (!_methodTranslators.ContainsKey(method.Name))
+                return false;
+
+            var translator = _methodTranslators[method.Name];
+            translator.Translate(m, state, nameGenerator);
+            return true;
         }
     }
 }
