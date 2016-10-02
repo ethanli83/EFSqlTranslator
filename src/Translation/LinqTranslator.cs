@@ -221,11 +221,12 @@ namespace Translation
                     joinTo = _dbFactory.BuildRef(childSelect, tableAlias);
                 }
 
+                
+                var dbJoin = _dbFactory.BuildJoin(joinTo);
                 joinTo.OwnerSelect = dbSelect;
+                joinTo.OwnerJoin = dbJoin;
 
                 // build join condition
-                var dbJoin = _dbFactory.BuildJoin(joinTo);
-
                 IDbBinary condition = null;
                 for (var i = 0; i < relation.FromKeys.Count; i++)
                 {
@@ -254,6 +255,7 @@ namespace Translation
 
                 dbJoin.Condition = condition;
                 dbJoin.Type = !relation.IsChildRelation ? JoinType.Inner : JoinType.LeftOuter;
+
 
                 dbSelect.Joins.Add(dbJoin);
                 _state.CreatedJoins[tupleKey] = dbJoin;

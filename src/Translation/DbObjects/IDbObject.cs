@@ -119,7 +119,11 @@ namespace Translation
 
         public IDbObject Referee { get; private set; }
 
+        // the select that contains the reference
         public IDbSelect OwnerSelect { get; set; }
+
+        // the join that joining to this reference
+        public IDbJoin OwnerJoin { get; set; }
         
         //public IDbSelect OwnerSelect { get; set; }
         public string Alias { get; set; }
