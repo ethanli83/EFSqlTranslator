@@ -6,6 +6,11 @@ namespace Translation.DbObjects.SqlObjects
     {
         private readonly SqlTypeConvertor _typeConvertor = new SqlTypeConvertor();
 
+        public DbKeyValue BuildKeyValue(string key, IDbObject val)
+        {
+            return new DbKeyValue(key, val);
+        }
+
         public IDbList<T> BuildList<T>() where T : IDbObject
         {
             return new SqlList<T>();
@@ -24,6 +29,7 @@ namespace Translation.DbObjects.SqlObjects
             };
             
             dbSelect.Targets.Add(dbReference);
+            dbReference.OwnerSelect = dbSelect;
             return dbSelect;
         }
 
@@ -35,6 +41,25 @@ namespace Translation.DbObjects.SqlObjects
                 Ref = dbRef,
                 ValType = BuildType(type),
                 Alias = alias
+            };
+        }
+
+        public IDbColumn BuildColumn(IDbColumn column)
+        {
+            return new SqlColumn 
+            {
+                Name = column.Name,
+                Ref = column.Ref,
+                ValType = BuildType(column.ValType.DotNetType),
+                Alias = column.Alias
+            };
+        }
+
+        public IDbRefColumn BuildRefColumn(DbReference dbRef)
+        {
+            return new SqlRefColumn 
+            {
+                Ref = dbRef
             };
         }
 
@@ -119,6 +144,9 @@ namespace Translation.DbObjects.SqlObjects
             
             if (type == typeof(String))
                 return "nvarchar";
+
+            if (type == typeof(JoinType))
+                return "<<JoinType>>";
             
             throw new NotImplementedException($"{type.Name} not supported.");
         }

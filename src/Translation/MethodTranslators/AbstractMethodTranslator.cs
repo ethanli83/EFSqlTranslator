@@ -44,9 +44,7 @@ namespace Translation.MethodTranslators
             dbSelect.Where = dbSelect.Where != null 
                 ? _dbFactory.BuildBinary(dbSelect.Where, DbOperator.And, whereClause)
                 : whereClause;
-        }
-
-        
+        }   
     }
 
     public class AnyMethodTranslator : AbstractMethodTranslator
@@ -72,7 +70,7 @@ namespace Translation.MethodTranslators
             var dbJoin = dbSelect.Joins.Single(j => j.To.Referee == childSelect);
 
             IDbBinary whereClause = null;
-            foreach(var joinKey in dbJoin.ToKeys)
+            foreach(var joinKey in dbJoin.GetChildren<IDbColumn>(c => c.Ref == dbJoin.To))
             {
                 var pkColumn = _dbFactory.BuildColumn(dbJoin.To, joinKey.Name, joinKey.ValType.DotNetType, joinKey.Alias);
                 var binary = _dbFactory.BuildBinary(pkColumn, DbOperator.NotEqual, _dbFactory.BuildConstant(null));

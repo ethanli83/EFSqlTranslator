@@ -41,6 +41,7 @@ namespace Translation
         {
             new WhereMethodTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new AnyMethodTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new JoinMethodTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
@@ -85,22 +86,63 @@ namespace Translation
             return c;
         }
 
+        protected override Expression VisitNew(NewExpression n)
+        {
+            var list = _dbFactory.BuildList<DbKeyValue>();
+            for (var i = 0; i < n.Members.Count; i++)
+            {
+                var member = n.Members[i];
+                var assignment = n.Arguments[i];
+
+                Visit(assignment);
+
+                var dbObj = _state.ResultStack.Pop();
+                var dbKeyValue = _dbFactory.BuildKeyValue(member.Name, dbObj);
+                list.Add(dbKeyValue);
+            }
+
+            _state.ResultStack.Push(list);
+            return n;
+        }
+
         protected override Expression VisitParameter(ParameterExpression p)
         {
-            var dbObject = _state.ResultStack.Pop();
-            
-            var dbSelect = dbObject as IDbSelect;
-            if (dbSelect != null)
+            DbReference dbRef = null;
+
+            if (_state.ParamterStack.Count > 0)
             {
-                _state.ResultStack.Push(dbObject);
-                _state.ResultStack.Push(dbSelect.Targets.First());
-                return p;
+                var dbRefs = _state.ParamterStack.Peek();
+                if (dbRefs.ContainsKey(p))
+                    dbRef = dbRefs[p];
             }
             
-            var dbRefs = (IDbList<DbReference>)dbObject;
-            var dbRef = dbRefs.First(r => r.Alias == p.Name);
+            // if we can not find the parameter expression in the ParamterStack,
+            // it means this is the first time we translates the parameter, so we
+            // need to look for it in the most recently translated select 
+            if (dbRef == null)
+            {
+                var results = new Stack<IDbObject>();
+                while(_state.ResultStack.Count > 0)
+                {
+                    var dbObject = _state.ResultStack.Pop();
+                    results.Push(dbObject);
+                    
+                    var dbSelect = dbObject as IDbSelect;
+                    if (dbSelect != null)
+                    {
+                        dbRef = dbSelect.Targets.First();
+                        break;
+                    }
+                }
 
+                while(results.Count > 0)
+                    _state.ResultStack.Push(results.Pop());
+            }
+
+            if (dbRef == null)
+                throw new NullReferenceException();
             _state.ResultStack.Push(dbRef);
+
             return p;
         }
 
@@ -175,9 +217,11 @@ namespace Translation
                     childSelect = _dbFactory.BuildSelect(childRef);
                     childRef.Alias = _nameGenerator.GetAlias(childSelect, dbTable.TableName);
 
-                    var tableAlias = _nameGenerator.GetAlias(dbSelect, "x");
+                    var tableAlias = _nameGenerator.GetAlias(dbSelect, "sq", true);
                     joinTo = _dbFactory.BuildRef(childSelect, tableAlias);
                 }
+
+                joinTo.OwnerSelect = dbSelect;
 
                 // build join condition
                 var dbJoin = _dbFactory.BuildJoin(joinTo);
@@ -191,14 +235,15 @@ namespace Translation
                     var fromColumn = _dbFactory.BuildColumn(fromRef, fromKey.Name, fromKey.ValType);
                     var toColumn = _dbFactory.BuildColumn(joinTo, toKey.Name, toKey.ValType);
 
-                    dbJoin.FromKeys.Add(fromColumn);
-                    dbJoin.ToKeys.Add(toColumn);
-
                     if (childRef != null && childSelect != null)
                     {
-                        var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType);
+                        var alias = _nameGenerator.GetAlias(dbSelect, "JoinKey", true);
+                        var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType, alias);
                         childSelect.Selection.Add(childColumn);
                         childSelect.GroupBys.Add(childColumn);
+
+                        toColumn.Name = alias;
+                        toColumn.Alias = string.Empty;
                     }
 
                     var binary = _dbFactory.BuildBinary(fromColumn, DbOperator.Equal, toColumn);
@@ -242,22 +287,35 @@ namespace Translation
 
         protected override Expression VisitLambda<T>(Expression<T> l)
         {
-            var pList = _dbFactory.BuildList<DbReference>();
+            var pList = new Dictionary<ParameterExpression, DbReference>();
             // the order of the parameters need to be reversed, as the first
             // query that be translated will be at the bottom of the stack, and the query
-            // for the last parameter will be at the top 
+            // for the last parameter will be at the top
+            var results = new Stack<IDbObject>();
             foreach(var p in l.Parameters.Reverse())
             {
                 Visit(p);
                 var dbRef = (DbReference)_state.ResultStack.Pop();
-                // todo: make a hash set of referred name istead of using alias name 
-                // as a ref can be referred by different parameter, the alias name may be overriden
-                dbRef.Alias = p.Name; 
-                pList.Add(dbRef);
-            }
-            _state.ResultStack.Push(pList);
+                pList[p] = dbRef;
 
+                // pop out used select for the parameter just translated
+                // so that the next parameter will be assigned with current select
+                while(_state.ResultStack.Count > 0)
+                {
+                    var dbObj = _state.ResultStack.Pop();
+                    results.Push(dbObj);
+                    if (dbObj is IDbSelect)
+                        break;
+                }
+            }
+
+            while(results.Count > 0)
+                _state.ResultStack.Push(results.Pop());                
+            
+            _state.ParamterStack.Push(pList);
             Visit(l.Body);
+            _state.ParamterStack.Pop();
+
             return l;
         }
 
@@ -280,11 +338,16 @@ namespace Translation
     public class TranslationState
     {
         private readonly Stack<IDbObject> _resultStack = new Stack<IDbObject>();
+
+        private readonly Stack<Dictionary<ParameterExpression, DbReference>> _paramterStack = 
+            new Stack<Dictionary<ParameterExpression, DbReference>>();
         
         private readonly Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> _createdJoins = 
             new Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin>();
 
         public Stack<IDbObject> ResultStack => _resultStack;
+
+        public Stack<Dictionary<ParameterExpression, DbReference>> ParamterStack => _paramterStack;
 
         public Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> CreatedJoins => _createdJoins;
     }
@@ -294,17 +357,32 @@ namespace Translation
         private readonly Dictionary<IDbSelect, Dictionary<string, int>> _uniqueAliasNames = 
             new Dictionary<IDbSelect, Dictionary<string, int>>();
 
-        public string GetAlias(IDbSelect dbSelect, string tableName)
+            private readonly Dictionary<string, int> _globalUniqueAliasNames = 
+                new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
+
+        public string GetAlias(IDbSelect dbSelect, string name, bool fullName = false)
         {
-            var uniqueNames = _uniqueAliasNames.ContainsKey(dbSelect)
+            int count;
+            if (dbSelect == null)
+            {
+                count = _globalUniqueAliasNames.ContainsKey(name)
+                ? ++_globalUniqueAliasNames[name]
+                : _globalUniqueAliasNames[name] = 0;
+            }
+            else
+            {
+                var uniqueNames = _uniqueAliasNames.ContainsKey(dbSelect)
                 ? _uniqueAliasNames[dbSelect]
                 : _uniqueAliasNames[dbSelect] = new Dictionary<string, int>();
 
-            var count = uniqueNames.ContainsKey(tableName)
-                ? ++uniqueNames[tableName]
-                : uniqueNames[tableName] = 0;
+                 count = uniqueNames.ContainsKey(name)
+                    ? ++uniqueNames[name]
+                    : uniqueNames[name] = 0;
+            }
             
-            return $"{tableName.Substring(0, 1).ToLower()}{count}";
+            return !fullName 
+                ? $"{name.Substring(0, 1).ToLower()}{count}"
+                : $"{name}{count}";
         }
     }
 

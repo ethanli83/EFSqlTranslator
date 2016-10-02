@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Translation
 {
@@ -13,7 +14,25 @@ namespace Translation
             Expression<Func<TOuter, TInner, TResult>> resultSelector,
             JoinType joinType = JoinType.Inner)
         {   
-            return null;
+            var method = typeof(QueryableExtensions).GetMethod("Join");
+            var callExpression = Expression.Call(
+                null,
+                method.MakeGenericMethod(new []
+                    { 
+                        typeof(TOuter),
+                        typeof(TInner),
+                        typeof(TResult) 
+                    }),
+                new Expression[] 
+                    { 
+                        outer.Expression, 
+                        inner.Expression,
+                        Expression.Quote(joinCondition),
+                        Expression.Quote(resultSelector),
+                        Expression.Constant(joinType)
+                    });
+                    
+            return outer.Provider.CreateQuery<TResult>(callExpression);
         }
     }
 }

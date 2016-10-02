@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Translation
 {
     public interface IDbObject
     {
-        
+        T[] GetChildren<T>(Func<T, bool> filterFunc =  null) where T : IDbObject;
     }
 
     public interface IDbTable : IDbObject
@@ -27,6 +28,29 @@ namespace Translation
         DbType ValType { get; set; }
         string Name { get; set; }
         DbReference Ref { get; set; }
+    }
+
+    public interface IDbRefColumn : IDbSelectable
+    {
+        DbReference Ref { get; set; }
+    }
+
+    public class DbKeyValue : IDbObject
+    {
+        public DbKeyValue(string key, IDbObject val)
+        {
+            Key = key;
+            Value = val;
+        }
+
+        public string Key { get; private set; }
+
+        public IDbObject Value { get; private set; }
+
+        public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
+        {
+            return Value.GetChildren<T>(filterFunc);
+        }
     }
 
     public interface IDbSelect : IDbObject
@@ -54,10 +78,6 @@ namespace Translation
         DbReference To { get; set; }
 
         IDbBinary Condition { get; set; }
-
-        IList<IDbColumn> FromKeys { get; set; }
-
-        IList<IDbColumn> ToKeys { get; set; }
 
         JoinType Type { get; set; }
     }
@@ -96,7 +116,11 @@ namespace Translation
         {
             Referee = dbObject;
         }
+
         public IDbObject Referee { get; private set; }
+
+        public IDbSelect OwnerSelect { get; set; }
+        
         //public IDbSelect OwnerSelect { get; set; }
         public string Alias { get; set; }
 
@@ -122,6 +146,24 @@ namespace Translation
         internal string ToSelectionString()
         {
             return $"{Alias}.*";
+        }
+
+        public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
+        {
+            T[] result;
+            if (this is T)
+            {
+                var obj = (T)(object)this;
+                result = filterFunc != null 
+                    ? filterFunc(obj) ? new T[] { obj } : new T[0] 
+                    : new T[] { obj };
+            }
+            else
+            {
+                result = new T[0];
+            }
+
+            return result.Concat(Referee.GetChildren<T>(filterFunc)).ToArray();
         }
     }
 

@@ -17,24 +17,16 @@ namespace Translation.App
 
             using (var db = new BloggingContext())
             {
-                var query = db.Blogs.Where(b => b.Url != null);
-                var blogs = db.Query(query);
+                var query = db.Blogs.Where(b => b.Posts.Any(p => p.User.UserName != null));
+                var query1 = db.Posts.
+                    Join(
+                        query, 
+                        (p, b) => p.BlogId == b.BlogId, 
+                        (p, b) => new { PId = p.PostId, b.Name },
+                        JoinType.LeftOuter);
 
-                var query2 = db.Posts.
-                    Join(query, (p, b) => p.BlogId == b.BlogId, (p, b) => p).
-                    Select(p => new 
-                    {
-                        p.PostId,
-                        p.Content
-                    });
-
-                var query3 = db.Posts.
-                    Join(query, (p, b) => p.BlogId == b.BlogId, (p, b) => new { p, b }).
-                    Select(x => new 
-                    {
-                        x.b.Url,
-                        x.p.Content
-                    });
+                db.Query(query);
+                db.Query(query1);
             }
         }
     }
@@ -48,7 +40,8 @@ namespace Translation.App
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
                 Console.WriteLine(sql);
-                return connection.Query<T>(sql);
+                var results = connection.Query(sql);
+                return results.OfType<T>();
             }
         }
     }

@@ -8,10 +8,21 @@ namespace Translation.DbObjects.SqlObjects
 {
     public class SqlObject : IDbObject
     {
+        public virtual T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
+        {
+            if (this is T)
+            {
+                var obj = (T)(object)this;
+                return filterFunc != null 
+                    ? filterFunc(obj) ? new T[] { obj } : new T[0] 
+                    : new T[] { obj };
+            }
 
+            return new T[0];
+        }
     }
 
-    public class SqlTable : IDbTable
+    public class SqlTable : SqlObject, IDbTable
     {
         public string Namespace { get; set; }
         public string TableName { get; set; }
@@ -29,13 +40,13 @@ namespace Translation.DbObjects.SqlObjects
         }
     }
 
-    public class SqlSelectable : IDbSelectable 
+    public class SqlSelectable : SqlObject, IDbSelectable 
     {
         public string Alias { get; set; }
 
         public virtual string ToSelectionString()
         {
-            throw new NotImplementedException();
+            return Alias;
         }
     }
 
@@ -44,6 +55,14 @@ namespace Translation.DbObjects.SqlObjects
         public DbType ValType { get; set; }
         public string Name { get; set; }
         public DbReference Ref { get; set; }
+
+        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
+        {
+            var result = base.GetChildren<T>(filterFunc);
+            var refResult = Ref.GetChildren<T>(filterFunc);
+
+            return result.Concat(refResult).ToArray();
+        }
 
         public override string ToString()
         {
@@ -59,11 +78,41 @@ namespace Translation.DbObjects.SqlObjects
 
         public override string ToSelectionString()
         {
-            return !string.IsNullOrEmpty(Alias) ? $"{this} as {Alias}" : $"{this}";
+            return !string.IsNullOrEmpty(Alias) ? $"{this} as '{Alias}'" : $"{this}";
         }
     }
 
-    public class SqlSelect : IDbSelect
+    public class SqlRefColumn : SqlSelectable, IDbRefColumn
+    {
+        public DbReference Ref { get; set; }
+
+        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
+        {
+            var result = base.GetChildren<T>(filterFunc);
+            var refResult = Ref.GetChildren<T>(filterFunc);
+
+            return result.Concat(refResult).ToArray();
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            
+            if (!string.IsNullOrEmpty(Ref.Alias))
+                sb.Append($"{Ref.Alias}.");
+
+            sb.Append($"*");
+
+            return sb.ToString();
+        }
+
+        public override string ToSelectionString()
+        {
+            return $"{this}";
+        }
+    }
+
+    public class SqlSelect : SqlObject, IDbSelect
     {
         public IList<IDbSelectable> Selection { get; set; } = new List<IDbSelectable>();
         
@@ -74,8 +123,22 @@ namespace Translation.DbObjects.SqlObjects
         public IList<IDbJoin> Joins { get; set; } = new List<IDbJoin>();
 
         public IList<IDbSelectable> OrderBys { get; set; } = new List<IDbSelectable>();
+        
         public IList<IDbSelectable> GroupBys { get; set; } = new List<IDbSelectable>();
+        
         public IList<DbReference> Targets { get; set; } = new List<DbReference>();
+
+        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
+        {
+            return base.GetChildren<T>(filterFunc).
+                Concat(Selection.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                Concat(From.GetChildren<T>(filterFunc)).
+                Concat(Where.GetChildren<T>(filterFunc)).
+                Concat(Joins.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                Concat(OrderBys.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                Concat(GroupBys.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                ToArray();
+        }
 
         public override string ToString()
         {
@@ -128,17 +191,21 @@ namespace Translation.DbObjects.SqlObjects
         }
     }
 
-    public class SqlJoin : IDbJoin
+    public class SqlJoin : SqlObject, IDbJoin
     {
         public DbReference To { get; set; }
 
         public IDbBinary Condition { get; set; }
 
-        public IList<IDbColumn> FromKeys { get; set; } = new List<IDbColumn>();
-
-        public IList<IDbColumn> ToKeys { get; set; } = new List<IDbColumn>();
-
         public JoinType Type { get; set; }
+
+        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
+        {
+            return base.GetChildren<T>(filterFunc).
+                Concat(To.GetChildren<T>(filterFunc)).
+                Concat(Condition.GetChildren<T>(filterFunc)).
+                ToArray();
+        }
 
         public override string ToString()
         {
@@ -171,7 +238,7 @@ namespace Translation.DbObjects.SqlObjects
         }
     }
 
-    public class SqlScript : IDbScript
+    public class SqlScript : SqlObject, IDbScript
     {
         public IList<IDbObject> PreScripts { get; set; } = new List<IDbObject>();
         public IList<IDbObject> Scripts { get; set; } = new List<IDbObject>();
@@ -185,9 +252,18 @@ namespace Translation.DbObjects.SqlObjects
 
             return sb.ToString();
         }
+
+        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
+        {
+            return base.GetChildren<T>(filterFunc).
+                Concat(PreScripts.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                Concat(Scripts.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                Concat(PostScripts.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                ToArray();
+        }
     }
 
-    public class SqlBinary : IDbBinary
+    public class SqlBinary : SqlObject, IDbBinary
     {
         public IDbObject Left { get; set; }
         public DbOperator Operator { get; set; }
@@ -201,9 +277,17 @@ namespace Translation.DbObjects.SqlObjects
 
             return $"{left} {optr} {right}";
         }
+
+        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
+        {
+            return base.GetChildren<T>(filterFunc).
+                Concat(Left.GetChildren<T>(filterFunc)).
+                Concat(Right.GetChildren<T>(filterFunc)).
+                ToArray();
+        }
     }
 
-    public class SqlConstant : IDbConstant
+    public class SqlConstant : SqlObject, IDbConstant
     {
         public DbType ValType { get; set; }
         public object Val { get; set; }
@@ -214,11 +298,14 @@ namespace Translation.DbObjects.SqlObjects
             if (Val == null)
                 return "null";
 
+            if (Val is string)
+                return $"'{Val}'";
+
             return Val.ToString();
         }
     }
 
-    public class SqlList<T> : IDbList<T> where T : IDbObject
+    public class SqlList<T> : SqlObject, IDbList<T> where T : IDbObject
     {
         private readonly IList<T> _items = new List<T>();
 
@@ -238,6 +325,13 @@ namespace Translation.DbObjects.SqlObjects
         public bool IsReadOnly { get { return _items.IsReadOnly; } }
 
         public IList<T> Items { get { return _items; } }
+
+        public override TC[] GetChildren<TC>(Func<TC, bool> filterFunc = null)
+        {
+            return base.GetChildren<TC>(filterFunc).
+                Concat(Items.SelectMany(s => s.GetChildren<TC>(filterFunc))).
+                ToArray();
+        }
 
         public void Add(T item)
         {
