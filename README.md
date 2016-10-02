@@ -70,3 +70,37 @@ left outer join (
 ) x0 on u0.'UserId' = x0.'UserId'                                                                                                                  
 where x0.'UserId' != null             
 ```
+
+## Manual join, select columns as result
+
+### linq expression
+```
+var query = db.Blogs.Where(b => b.Posts.Any(p => p.User.UserName != null));
+var query1 = db.Posts.
+    Join(
+        query, 
+        (p, b) => p.BlogId == b.BlogId && p.Content != null,, 
+        (p, b) => new { PId = p.PostId, b.Name },
+        JoinType.LeftOuter);
+```
+
+### translated sql
+```sql
+select sq0.*
+from (
+    select p0.'PostId' as 'PId', sq0.'Name' as 'Name'
+    from Posts p0
+    left outer join (
+        select b0.'Name', b0.'BlogId' as 'JoinKey1'
+        from Blogs b0
+        left outer join (
+            select p0.'BlogId' as 'JoinKey0'
+            from Posts p0
+            inner join Users u0 on p0.'UserId' = u0.'UserId'
+            where u0.'UserName' != null
+            group by p0.'BlogId'
+        ) sq0 on b0.'BlogId' = sq0.'JoinKey0'
+        where sq0.'JoinKey0' != null
+    ) sq0 on p0.'BlogId' = sq0.'JoinKey1' and p0.'Content' != null
+) sq0
+```

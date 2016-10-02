@@ -21,7 +21,7 @@ namespace Translation.App
                 var query1 = db.Posts.
                     Join(
                         query, 
-                        (p, b) => p.BlogId == b.BlogId, 
+                        (p, b) => p.BlogId == b.BlogId && p.Content != null,
                         (p, b) => new { PId = p.PostId, b.Name },
                         JoinType.LeftOuter);
 
