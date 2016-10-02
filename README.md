@@ -71,16 +71,15 @@ left outer join (
 where x0.'UserId' != null             
 ```
 
-## Manual join, select columns as result
+## Manual join with custom condition, select columns as result
 
 ### linq expression
 ```
-var query = db.Blogs.Where(b => b.Posts.Any(p => p.User.UserName != null));
-var query1 = db.Posts.
+var query = db.Posts.
     Join(
-        query, 
-        (p, b) => p.BlogId == b.BlogId && p.Content != null,, 
-        (p, b) => new { PId = p.PostId, b.Name },
+        db.Blogs.Where(b => b.Url != null), 
+        (p, b) => p.BlogId == b.BlogId && b.User.UserName == "ethan",
+        (p, b) => new { PId = p.PostId, b.Name, BlogUser = b.User.UserName, PostUser = p.User.UserName },
         JoinType.LeftOuter);
 ```
 
@@ -88,19 +87,14 @@ var query1 = db.Posts.
 ```sql
 select sq0.*
 from (
-    select p0.'PostId' as 'PId', sq0.'Name' as 'Name'
+    select p0.'PostId' as 'PId', sq0.'Name' as 'Name', sq0.'UserName' as 'BlogUser', u0.'UserName' as 'PostUser'
     from Posts p0
+    inner join Users u0 on p0.'UserId' = u0.'UserId'
     left outer join (
-        select b0.'Name', b0.'BlogId' as 'JoinKey1'
+        select b0.'Name', u0.'UserName', b0.'BlogId' as 'BlogId_jk0', u0.'UserName' as 'UserName_jk0'
         from Blogs b0
-        left outer join (
-            select p0.'BlogId' as 'JoinKey0'
-            from Posts p0
-            inner join Users u0 on p0.'UserId' = u0.'UserId'
-            where u0.'UserName' != null
-            group by p0.'BlogId'
-        ) sq0 on b0.'BlogId' = sq0.'JoinKey0'
-        where sq0.'JoinKey0' != null
-    ) sq0 on p0.'BlogId' = sq0.'JoinKey1' and p0.'Content' != null
+        inner join Users u0 on b0.'UserId' = u0.'UserId'
+        where b0.'Url' != null
+    ) sq0 on p0.'BlogId' = sq0.'BlogId_jk0' and sq0.'UserName_jk0' = 'ethan'
 ) sq0
 ```

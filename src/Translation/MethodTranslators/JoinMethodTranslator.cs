@@ -37,7 +37,7 @@ namespace Translation.MethodTranslators
             // create join to inner select
             foreach(var joinKey in joinCondition.GetChildren<IDbColumn>(c => c.Ref.OwnerSelect == toSelect))
             {
-                var alias = nameGenerator.GetAlias(toSelect, "JoinKey", true);
+                var alias = nameGenerator.GetAlias(toSelect, joinKey.Name + "_jk", true);
                 var innerCol = _dbFactory.BuildColumn(joinKey);
                 innerCol.Alias = alias;
                 toSelect.Selection.Add(innerCol);

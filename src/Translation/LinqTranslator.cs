@@ -195,7 +195,7 @@ namespace Translation
 
         private IDbJoin GetOrCreateJoin(EntityRelation relation, DbReference fromRef)
         {
-            var dbSelect = (IDbSelect)_state.ResultStack.Peek();
+            var dbSelect = _state.ResultStack.OfType<IDbSelect>().First(d => fromRef.OwnerSelect == d);
             var tupleKey = Tuple.Create(dbSelect, relation);
 
             if (!_state.CreatedJoins.ContainsKey(tupleKey))
@@ -237,7 +237,7 @@ namespace Translation
 
                     if (childRef != null && childSelect != null)
                     {
-                        var alias = _nameGenerator.GetAlias(dbSelect, "JoinKey", true);
+                        var alias = _nameGenerator.GetAlias(dbSelect, toKey.Name + "_jk", true);
                         var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType, alias);
                         childSelect.Selection.Add(childColumn);
                         childSelect.GroupBys.Add(childColumn);

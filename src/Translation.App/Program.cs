@@ -17,16 +17,14 @@ namespace Translation.App
 
             using (var db = new BloggingContext())
             {
-                var query = db.Blogs.Where(b => b.Posts.Any(p => p.User.UserName != null));
-                var query1 = db.Posts.
+                var query = db.Posts.
                     Join(
-                        query, 
-                        (p, b) => p.BlogId == b.BlogId && p.Content != null,
-                        (p, b) => new { PId = p.PostId, b.Name },
+                        db.Blogs.Where(b => b.Url != null), 
+                        (p, b) => p.BlogId == b.BlogId && b.User.UserName == "ethan",
+                        (p, b) => new { PId = p.PostId, b.Name, BlogUser = b.User.UserName, PostUser = p.User.UserName },
                         JoinType.LeftOuter);
 
                 db.Query(query);
-                db.Query(query1);
             }
         }
     }
