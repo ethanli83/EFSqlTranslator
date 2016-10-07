@@ -83,5 +83,14 @@ namespace Translation
         {
             return GetSqlOperator(GetDbOperator(type));
         }
+
+        public static bool IsNullVal(this IDbObject obj)
+        {
+            var dbConst = obj as IDbConstant;
+            if (dbConst == null)
+                return false;
+
+            return dbConst.Val == null;
+        }
     }
 }

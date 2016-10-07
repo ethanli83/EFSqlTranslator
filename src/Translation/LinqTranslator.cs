@@ -330,6 +330,15 @@ namespace Translation
             var right = _state.ResultStack.Pop();
 
             var dbOptr = SqlTranslationHelper.GetDbOperator(b.NodeType);
+            if (left.IsNullVal() || right.IsNullVal())
+            {
+                dbOptr = dbOptr == DbOperator.Equal
+                    ? DbOperator.Is
+                    : dbOptr == DbOperator.NotEqual
+                        ? DbOperator.IsNot
+                        : dbOptr;
+            }
+
             var dbBinary = _dbFactory.BuildBinary(left, dbOptr, right);
 
             _state.ResultStack.Push(dbBinary);

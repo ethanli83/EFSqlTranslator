@@ -14,7 +14,7 @@ var query = db.Blogs.Where(b => b.Url != null);
 ```sql
 select b.*                                                                                                              
 from Blogs b                                                                                                         
-where b.'Url' != null                                                                                                
+where b.'Url' is not null                                                                                                
 ```
 
 ## filter on basic column value from a parent relation
@@ -28,7 +28,7 @@ var query2 = db.Posts.Where(p => p.Blog.Url != null);
 select p.*                                                                                                              
 from Posts p                                                                                                         
 inner join Blogs b0 on p.'BlogId' = b0.'BlogId'                                                                      
-where b0.'Url' != null                                                                                               
+where b0.'Url' is not null                                                                                               
 ```
 
 ## filter on basic column value from a child relation
@@ -44,10 +44,10 @@ from Blogs b
 left outer join (                                                                                                                                  
     select p.'BlogId'                                                                                                                              
     from Posts p                                                                                                                                   
-    where p.'Content' != null                                                                                                                      
+    where p.'Content' is not null                                                                                                                      
     group by p.'BlogId'                                                                                                                            
 ) x0 on b.'BlogId' = x0.'BlogId'                                                                                                                   
-where x0.'BlogId' != null                                                                                           
+where x0.'BlogId' is not null                                                                                           
 ```
 
 ## filter on basic column value from multiple deep relation                                                     
@@ -65,10 +65,10 @@ left outer join (
     select c.'UserId'                                                                                                                              
     from Comments c                                                                                                                                
     inner join Posts p0 on c.'PostId' = p0.'PostId'                                                                                                
-    where p0.'Content' != null                                                                                                                     
+    where p0.'Content' is not null                                                                                                                     
     group by c.'UserId'                                                                                                                            
 ) x0 on u0.'UserId' = x0.'UserId'                                                                                                                  
-where x0.'UserId' != null             
+where x0.'UserId' is not null             
 ```
 
 ## Manual join with custom condition, select columns as result
@@ -94,7 +94,7 @@ from (
         select b0.'Name', u0.'UserName', b0.'BlogId' as 'BlogId_jk0', u0.'UserName' as 'UserName_jk0'
         from Blogs b0
         inner join Users u0 on b0.'UserId' = u0.'UserId'
-        where b0.'Url' != null
+        where b0.'Url' is not null
     ) sq0 on p0.'BlogId' = sq0.'BlogId_jk0' and sq0.'UserName_jk0' = 'ethan'
 ) sq0
 ```
