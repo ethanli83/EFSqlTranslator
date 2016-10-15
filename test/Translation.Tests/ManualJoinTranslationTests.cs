@@ -26,17 +26,25 @@ namespace Translation.Tests
                 var sql = script.ToString();
 
                 const string expected = @"
-select q0.*
+select sq0.*
 from (
-    select p0.'PostId' as 'PId', q0.'BlogId' as 'BlogId'
+    select p0.'PostId' as 'PId', sq0.'Name' as 'Name'
     from Posts p0
-    inner join (
-        select b0.'BlogId', b0.'BlogId', u0.'UserName'
+    inner join Users u0 on p0.'UserId' = u0.'UserId'
+    left outer join (
+        select b0.'Name', b0.'BlogId' as 'BlogId_jk1'
         from Blogs b0
-        inner join Users u0 on b0.'UserId' = u0.'UserId'
-        where b0.'Url' != null
-    ) q0 on p0.'BlogId' = q0.'BlogId' and q0.'UserName' = 'ethan'
-) q0";
+        left outer join (
+            select p0.'BlogId' as 'BlogId_jk0'
+            from Posts p0
+            inner join Users u0 on p0.'UserId' = u0.'UserId'
+            where u0.'UserName' is not null
+            group by p0.'BlogId'
+        ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
+        where sq0.'BlogId_jk0' is not null
+    ) sq0 on p0.'BlogId' = sq0.'BlogId_jk1' and u0.'UserName' = 'ethan'
+) sq0
+";
 
                 TestUtils.AssertStringEqual(expected, sql);                
             }
