@@ -20,9 +20,9 @@ namespace Translation.Tests
                 var sql = script.ToString();
                 
                 const string expected = @"
-select b.*
-from Blogs b
-where b.'Url' != null";
+select b0.*
+from Blogs b0
+where b0.'Url' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

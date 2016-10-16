@@ -36,7 +36,15 @@ namespace Translation.App
                     Select(g => new { g.User, g.Url }).
                     Select(g => new { g.User.UserName, g.Url });
 
-                db.Query(query3);
+                var query4 = db.Blogs.Where(b => b.Posts.Any(p => p.User.UserName != null));
+                var query5 = db.Posts.
+                    Join(
+                        query4, 
+                        (p, b) => p.BlogId == b.BlogId && p.User.UserName == "ethan", 
+                        (p, b) => new { PId = p.PostId, b.Name },
+                        JoinType.LeftOuter);
+
+                db.Query(query5);
             }
         }
     }

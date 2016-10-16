@@ -310,17 +310,17 @@ namespace Translation
 
                 // pop out used select for the parameter just translated
                 // so that the next parameter will be assigned with current select
-                // while(_state.ResultStack.Count > 0)
-                // {
-                //     var dbObj = _state.ResultStack.Pop();
-                //     results.Push(dbObj);
-                //     if (dbObj is IDbSelect)
-                //         break;
-                // }
+                while(_state.ResultStack.Count > 0)
+                {
+                    var dbObj = _state.ResultStack.Pop();
+                    results.Push(dbObj);
+                    if (dbObj is IDbSelect)
+                        break;
+                }
             }
 
-            // while(results.Count > 0)
-            //     _state.ResultStack.Push(results.Pop());                
+            while(results.Count > 0)
+                _state.ResultStack.Push(results.Pop());                
             
             _state.ParamterStack.Push(pList);
             Visit(l.Body);

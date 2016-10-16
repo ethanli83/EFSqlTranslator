@@ -83,18 +83,18 @@ namespace Translation.MethodTranslators
             var dbRef = selection as DbReference;
             if (dbRef != null)
             {
-                var refColumn = _dbFactory.BuildRefColumn(dbRef);
-
+                IDbRefColumn toRefCol = null;
                 if (dbRef.OwnerSelect != fromSelect)
                 {
                     var toSelect = (IDbSelect)toSelectRef.Referee;
-                    var toRefCol = _dbFactory.BuildRefColumn(dbRef);
-                    toSelect.AddSelection(toRefCol, _dbFactory);
+                    toRefCol = _dbFactory.BuildRefColumn(dbRef);
                     
-                    refColumn.RefTo = toRefCol;
+                    toSelect.AddSelection(toRefCol, _dbFactory);
                     dbRef = toSelectRef;
                 }
 
+                var refColumn = _dbFactory.BuildRefColumn(dbRef);
+                refColumn.RefTo = toRefCol;
                 return refColumn;   
             }
 

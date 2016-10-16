@@ -20,10 +20,10 @@ namespace Translation.Tests
                 var sql = script.ToString();
 
                 const string expected = @"
-select p.*
-from Posts p
-inner join Blogs b0 on p.'BlogId' = b0.'BlogId'
-where b0.'Url' != null ";
+select p0.*
+from Posts p0
+inner join Blogs b0 on p0.'BlogId' = b0.'BlogId'
+where b0.'Url' is not null ";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
@@ -40,15 +40,15 @@ where b0.'Url' != null ";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b.*
-from Blogs b
+select b0.*
+from Blogs b0
 left outer join (
-    select p.'BlogId'
-    from Posts p
-    where p.'Content' != null
-    group by p.'BlogId'
-) x0 on b.'BlogId' = x0.'BlogId'
-where x0.'BlogId' != null";
+    select p0.'BlogId' as 'BlogId_jk0'
+    from Posts p0
+    where p0.'Content' is not null
+    group by p0.'BlogId'
+) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
+where sq0.'BlogId_jk0' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
@@ -65,17 +65,17 @@ where x0.'BlogId' != null";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b.*
-from Blogs b
-inner join Users u0 on b.'UserId' = u0.'UserId'
+select b0.*
+from Blogs b0
+inner join Users u0 on b0.'UserId' = u0.'UserId'
 left outer join (
-    select c.'UserId'
-    from Comments c
-    inner join Posts p0 on c.'PostId' = p0.'PostId'
-    where p0.'Content' != null
-    group by c.'UserId'
-) x0 on u0.'UserId' = x0.'UserId'
-where x0.'UserId' != null";
+    select c0.'UserId' as 'UserId_jk0'
+    from Comments c0
+    inner join Posts p0 on c0.'PostId' = p0.'PostId'
+    where p0.'Content' is not null
+    group by c0.'UserId'
+) sq0 on u0.'UserId' = sq0.'UserId_jk0'
+where sq0.'UserId_jk0' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

@@ -184,7 +184,7 @@ namespace Translation.DbObjects.SqlObjects
             if (GroupBys.Count > 0)
             {
                 sb.AppendLine();
-                sb.Append($"{GroupBys}");
+                sb.Append($"group by {string.Join(", ", GroupBys)}");
             }
 
             return sb.ToString();
