@@ -73,7 +73,7 @@ namespace Translation.MethodTranslators
             foreach(var joinKey in dbJoin.GetChildren<IDbColumn>(c => c.Ref == dbJoin.To))
             {
                 var pkColumn = _dbFactory.BuildColumn(dbJoin.To, joinKey.Name, joinKey.ValType.DotNetType, joinKey.Alias);
-                var binary = _dbFactory.BuildBinary(pkColumn, DbOperator.NotEqual, _dbFactory.BuildConstant(null));
+                var binary = _dbFactory.BuildBinary(pkColumn, DbOperator.IsNot, _dbFactory.BuildConstant(null));
                 whereClause = whereClause != null 
                     ? _dbFactory.BuildBinary(whereClause, DbOperator.And, binary)
                     : binary;

@@ -7,8 +7,8 @@ namespace Translation.Tests
     {
         public static void AssertStringEqual(string expected, string actual)
         {
-            expected = Regex.Replace(expected, @"[\S+\n\r\s]+", " ").Trim();
-            actual = Regex.Replace(actual, @"[\S+\n\r\s]+", " ").Trim();
+            expected = Regex.Replace(expected, @"[\n\r\s]+", " ").Trim();
+            actual = Regex.Replace(actual, @"[\n\r\s]+", " ").Trim();
             Assert.Equal(expected, actual);
         }
     }
