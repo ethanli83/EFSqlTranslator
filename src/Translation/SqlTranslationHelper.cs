@@ -1,10 +1,83 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
+using Translation.DbObjects;
 
 namespace Translation
 {
-    public static class SqlTranslationHelper
+    internal static class SqlTranslationHelper
     {
+        public static string GetSqlOperator(ExpressionType type)
+        {
+            return GetSqlOperator(GetDbOperator(type));
+        }
+
+        public static bool IsNullVal(this IDbObject obj)
+        {
+            var dbConst = obj as IDbConstant;
+            if (dbConst == null)
+                return false;
+
+            return dbConst.Val == null;
+        }
+
+        public static bool IsAnonymouse(this Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            return type.Name.StartsWith("<>") || type.Name.StartsWith("VB$");
+        }
+
+        public static void AddSelection(this IDbSelect dbSelect, IDbSelectable selectable, IDbObjectFactory dbFactory)
+        {
+            dbSelect.Selection.Add(selectable);
+            if (dbSelect.GroupBys.Any())
+                dbSelect.GroupBys.Add(selectable);
+        }
+
+        public static void UpdateJoinType(DbReference dbRef)
+        {
+            var joins = dbRef.OwnerSelect.Joins.Where(j => j.To == dbRef);
+            foreach(var dbJoin in joins)
+            {
+                dbJoin.Type = JoinType.LeftOuter;
+                var relatedRefs = dbJoin.Condition.GetChildren<DbReference>(r => r != dbJoin.To);
+                foreach(var relatedRef in relatedRefs)
+                    UpdateJoinType(relatedRef); 
+            }
+        }
+
+        public static IDbSelectable[] ProcessSelection(IDbObject dbObj, IDbObjectFactory factory)
+        {
+            if (dbObj is IDbList<DbKeyValue>)
+            {
+                var keyVals = (IDbList<DbKeyValue>)dbObj;   
+                return keyVals.SelectMany(kv => ProcessSelection(kv, factory)).ToArray();
+            }
+            else if (dbObj is DbReference)
+            {
+                var dbRef = (DbReference)dbObj;
+                return new [] { factory.BuildRefColumn(dbRef) };
+            }
+            else if (dbObj is DbKeyValue)
+            {
+                var kv = (DbKeyValue)dbObj;
+                var dbRef = kv.Value as DbReference;
+                
+                var selectables = ProcessSelection(kv.Value, factory);
+                
+                foreach(var selectable in selectables)
+                    selectable.Alias = kv.Key;
+
+                return selectables;
+            }
+            else
+            {
+                return new [] { (IDbSelectable)dbObj };
+            }
+        }
+
         public static DbOperator GetDbOperator(ExpressionType type)
         {
             switch (type)
@@ -77,20 +150,6 @@ namespace Translation
                 default:
                     throw new NotSupportedException(optr.ToString());
             }
-        }
-
-        public static string GetSqlOperator(ExpressionType type)
-        {
-            return GetSqlOperator(GetDbOperator(type));
-        }
-
-        public static bool IsNullVal(this IDbObject obj)
-        {
-            var dbConst = obj as IDbConstant;
-            if (dbConst == null)
-                return false;
-
-            return dbConst.Val == null;
         }
     }
 }

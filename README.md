@@ -98,3 +98,48 @@ from (
     ) sq0 on p0.'BlogId' = sq0.'BlogId_jk0' and sq0.'UserName_jk0' = 'ethan'
 ) sq0
 ```
+
+## Simple Selections
+
+### linq expression
+```
+var query = db.Posts.
+    Where(p => p.User.UserName != null).
+    Select(p => new { p.Content, p.Blog.User.UserName });
+```
+
+### translated sql
+```sql
+select p0.'Content' as 'Content', u1.'UserName' as 'UserName'
+from Posts p0
+inner join Users u0 on p0.'UserId' = u0.'UserId'
+left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
+left outer join Users u1 on b0.'UserId' = u1.'UserId'
+where u0.'UserName' is not null
+```
+
+## Select multiple times
+
+### linq expression
+```
+var query = db.Posts.
+    Where(p => p.Content != null).
+    Select(p => p.Blog).
+    Select(g => new { g.User, g.Url }).
+    Select(g => new { g.User.UserName, g.Url });
+```
+
+### translated sql
+```sql
+select sq0.'UserName' as 'UserName', sq0.'Url' as 'Url'
+from (
+    select sq0.*, sq0.'Url' as 'Url'
+    from (
+        select b0.*, u0.*
+        from Posts p0
+        left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
+        left outer join Users u0 on b0.'UserId' = u0.'UserId'
+        where p0.'Content' is not null
+    ) sq0
+) sq0
+```

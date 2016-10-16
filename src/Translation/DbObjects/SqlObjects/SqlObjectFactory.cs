@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace Translation.DbObjects.SqlObjects
 {
@@ -28,7 +29,6 @@ namespace Translation.DbObjects.SqlObjects
                 From = dbReference
             };
             
-            dbSelect.Targets.Add(dbReference);
             dbReference.OwnerSelect = dbSelect;
             return dbSelect;
         }
@@ -55,11 +55,12 @@ namespace Translation.DbObjects.SqlObjects
             };
         }
 
-        public IDbRefColumn BuildRefColumn(DbReference dbRef)
+        public IDbRefColumn BuildRefColumn(DbReference dbRef, string alias = null)
         {
             return new SqlRefColumn 
             {
-                Ref = dbRef
+                Ref = dbRef,
+                Alias = alias
             };
         }
 
@@ -68,7 +69,9 @@ namespace Translation.DbObjects.SqlObjects
             return new SqlTable
             {
                 Namespace = entityInfo.Namespace,
-                TableName = entityInfo.EntityName
+                TableName = entityInfo.EntityName,
+                PrimaryKeys = entityInfo.Keys.
+                    Select(k => BuildColumn(null, k.Name, k.ValType)).ToList()
             };
         }
 
@@ -132,6 +135,24 @@ namespace Translation.DbObjects.SqlObjects
         public IDbList<T> BuildList<T>(params T[] objs) where T : IDbObject
         {
             return new SqlList<T>(objs);
+        }
+        
+        public IDbKeyWord BuildKeyWord(string keyWord)
+        {
+            return new SqlKeyWord
+                {
+                    KeyWord = keyWord
+                };
+        }
+
+        public IDbSelectable BuildSelection(DbReference dbRef, IDbObject selectExpression, string alias = "")
+        {
+            return new SqlSelectable
+                {
+                    SelectExpression = selectExpression,
+                    Ref = dbRef,
+                    Alias = alias
+                };
         }
     }
 

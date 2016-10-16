@@ -39,9 +39,11 @@ namespace Translation
 
         private void RegisterDefaultPlugIns()
         {
-            new WhereMethodTranslator(_infoProvider, _dbFactory).Register(_plugIns);
-            new AnyMethodTranslator(_infoProvider, _dbFactory).Register(_plugIns);
-            new JoinMethodTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new WhereTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new AnyTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new JoinTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new GroupByTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new SelectTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
@@ -109,7 +111,16 @@ namespace Translation
         {
             DbReference dbRef = null;
 
-            if (_state.ParamterStack.Count > 0)
+            if (p.Type.IsAnonymouse())
+            {
+                var dbSelect = _state.GetLastSelect();
+                dbRef = _dbFactory.BuildRef(null);
+                
+                foreach(var selection in dbSelect.Selection)
+                    dbRef.RefSelection[selection.Alias] = selection;
+            }
+
+            if (dbRef == null && _state.ParamterStack.Count > 0)
             {
                 var dbRefs = _state.ParamterStack.Peek();
                 if (dbRefs.ContainsKey(p))
@@ -118,29 +129,21 @@ namespace Translation
             
             // if we can not find the parameter expression in the ParamterStack,
             // it means this is the first time we translates the parameter, so we
-            // need to look for it in the most recently translated select 
+            // need to look for it in the most recently translated select
+            // this is required because we may not always has select on the top
+            // of the stack, especially we translating arguments for method calls 
             if (dbRef == null)
             {
-                var results = new Stack<IDbObject>();
-                while(_state.ResultStack.Count > 0)
-                {
-                    var dbObject = _state.ResultStack.Pop();
-                    results.Push(dbObject);
-                    
-                    var dbSelect = dbObject as IDbSelect;
-                    if (dbSelect != null)
-                    {
-                        dbRef = dbSelect.Targets.First();
-                        break;
-                    }
-                }
-
-                while(results.Count > 0)
-                    _state.ResultStack.Push(results.Pop());
+                // var dbSelect = (IDbSelect)_state.ResultStack.Peek();
+                // dbRef = dbSelect.Targets.First();
+                var dbSelect = _state.GetLastSelect();
+                var refCol = dbSelect.Selection.OfType<IDbRefColumn>().LastOrDefault();
+                dbRef = refCol != null ? refCol.Ref : dbSelect.From;
             }
 
             if (dbRef == null)
                 throw new NullReferenceException();
+
             _state.ResultStack.Push(dbRef);
 
             return p;
@@ -148,18 +151,25 @@ namespace Translation
 
         protected override Expression VisitMember(MemberExpression m)
         {
+            Visit(m.Expression);
+
             var typeInfo = m.Type.GetTypeInfo();
+
+            if (m.Expression.Type.Name.StartsWith("<>"))
+            {
+                var dbRef = (DbReference)_state.ResultStack.Pop();
+                var dbObj = dbRef.RefSelection[m.Member.Name];
+                _state.ResultStack.Push(dbObj);
+                return m;
+            }
 
             // if the member is a queryable entity, we need to translate it
             // into a relation, which means a join 
             var entityInfo = _infoProvider.FindEntityInfo(m.Type);
             if (entityInfo != null)
             {
-                var e = m.Expression;
-                Visit(e);
-
                 var fromRef = (DbReference)_state.ResultStack.Pop();
-                var fromEntity = _infoProvider.FindEntityInfo(e.Type);
+                var fromEntity = _infoProvider.FindEntityInfo(m.Expression.Type);
                 var relation = fromEntity.GetRelation(m.Member.Name);
 
                 var dbJoin = GetOrCreateJoin(relation, fromRef);
@@ -173,10 +183,8 @@ namespace Translation
 
             if (typeInfo.Namespace.StartsWith("System"))
             {
-                // build a column expression for
-                Visit(m.Expression);
-
-                var dbRef = (DbReference)_state.ResultStack.Pop();
+                var dbObj = _state.ResultStack.Pop();
+                var dbRef = dbObj as DbReference ?? ((IDbRefColumn)dbObj).Ref;
                 var col = _dbFactory.BuildColumn(dbRef, m.Member.Name, m.Type);
                 
                 _state.ResultStack.Push(col);
@@ -240,7 +248,7 @@ namespace Translation
                     {
                         var alias = _nameGenerator.GetAlias(dbSelect, toKey.Name + "_jk", true);
                         var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType, alias);
-                        childSelect.Selection.Add(childColumn);
+                        childSelect.AddSelection(childColumn, _dbFactory);
                         childSelect.GroupBys.Add(childColumn);
 
                         toColumn.Name = alias;
@@ -302,17 +310,17 @@ namespace Translation
 
                 // pop out used select for the parameter just translated
                 // so that the next parameter will be assigned with current select
-                while(_state.ResultStack.Count > 0)
-                {
-                    var dbObj = _state.ResultStack.Pop();
-                    results.Push(dbObj);
-                    if (dbObj is IDbSelect)
-                        break;
-                }
+                // while(_state.ResultStack.Count > 0)
+                // {
+                //     var dbObj = _state.ResultStack.Pop();
+                //     results.Push(dbObj);
+                //     if (dbObj is IDbSelect)
+                //         break;
+                // }
             }
 
-            while(results.Count > 0)
-                _state.ResultStack.Push(results.Pop());                
+            // while(results.Count > 0)
+            //     _state.ResultStack.Push(results.Pop());                
             
             _state.ParamterStack.Push(pList);
             Visit(l.Body);
@@ -340,6 +348,13 @@ namespace Translation
             }
 
             var dbBinary = _dbFactory.BuildBinary(left, dbOptr, right);
+            
+            if (dbOptr == DbOperator.Or)
+            {
+                var dbRefs = dbBinary.GetChildren<DbReference>().Distinct();
+                foreach(var dbRef in dbRefs)
+                    SqlTranslationHelper.ProcessSelection(dbRef, _dbFactory);    
+            }
 
             _state.ResultStack.Push(dbBinary);
             return b;
@@ -361,6 +376,27 @@ namespace Translation
         public Stack<Dictionary<ParameterExpression, DbReference>> ParamterStack => _paramterStack;
 
         public Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> CreatedJoins => _createdJoins;
+
+        public IDbSelect GetLastSelect()
+        {
+            IDbSelect dbSelect = null;
+
+            var results = new Stack<IDbObject>();
+            while(ResultStack.Count > 0)
+            {
+                var dbObject = ResultStack.Pop();
+                results.Push(dbObject);
+                
+                dbSelect = dbObject as IDbSelect;
+                if (dbSelect != null)
+                    break;
+            }
+
+            while(results.Count > 0)
+                ResultStack.Push(results.Pop());
+
+            return dbSelect;
+        }
     }
 
     public class UniqueNameGenerator

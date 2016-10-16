@@ -24,9 +24,9 @@ namespace Translation.MethodTranslators
             MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator);
     }
 
-    public class WhereMethodTranslator : AbstractMethodTranslator
+    public class WhereTranslator : AbstractMethodTranslator
     {
-        public WhereMethodTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) 
+        public WhereTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) 
             : base(infoProvider, dbFactory)
         {
         }
@@ -47,9 +47,9 @@ namespace Translation.MethodTranslators
         }   
     }
 
-    public class AnyMethodTranslator : AbstractMethodTranslator
+    public class AnyTranslator : AbstractMethodTranslator
     {
-        public AnyMethodTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) 
+        public AnyTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) 
             : base(infoProvider, dbFactory)
         {
         }

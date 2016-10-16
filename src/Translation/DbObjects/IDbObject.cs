@@ -14,10 +14,16 @@ namespace Translation
     {
         string Namespace { get; set; }
         string TableName { get; set; }
+
+        IList<IDbColumn> PrimaryKeys { get; set; }
     }
 
     public interface IDbSelectable : IDbObject
     {
+        IDbObject SelectExpression { get; set; }
+
+        DbReference Ref { get; set; }
+
         string Alias { get; set; }
 
         string ToSelectionString();
@@ -27,12 +33,11 @@ namespace Translation
     {
         DbType ValType { get; set; }
         string Name { get; set; }
-        DbReference Ref { get; set; }
     }
 
     public interface IDbRefColumn : IDbSelectable
     {
-        DbReference Ref { get; set; }
+        IDbRefColumn RefTo { get; set; }
     }
 
     public class DbKeyValue : IDbObject
@@ -57,10 +62,6 @@ namespace Translation
     {
         // columns or expression that the query return as result columns
         IList<IDbSelectable> Selection { get; set; }
-        
-        // queryable entities that referred by columns or expressions in Selection
-        // such as x in select x.col from xtable x 
-        IList<DbReference> Targets { get; set; }
         
         DbReference From { get; set; }
         
@@ -106,8 +107,13 @@ namespace Translation
     public interface IDbConstant : IDbObject
     {
         DbType ValType { get; set; }
-        Object Val { get; set; }
+        object Val { get; set; }
         bool AsParam { get; set; }
+    }
+
+    public interface IDbKeyWord : IDbObject
+    {
+        string KeyWord { get; set; }
     }
 
     public class DbReference : IDbObject
@@ -117,6 +123,10 @@ namespace Translation
             Referee = dbObject;
         }
 
+        public IDbObject SelectExpression { get; set; }
+
+        public DbReference Ref { get; set; }
+
         public IDbObject Referee { get; private set; }
 
         // the select that contains the reference
@@ -125,6 +135,8 @@ namespace Translation
         // the join that joining to this reference
         public IDbJoin OwnerJoin { get; set; }
         
+        public IDictionary<string, IDbSelectable> RefSelection { get; set; } = new Dictionary<string, IDbSelectable>();
+
         //public IDbSelect OwnerSelect { get; set; }
         public string Alias { get; set; }
 
@@ -147,7 +159,7 @@ namespace Translation
             return sb.ToString();
         }
 
-        internal string ToSelectionString()
+        public string ToSelectionString()
         {
             return $"{Alias}.*";
         }

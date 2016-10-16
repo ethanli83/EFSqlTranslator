@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using Translation.DbObjects;
 
 namespace Translation.MethodTranslators
 {
-    public class JoinMethodTranslator : AbstractMethodTranslator
+    public class JoinTranslator : AbstractMethodTranslator
     {
-        public JoinMethodTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) 
+        public JoinTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) 
             : base(infoProvider, dbFactory)
         {
         }
@@ -40,7 +38,7 @@ namespace Translation.MethodTranslators
                 var alias = nameGenerator.GetAlias(toSelect, joinKey.Name + "_jk", true);
                 var innerCol = _dbFactory.BuildColumn(joinKey);
                 innerCol.Alias = alias;
-                toSelect.Selection.Add(innerCol);
+                toSelect.AddSelection(innerCol, _dbFactory);
                 
                 joinKey.Ref = toSelectRef;
                 joinKey.Name = alias;
@@ -71,12 +69,12 @@ namespace Translation.MethodTranslators
             {
                 var selectable = GetSelectable(fromSelect, keyValue.Value, toSelectRef);
                 selectable.Alias = keyValue.Key;
-                fromSelect.Selection.Add(selectable);
+                fromSelect.AddSelection(selectable, _dbFactory);
             }
             else
             {
                 var selectable = GetSelectable(fromSelect, selection, toSelectRef);
-                fromSelect.Selection.Add(selectable);
+                fromSelect.AddSelection(selectable, _dbFactory);
             }
         }
 
@@ -85,16 +83,18 @@ namespace Translation.MethodTranslators
             var dbRef = selection as DbReference;
             if (dbRef != null)
             {
+                var refColumn = _dbFactory.BuildRefColumn(dbRef);
+
                 if (dbRef.OwnerSelect != fromSelect)
                 {
                     var toSelect = (IDbSelect)toSelectRef.Referee;
-                    var refCol = _dbFactory.BuildRefColumn(dbRef);
-                    toSelect.Selection.Add(refCol);
+                    var toRefCol = _dbFactory.BuildRefColumn(dbRef);
+                    toSelect.AddSelection(toRefCol, _dbFactory);
                     
+                    refColumn.RefTo = toRefCol;
                     dbRef = toSelectRef;
                 }
 
-                var refColumn = _dbFactory.BuildRefColumn(dbRef);
                 return refColumn;   
             }
 
@@ -104,7 +104,7 @@ namespace Translation.MethodTranslators
                 if (column.Ref.OwnerSelect != fromSelect)
                 {
                     var toSelect = (IDbSelect)toSelectRef.Referee;
-                    toSelect.Selection.Add(column);
+                    toSelect.AddSelection(column, _dbFactory);
                     
                     column = _dbFactory.BuildColumn(column);
                     column.Ref = toSelectRef;

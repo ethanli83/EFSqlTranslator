@@ -18,13 +18,25 @@ namespace Translation.App
             using (var db = new BloggingContext())
             {
                 var query = db.Posts.
-                    Join(
-                        db.Blogs.Where(b => b.Url != null), 
-                        (p, b) => p.BlogId == b.BlogId && b.User.UserName == "ethan",
-                        (p, b) => new { PId = p.PostId, b.Name, BlogUser = b.User.UserName, PostUser = p.User.UserName },
-                        JoinType.LeftOuter);
+                    Where(p => p.User.UserName != null).
+                    Select(p => new { p.Content, p.Blog.User.UserName });
 
-                db.Query(query);
+                var query1 = db.Posts.
+                    Where(p => p.Content != null && p.User.UserName != null).
+                    Select(p => new { p.Blog, p.Blog.User.UserName });
+
+                var query2 = db.Posts.
+                    Where(p => p.Content != null).
+                    Select(p => new { p.Blog, p.User.UserName }).
+                    Select(p => new { p.Blog.Url, p.Blog.Name, p.UserName });
+
+                var query3 = db.Posts.
+                    Where(p => p.Content != null).
+                    Select(p => p.Blog).
+                    Select(g => new { g.User, g.Url }).
+                    Select(g => new { g.User.UserName, g.Url });
+
+                db.Query(query3);
             }
         }
     }

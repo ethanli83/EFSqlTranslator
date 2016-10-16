@@ -25,6 +25,9 @@ namespace Translation.DbObjects.SqlObjects
     public class SqlTable : SqlObject, IDbTable
     {
         public string Namespace { get; set; }
+
+        public IList<IDbColumn> PrimaryKeys { get; set; } = new List<IDbColumn>();
+
         public string TableName { get; set; }
 
         public override string ToString()
@@ -42,19 +45,30 @@ namespace Translation.DbObjects.SqlObjects
 
     public class SqlSelectable : SqlObject, IDbSelectable 
     {
+        public IDbObject SelectExpression { get; set; }
+
+        public DbReference Ref { get; set; }
+
         public string Alias { get; set; }
+
+        public override string ToString()
+        {
+            return string.IsNullOrEmpty(Alias) 
+                ? $"{SelectExpression}"
+                : $"{SelectExpression} as '{Alias}'";
+        }
 
         public virtual string ToSelectionString()
         {
-            return Alias;
+            return ToString();
         }
     }
 
     public class SqlColumn : SqlSelectable, IDbColumn
     {
         public DbType ValType { get; set; }
+        
         public string Name { get; set; }
-        public DbReference Ref { get; set; }
 
         public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
         {
@@ -84,14 +98,14 @@ namespace Translation.DbObjects.SqlObjects
 
     public class SqlRefColumn : SqlSelectable, IDbRefColumn
     {
-        public DbReference Ref { get; set; }
+        public IDbRefColumn RefTo { get; set; }
 
         public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
         {
-            var result = base.GetChildren<T>(filterFunc);
-            var refResult = Ref.GetChildren<T>(filterFunc);
-
-            return result.Concat(refResult).ToArray();
+            return base.GetChildren<T>(filterFunc).
+                Concat(Ref.GetChildren<T>(filterFunc)).
+                Concat(RefTo.GetChildren<T>(filterFunc)).
+                ToArray();
         }
 
         public override string ToString()
@@ -125,18 +139,16 @@ namespace Translation.DbObjects.SqlObjects
         public IList<IDbSelectable> OrderBys { get; set; } = new List<IDbSelectable>();
         
         public IList<IDbSelectable> GroupBys { get; set; } = new List<IDbSelectable>();
-        
-        public IList<DbReference> Targets { get; set; } = new List<DbReference>();
 
         public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
         {
             return base.GetChildren<T>(filterFunc).
-                Concat(Selection.SelectMany(s => s.GetChildren<T>(filterFunc))).
-                Concat(From.GetChildren<T>(filterFunc)).
-                Concat(Where.GetChildren<T>(filterFunc)).
-                Concat(Joins.SelectMany(s => s.GetChildren<T>(filterFunc))).
-                Concat(OrderBys.SelectMany(s => s.GetChildren<T>(filterFunc))).
-                Concat(GroupBys.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                Concat(Selection?.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                Concat(From?.GetChildren<T>(filterFunc)).
+                Concat(Where?.GetChildren<T>(filterFunc)).
+                Concat(Joins?.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                Concat(OrderBys?.SelectMany(s => s.GetChildren<T>(filterFunc))).
+                Concat(GroupBys?.SelectMany(s => s.GetChildren<T>(filterFunc))).
                 ToArray();
         }
 
@@ -149,7 +161,7 @@ namespace Translation.DbObjects.SqlObjects
             if (Selection.Count > 0)
                 AppendSelection(sb);
             else
-                AppendTargetSelections(sb);
+                sb.Append($" {From.ToSelectionString()}");
 
             if (From != null)
             {
@@ -172,7 +184,7 @@ namespace Translation.DbObjects.SqlObjects
             if (GroupBys.Count > 0)
             {
                 sb.AppendLine();
-                sb.Append($"group by {string.Join(", ", GroupBys)}");
+                sb.Append($"{GroupBys}");
             }
 
             return sb.ToString();
@@ -182,12 +194,6 @@ namespace Translation.DbObjects.SqlObjects
         {
             var columns = Selection.Select(c => c.ToSelectionString());
             sb.Append($" {string.Join(", ", columns)}");
-        }
-
-        public void AppendTargetSelections(StringBuilder sb)
-        {
-            var targetSelectCol = Targets.Select(t => t.ToSelectionString());
-            sb.Append($" {string.Join(", ", targetSelectCol)}");
         }
     }
 
@@ -302,6 +308,16 @@ namespace Translation.DbObjects.SqlObjects
                 return $"'{Val}'";
 
             return Val.ToString();
+        }
+    }
+
+    public class SqlKeyWord : SqlObject, IDbKeyWord
+    {
+        public string KeyWord { get; set; }
+
+        public override string ToString()
+        {
+            return $"{KeyWord}";
         }
     }
 
