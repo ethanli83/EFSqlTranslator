@@ -111,14 +111,24 @@ namespace Translation
         {
             DbReference dbRef = null;
 
-            if (p.Type.IsAnonymouse())
+            if (p.Type.IsAnonymouse() || p.Type.IsGrouping())
             {
                 var dbSelect = _state.GetLastSelect();
                 dbRef = _dbFactory.BuildRef(null);
+                dbRef.OwnerSelect = dbSelect;
                 
-                foreach(var selection in dbSelect.Selection)
-                    dbRef.RefSelection[selection.Alias] = selection;
+                if (p.Type.IsAnonymouse())
+                {
+                    foreach(var selection in dbSelect.Selection)
+                        dbRef.RefSelection[selection.Alias] = selection;
+                }
+                else
+                {
+                    foreach(var groupBy in dbSelect.GroupBys.GroupBys)
+                        dbRef.RefSelection[groupBy.Key] = groupBy.Value;
+                }
             }
+
 
             if (dbRef == null && _state.ParamterStack.Count > 0)
             {
@@ -155,11 +165,30 @@ namespace Translation
 
             var typeInfo = m.Type.GetTypeInfo();
 
-            if (m.Expression.Type.Name.StartsWith("<>"))
+            if (m.Expression.Type.IsAnonymouse())
             {
                 var dbRef = (DbReference)_state.ResultStack.Pop();
                 var dbObj = dbRef.RefSelection[m.Member.Name];
                 _state.ResultStack.Push(dbObj);
+                return m;
+            }
+
+            if (m.Expression.Type.IsGrouping())            
+            {
+                var dbRef = (DbReference)_state.ResultStack.Pop();
+                
+                var dbSelect = dbRef.OwnerSelect;
+                if (dbSelect.GroupBys.IsSingleKey)
+                {
+                    var kColumn = dbRef.RefSelection.First();
+                    var colum = _dbFactory.BuildColumn(kColumn.Value.Ref, kColumn.Key, m.Type);
+                    _state.ResultStack.Push(colum);
+                }
+                else
+                {
+                    _state.ResultStack.Push(dbRef);   
+                }
+
                 return m;
             }
 
@@ -168,12 +197,20 @@ namespace Translation
             var entityInfo = _infoProvider.FindEntityInfo(m.Type);
             if (entityInfo != null)
             {
-                var fromRef = (DbReference)_state.ResultStack.Pop();
+                var dbObj = _state.ResultStack.Pop();
+                var refCol = dbObj as IDbRefColumn;
+                var fromRef = refCol != null ? refCol.Ref : (DbReference)dbObj;
+
                 var fromEntity = _infoProvider.FindEntityInfo(m.Expression.Type);
                 var relation = fromEntity.GetRelation(m.Member.Name);
 
-                var dbJoin = GetOrCreateJoin(relation, fromRef);
-                if(relation.IsChildRelation)
+                var dbJoin = GetOrCreateJoin(relation, fromRef, refCol);
+                if (refCol != null)
+                {
+                    var newRefCol = _dbFactory.BuildRefColumn(dbJoin.To, m.Member.Name);
+                    _state.ResultStack.Push(newRefCol);
+                }    
+                else if(relation.IsChildRelation)
                     _state.ResultStack.Push(dbJoin.To.Referee);
                 else
                     _state.ResultStack.Push(dbJoin.To);
@@ -184,10 +221,15 @@ namespace Translation
             if (typeInfo.Namespace.StartsWith("System"))
             {
                 var dbObj = _state.ResultStack.Pop();
-                var dbRef = dbObj as DbReference ?? ((IDbRefColumn)dbObj).Ref;
-                var col = _dbFactory.BuildColumn(dbRef, m.Member.Name, m.Type);
+                var refCol = dbObj as IDbRefColumn;
+                var dbRef = refCol != null ? refCol.Ref : (DbReference)dbObj;
                 
+                var col = _dbFactory.BuildColumn(dbRef, m.Member.Name, m.Type);
                 _state.ResultStack.Push(col);
+
+                if (refCol != null)
+                    refCol.AddRefSelection(m.Member.Name, m.Type, _dbFactory, null, false);
+
                 return m;
             }
 
@@ -201,9 +243,9 @@ namespace Translation
                 typeof(IQueryable<>).MakeGenericType(type).IsAssignableFrom(m.Type));
         }
 
-        private IDbJoin GetOrCreateJoin(EntityRelation relation, DbReference fromRef)
+        private IDbJoin GetOrCreateJoin(EntityRelation relation, DbReference fromRef, IDbRefColumn refCol)
         {
-            var dbSelect = _state.ResultStack.OfType<IDbSelect>().First(d => fromRef.OwnerSelect == d);
+            var dbSelect = fromRef.OwnerSelect;
             var tupleKey = Tuple.Create(dbSelect, relation);
 
             if (!_state.CreatedJoins.ContainsKey(tupleKey))
@@ -225,11 +267,10 @@ namespace Translation
                     childSelect = _dbFactory.BuildSelect(childRef);
                     childRef.Alias = _nameGenerator.GetAlias(childSelect, dbTable.TableName);
 
-                    var tableAlias = _nameGenerator.GetAlias(dbSelect, "sq", true);
+                    var tableAlias = _nameGenerator.GetAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
                     joinTo = _dbFactory.BuildRef(childSelect, tableAlias);
                 }
 
-                
                 var dbJoin = _dbFactory.BuildJoin(joinTo);
                 joinTo.OwnerSelect = dbSelect;
                 joinTo.OwnerJoin = dbJoin;
@@ -246,13 +287,30 @@ namespace Translation
 
                     if (childRef != null && childSelect != null)
                     {
-                        var alias = _nameGenerator.GetAlias(dbSelect, toKey.Name + "_jk", true);
+                        var alias = _nameGenerator.GetAlias(childSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
                         var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType, alias);
+                        childColumn.IsJoinKey = true;
+                        
+                        childSelect.GroupBys = _dbFactory.BuildGroupBys();
                         childSelect.AddSelection(childColumn, _dbFactory);
-                        childSelect.GroupBys.Add(childColumn);
-
+                        
                         toColumn.Name = alias;
                         toColumn.Alias = string.Empty;
+                    }
+
+                    if (refCol != null)
+                    {
+                        var alias = refCol.Ref.Referee is IDbSelect
+                            ? _nameGenerator.GetAlias(dbSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true)
+                            : null;
+
+                        refCol.AddRefSelection(fromKey.Name, fromKey.ValType, _dbFactory, alias, true);
+
+                        if (alias != null)
+                        {
+                            fromColumn.Name = alias;
+                            fromColumn.Alias = string.Empty;
+                        }
                     }
 
                     var binary = _dbFactory.BuildBinary(fromColumn, DbOperator.Equal, toColumn);

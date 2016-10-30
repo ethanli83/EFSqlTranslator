@@ -55,12 +55,13 @@ namespace Translation.DbObjects.SqlObjects
             };
         }
 
-        public IDbRefColumn BuildRefColumn(DbReference dbRef, string alias = null)
+        public IDbRefColumn BuildRefColumn(DbReference dbRef, string alias = null, IDbRefColumn fromRefColumn = null)
         {
             return new SqlRefColumn 
             {
                 Ref = dbRef,
-                Alias = alias
+                Alias = alias,
+                RefTo = fromRefColumn
             };
         }
 
@@ -153,6 +154,11 @@ namespace Translation.DbObjects.SqlObjects
                     Ref = dbRef,
                     Alias = alias
                 };
+        }
+
+        public DbGroupByCollection BuildGroupBys()
+        {
+            return new DbGroupByCollection();
         }
     }
 

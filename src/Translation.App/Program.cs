@@ -18,33 +18,35 @@ namespace Translation.App
             using (var db = new BloggingContext())
             {
                 var query = db.Posts.
-                    Where(p => p.User.UserName != null).
-                    Select(p => new { p.Content, p.Blog.User.UserName });
+                    Where(p => p.Blog.User.Comments.Any(c => c.CommentId > 20));
 
                 var query1 = db.Posts.
-                    Where(p => p.Content != null && p.User.UserName != null).
-                    Select(p => new { p.Blog, p.Blog.User.UserName });
+                    Where(p => p.Content != null).
+                    GroupBy(p => p.BlogId).
+                    Select(g => new { g.Key });
 
                 var query2 = db.Posts.
                     Where(p => p.Content != null).
-                    Select(p => new { p.Blog, p.User.UserName }).
-                    Select(p => new { p.Blog.Url, p.Blog.Name, p.UserName });
+                    GroupBy(p => new { p.BlogId, p.User.UserName }).
+                    Select(g => new { g.Key.UserName });
+
+                var query2_1 = db.Posts.
+                    Where(p => p.Content != null).
+                    GroupBy(p => new { p.Blog }).
+                    Select(g => new { g.Key.Blog.Url, g.Key.Blog.User.UserName });
 
                 var query3 = db.Posts.
                     Where(p => p.Content != null).
-                    Select(p => p.Blog).
-                    Select(g => new { g.User, g.Url }).
-                    Select(g => new { g.User.UserName, g.Url });
+                    Select(p => new { p.Blog, p.User }).
+                    GroupBy(x => new { x.Blog }).
+                    Select(x => new { x.Key.Blog.Url, x.Key.Blog.User.UserName });
 
-                var query4 = db.Blogs.Where(b => b.Posts.Any(p => p.User.UserName != null));
-                var query5 = db.Posts.
-                    Join(
-                        query4, 
-                        (p, b) => p.BlogId == b.BlogId && p.User.UserName == "ethan", 
-                        (p, b) => new { PId = p.PostId, b.Name },
-                        JoinType.LeftOuter);
+                var query4 = db.Posts.
+                    Where(p => p.Content != null).
+                    Select(p => new { p.Blog, p.User }).
+                    Select(x => new { x.Blog.Url, x.User.UserId, u = x.Blog.User.UserName });
 
-                db.Query(query5);
+                db.Query(query2_1);
             }
         }
     }

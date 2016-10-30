@@ -26,6 +26,8 @@ namespace Translation
 
         string Alias { get; set; }
 
+        bool IsJoinKey { get; set; }
+
         string ToSelectionString();
     }
 
@@ -38,6 +40,8 @@ namespace Translation
     public interface IDbRefColumn : IDbSelectable
     {
         IDbRefColumn RefTo { get; set; }
+
+        IEnumerable<IDbSelectable>  GetRefSelection();
     }
 
     public class DbKeyValue : IDbObject
@@ -71,7 +75,56 @@ namespace Translation
 
         IList<IDbSelectable> OrderBys { get; set; }
         
-        IList<IDbSelectable> GroupBys { get; set; }
+        DbGroupByCollection GroupBys { get; set; }
+    }
+
+    public class DbGroupByCollection : IDbObject
+    {
+        public IDictionary<string, IDbSelectable> GroupBys { get; set; } = 
+            new Dictionary<string, IDbSelectable>();
+
+        public void Add(IDbSelectable selectable)
+        {
+            var alias = GetAlias(selectable);
+            GroupBys.Add(alias, selectable);
+        }
+
+        private string GetAlias(IDbSelectable selectable)
+        {
+            var alias = selectable.Alias;
+            if (string.IsNullOrEmpty(alias))
+            {
+                var dbColumn = selectable as IDbColumn;
+                if (dbColumn != null)
+                    alias = dbColumn.Name;
+                else
+                    throw new InvalidOperationException("{key} does not have alias");
+            }
+            return alias;
+        }
+
+        public bool IsSingleKey { get; set; }
+
+        public bool Any()
+        {
+            return GroupBys.Any();
+        }
+
+        public bool Contains(IDbSelectable selectable)
+        {
+            var alias = GetAlias(selectable);
+            return GroupBys.ContainsKey(alias);
+        }
+
+        public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
+        {
+            return GroupBys.Values.SelectMany(s => s.GetChildren<T>(filterFunc)).ToArray();
+        }
+
+        public override string ToString()
+        {
+            return string.Join(", ", GroupBys.Values);
+        }
     }
 
     public interface IDbJoin : IDbObject
@@ -157,11 +210,6 @@ namespace Translation
             sb.Append($") {Alias}");
 
             return sb.ToString();
-        }
-
-        public string ToSelectionString()
-        {
-            return $"{Alias}.*";
         }
 
         public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject

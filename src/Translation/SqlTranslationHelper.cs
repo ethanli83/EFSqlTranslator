@@ -7,6 +7,10 @@ namespace Translation
 {
     internal static class SqlTranslationHelper
     {
+        public const string JoinKeySuffix = "_jk";
+
+        public const string SubSelectPrefix = "sq";
+
         public static string GetSqlOperator(ExpressionType type)
         {
             return GetSqlOperator(GetDbOperator(type));
@@ -29,13 +33,26 @@ namespace Translation
             return type.Name.StartsWith("<>") || type.Name.StartsWith("VB$");
         }
 
+        public static bool IsGrouping(this Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            return type.GenericTypeArguments.Length == 2 &&
+                   type == typeof(IGrouping<,>).MakeGenericType(type.GenericTypeArguments);
+        }
+
+        /// add selectable to the select and also check if the selectable is 
+        /// also required to be added on group by
         public static void AddSelection(this IDbSelect dbSelect, IDbSelectable selectable, IDbObjectFactory dbFactory)
         {
             dbSelect.Selection.Add(selectable);
-            if (dbSelect.GroupBys.Any())
+            if (dbSelect.GroupBys != null && !dbSelect.GroupBys.Contains(selectable))
                 dbSelect.GroupBys.Add(selectable);
         }
 
+        /// update all joins that are related to dbRef to be left outer join
+        /// this is required by method such as Select or GroupBy 
         public static void UpdateJoinType(DbReference dbRef)
         {
             var joins = dbRef.OwnerSelect.Joins.Where(j => j.To == dbRef);
@@ -76,6 +93,65 @@ namespace Translation
             {
                 return new [] { (IDbSelectable)dbObj };
             }
+        }
+
+        public static IDbSelectable GetOrCreateSelectable(
+            IDbSelectable selectable, DbReference dbRef, IDbObjectFactory dbFactory)
+        {
+            if (dbRef == null)
+                return selectable;
+
+            IDbSelectable newSelectable = null;
+            if (selectable is IDbColumn)
+            {
+                var oCol = (IDbColumn)selectable;
+                newSelectable = dbFactory.BuildColumn(oCol);
+                newSelectable.Ref = dbRef;
+
+                if (dbRef.Referee is IDbSelect 
+                    && oCol.Ref.OwnerSelect != null 
+                    && !oCol.Ref.OwnerSelect.Selection.Contains(oCol))
+                {
+                    oCol.Alias = null;
+                    oCol.Ref.OwnerSelect.AddSelection(oCol, dbFactory);
+                }
+            }
+            else if (selectable is IDbRefColumn)
+            {
+                var oRefCol = (IDbRefColumn)selectable;
+                var oSelect = oRefCol.Ref.OwnerSelect;
+
+                if (!oSelect.Selection.Contains(oRefCol))
+                    oSelect.AddSelection(oRefCol, dbFactory);
+                
+                newSelectable = dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
+            }
+            else if (selectable is DbReference)
+            {
+                var oRef = (DbReference)selectable;
+                newSelectable = dbFactory.BuildRefColumn(dbRef, oRef.Alias);
+            }
+            
+            if (newSelectable == null)
+                throw new InvalidOperationException();
+
+            return newSelectable;
+        }
+
+        public static void AddRefSelection(
+            this IDbRefColumn refColumn, string columnName, Type columnType, 
+            IDbObjectFactory dbFactory, string alias, bool isJoinKey)
+        {
+            if (refColumn.RefTo != null)
+            {
+                refColumn.RefTo.AddRefSelection(columnName, columnType, dbFactory, alias, isJoinKey);
+                columnName = alias ?? columnName;
+                alias = null;
+            }   
+
+            var refToCol = dbFactory.BuildColumn(refColumn.Ref, columnName, columnType, alias);
+            refToCol.IsJoinKey = isJoinKey;
+            refColumn.Ref.RefSelection[columnName] = refToCol;
         }
 
         public static DbOperator GetDbOperator(ExpressionType type)

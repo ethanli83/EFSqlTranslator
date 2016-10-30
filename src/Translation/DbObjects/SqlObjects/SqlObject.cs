@@ -51,6 +51,8 @@ namespace Translation.DbObjects.SqlObjects
 
         public string Alias { get; set; }
 
+        public bool IsJoinKey { get; set; }
+
         public override string ToString()
         {
             return string.IsNullOrEmpty(Alias) 
@@ -112,17 +114,48 @@ namespace Translation.DbObjects.SqlObjects
         {
             var sb = new StringBuilder();
             
-            if (!string.IsNullOrEmpty(Ref.Alias))
-                sb.Append($"{Ref.Alias}.");
-
-            sb.Append($"*");
+            var refToCols = GetRefSelection();
+            if (refToCols.Any())
+            {
+                sb.Append(string.Join(", ", refToCols));
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(Ref.Alias))
+                    sb.Append($"{Ref.Alias}.");
+                sb.Append($"*");
+            }
 
             return sb.ToString();
         }
 
+        public IEnumerable<IDbSelectable> GetRefSelection()
+        {
+            var selection = RefTo != null 
+                ? RefTo.GetRefSelection()
+                : Ref.RefSelection.Values;
+
+            return selection.Select(c => { c.Ref = Ref; return c; });
+        }
+
         public override string ToSelectionString()
         {
-            return $"{this}";
+            var sb = new StringBuilder();
+            
+            var refToCols = GetRefSelection();
+            if (refToCols.Any())
+            {
+                var selection = refToCols.Where(r => !r.IsJoinKey).Select(v => v.ToSelectionString());
+                sb.Append(string.Join(", ", selection));
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(Ref.Alias))
+                    sb.Append($"{Ref.Alias}.");
+                sb.Append($"*");
+            }
+
+            return sb.ToString();
         }
     }
 
@@ -138,18 +171,11 @@ namespace Translation.DbObjects.SqlObjects
 
         public IList<IDbSelectable> OrderBys { get; set; } = new List<IDbSelectable>();
         
-        public IList<IDbSelectable> GroupBys { get; set; } = new List<IDbSelectable>();
+        public DbGroupByCollection GroupBys { get; set; }
 
         public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
         {
-            return base.GetChildren<T>(filterFunc).
-                Concat(Selection?.SelectMany(s => s.GetChildren<T>(filterFunc))).
-                Concat(From?.GetChildren<T>(filterFunc)).
-                Concat(Where?.GetChildren<T>(filterFunc)).
-                Concat(Joins?.SelectMany(s => s.GetChildren<T>(filterFunc))).
-                Concat(OrderBys?.SelectMany(s => s.GetChildren<T>(filterFunc))).
-                Concat(GroupBys?.SelectMany(s => s.GetChildren<T>(filterFunc))).
-                ToArray();
+            return base.GetChildren<T>(filterFunc);
         }
 
         public override string ToString()
@@ -161,7 +187,7 @@ namespace Translation.DbObjects.SqlObjects
             if (Selection.Count > 0)
                 AppendSelection(sb);
             else
-                sb.Append($" {From.ToSelectionString()}");
+                sb.Append($" {From.Alias}.*");
 
             if (From != null)
             {
@@ -181,7 +207,7 @@ namespace Translation.DbObjects.SqlObjects
                 sb.Append($"where {Where}");
             }
 
-            if (GroupBys.Count > 0)
+            if (GroupBys != null && GroupBys.Any())
             {
                 sb.AppendLine();
                 sb.Append($"group by {string.Join(", ", GroupBys)}");
@@ -192,7 +218,7 @@ namespace Translation.DbObjects.SqlObjects
 
         public void AppendSelection(StringBuilder sb)
         {
-            var columns = Selection.Select(c => c.ToSelectionString());
+            var columns = Selection.Select(c => c.ToSelectionString()).Where(s => !string.IsNullOrEmpty(s));
             sb.Append($" {string.Join(", ", columns)}");
         }
     }

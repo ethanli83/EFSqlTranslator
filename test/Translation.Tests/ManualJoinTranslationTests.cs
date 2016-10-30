@@ -32,7 +32,7 @@ from (
     from Posts p0
     inner join Users u0 on p0.'UserId' = u0.'UserId'
     left outer join (
-        select b0.'Name', b0.'BlogId' as 'BlogId_jk1'
+        select b0.'Name', b0.'BlogId' as 'BlogId_jk0'
         from Blogs b0
         left outer join (
             select p0.'BlogId' as 'BlogId_jk0'
@@ -42,7 +42,7 @@ from (
             group by p0.'BlogId'
         ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
         where sq0.'BlogId_jk0' is not null
-    ) sq0 on p0.'BlogId' = sq0.'BlogId_jk1' and u0.'UserName' = 'ethan'
+    ) sq0 on p0.'BlogId' = sq0.'BlogId_jk0' and u0.'UserName' = 'ethan'
 ) sq0
 ";
 

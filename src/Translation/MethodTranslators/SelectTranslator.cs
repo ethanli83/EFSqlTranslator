@@ -35,7 +35,7 @@ namespace Translation.MethodTranslators
             {
                 newSelectRef = _dbFactory.BuildRef(dbSelect);
                 dbSelect = _dbFactory.BuildSelect(newSelectRef);
-                newSelectRef.Alias = nameGenerator.GetAlias(dbSelect, "sq", true);
+                newSelectRef.Alias = nameGenerator.GetAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
             }
             
             // put selections onto the select
@@ -44,48 +44,11 @@ namespace Translation.MethodTranslators
             {
                 SqlTranslationHelper.UpdateJoinType(selectable.Ref);
 
-                var newSelection = GetOrCreateSelectable(selectable, newSelectRef);
+                var newSelection = SqlTranslationHelper.GetOrCreateSelectable(selectable, newSelectRef, _dbFactory);
                 dbSelect.AddSelection(newSelection, _dbFactory);
             }
 
             state.ResultStack.Push(dbSelect);
-        }
-
-        private IDbSelectable GetOrCreateSelectable(IDbSelectable selectable, DbReference dbRef)
-        {
-            if (dbRef == null)
-                return selectable;
-
-            IDbSelectable newSelectable = null;
-            if (selectable is IDbColumn)
-            {
-                var oCol = (IDbColumn)selectable;
-                newSelectable = _dbFactory.BuildColumn(oCol);
-                newSelectable.Ref = dbRef;
-            }
-            else if (selectable is IDbRefColumn)
-            {
-                var oRefCol = (IDbRefColumn)selectable;
-                var oSelect = oRefCol.Ref.OwnerSelect;
-                if (!oSelect.Selection.Contains(oRefCol))
-                    oSelect.AddSelection(oRefCol, _dbFactory);
-                
-                var nRefCol = _dbFactory.BuildRefColumn(dbRef, oRefCol.Alias);
-                nRefCol.RefTo = oRefCol;
-
-                newSelectable = nRefCol;
-            }
-            else if (selectable is DbReference)
-            {
-                var oRef = (DbReference)selectable;
-                var nRefCol = _dbFactory.BuildRefColumn(dbRef, oRef.Alias);
-                newSelectable = nRefCol;
-            }
-            
-            if (newSelectable == null)
-                throw new InvalidOperationException();
-
-            return newSelectable;
         }
     }
 }
