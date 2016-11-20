@@ -1,3 +1,4 @@
 1, Translation is always from left to right.
 2, Child relation is always tranlsated into a join to a sub-select.
-3, Whenever a column is created with a DbReference which is referring a sub-select, we will need to add the colum into the sub-select.
+3, Whenever a column is created with a DbReference which is referring a sub-select, we will need to add the colum into the sub-select. This process of adding columns into sub-select is recursive. 
+4, Column will be created if they are directly used in expression or it is required by relationship. Doing group-by or select on entities will also require primary key to be created and added.

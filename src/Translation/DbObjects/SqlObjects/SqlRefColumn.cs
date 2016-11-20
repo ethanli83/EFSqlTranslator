@@ -15,6 +15,8 @@ namespace Translation.DbObjects.SqlObjects
 
         public bool OnOrderBy { get; set; }
 
+        public bool IsReferred { get; set; }
+
         public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
         {
             return base.GetChildren<T>(filterFunc).

@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Linq.Expressions;
 using Translation.DbObjects;
 
@@ -19,32 +18,27 @@ namespace Translation.MethodTranslators
         public override void Translate(
             MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator)
         {
-            // group by can be a column, a expression, or a list of columns / expressions
             var arguments = state.ResultStack.Pop();
             var dbSelect = (IDbSelect)state.ResultStack.Pop();
 
-            // if the selection of the select is not empty
-            // always wrap it inside another select which will be used
-            // for the recent of translation
-            DbReference newSelectRef = null;
-            if (dbSelect.Selection.Any())
-            {
-                newSelectRef = _dbFactory.BuildRef(dbSelect);
-                dbSelect = _dbFactory.BuildSelect(newSelectRef);
-                newSelectRef.Alias = nameGenerator.GenerateAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
-            }
-            
-            // put selections onto the select
             var selections = SqlTranslationHelper.ProcessSelection(arguments, _dbFactory);
             foreach(var selectable in selections)
             {
                 SqlTranslationHelper.UpdateJoinType(selectable.Ref);
-
-                var newSelectable = SqlTranslationHelper.GetOrCreateSelectable(selectable, newSelectRef, _dbFactory);
-                dbSelect.Selection.Add(newSelectable);
+                dbSelect.Selection.Add(selectable);
             }
 
-            state.ResultStack.Push(dbSelect);
+            var newSelectRef = _dbFactory.BuildRef(dbSelect);
+            var newSelect = _dbFactory.BuildSelect(newSelectRef);
+            newSelectRef.Alias = nameGenerator.GenerateAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
+
+            foreach(var selectable in selections)
+            {
+                var newSelectable = SqlTranslationHelper.CreateNewSelectable(selectable, newSelectRef, _dbFactory);
+                newSelect.Selection.Add(newSelectable);
+            }
+
+            state.ResultStack.Push(newSelect);
         }
     }
 }

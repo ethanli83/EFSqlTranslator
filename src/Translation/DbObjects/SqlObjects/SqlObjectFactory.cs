@@ -33,13 +33,18 @@ namespace Translation.DbObjects.SqlObjects
             return dbSelect;
         }
 
-        public IDbColumn BuildColumn(DbReference dbRef, string colName, Type type, string alias = "", bool isJoinKey = false)
+        public IDbColumn BuildColumn(DbReference dbRef, string colName, Type type, string alias = null, bool isJoinKey = false)
+        {
+            return BuildColumn(dbRef, colName, BuildType(type), alias, isJoinKey);
+        }
+
+        public IDbColumn BuildColumn(DbReference dbRef, string colName, DbType type, string alias = null, bool isJoinKey = false)
         {
             return new SqlColumn 
             {
                 Name = colName,
                 Ref = dbRef,
-                ValType = BuildType(type),
+                ValType = type,
                 Alias = alias,
                 IsJoinKey = isJoinKey
             };
@@ -62,7 +67,8 @@ namespace Translation.DbObjects.SqlObjects
             {
                 Ref = dbRef,
                 Alias = alias,
-                RefTo = fromRefColumn
+                RefTo = fromRefColumn,
+                IsReferred = fromRefColumn != null ? fromRefColumn.IsReferred : false 
             };
         }
 
@@ -152,7 +158,7 @@ namespace Translation.DbObjects.SqlObjects
                 };
         }
 
-        public IDbSelectable BuildSelection(DbReference dbRef, IDbObject selectExpression, string alias = "")
+        public IDbSelectable BuildSelection(DbReference dbRef, IDbObject selectExpression, string alias = null)
         {
             return new SqlSelectable
                 {

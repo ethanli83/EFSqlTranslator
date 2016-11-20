@@ -10,8 +10,9 @@ namespace Translation.DbObjects
         IDbSelect BuildSelect(DbReference dbReference);
         IDbSelect BuildSelect(IDbTable dbTable);
         IDbJoin BuildJoin(DbReference joinTo, IDbSelect dbSelect, IDbBinary condition = null, JoinType joinType = JoinType.Inner);
-        IDbSelectable BuildSelection(DbReference dbRef, IDbObject selectExpression, string alias = "");
-        IDbColumn BuildColumn(DbReference dbRef, string colName, Type type, string alias = "", bool isJoinKey = false);
+        IDbSelectable BuildSelection(DbReference dbRef, IDbObject selectExpression, string alias = null);
+        IDbColumn BuildColumn(DbReference dbRef, string colName, Type type, string alias = null, bool isJoinKey = false);
+        IDbColumn BuildColumn(DbReference dbRef, string colName, DbType type, string alias = null, bool isJoinKey = false);
         IDbColumn BuildColumn(IDbColumn column);
         IDbRefColumn BuildRefColumn(DbReference dbRef, string alias = null, IDbRefColumn fromRefColumn = null);
         IDbList<T> BuildList<T>() where T : IDbObject;

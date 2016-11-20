@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Translation.DbObjects.SqlObjects
@@ -52,7 +53,7 @@ namespace Translation.DbObjects.SqlObjects
                 sb.Append($"where {Where}");
             }
 
-            if (GroupBys != null && GroupBys.Any())
+            if (GroupBys.Any())
             {
                 sb.AppendLine();
                 sb.Append($"group by {string.Join(", ", GroupBys)}");

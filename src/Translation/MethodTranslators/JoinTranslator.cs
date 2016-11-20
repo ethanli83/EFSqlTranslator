@@ -29,6 +29,7 @@ namespace Translation.MethodTranslators
 
             var toSelectRef = _dbFactory.BuildRef(toSelect, nameGenerator.GenerateAlias(fromSelect, "sq", true));
 
+            // todo: review how join condition is translated
             // create result selection for final select
             UpdateSelection(fromSelect, selection, toSelectRef);
 

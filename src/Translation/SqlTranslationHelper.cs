@@ -86,7 +86,7 @@ namespace Translation
             }
         }
 
-        public static IDbSelectable GetOrCreateSelectable(
+        public static IDbSelectable CreateNewSelectable(
             IDbSelectable selectable, DbReference dbRef, IDbObjectFactory dbFactory)
         {
             if (dbRef == null)
@@ -96,16 +96,12 @@ namespace Translation
             if (selectable is IDbColumn)
             {
                 var oCol = (IDbColumn)selectable;
-                newSelectable = dbFactory.BuildColumn(oCol);
-                newSelectable.Ref = dbRef;
+                newSelectable = dbFactory.BuildColumn(dbRef, oCol.GetAliasOrName(), oCol.ValType);
             }
             else if (selectable is IDbRefColumn)
             {
                 var oRefCol = (IDbRefColumn)selectable;
                 var oSelect = oRefCol.Ref.OwnerSelect;
-
-                // if (!oSelect.Selection.Contains(oRefCol))
-                //     oSelect.AddSelection(oRefCol, dbFactory);
                 
                 newSelectable = dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
             }
@@ -119,22 +115,6 @@ namespace Translation
                 throw new InvalidOperationException();
 
             return newSelectable;
-        }
-
-        public static void AddRefSelection(
-            this IDbRefColumn refColumn, string columnName, Type columnType, 
-            IDbObjectFactory dbFactory, string alias, bool isJoinKey)
-        {
-            if (refColumn.RefTo != null)
-            {
-                refColumn.RefTo.AddRefSelection(columnName, columnType, dbFactory, alias, isJoinKey);
-                columnName = alias ?? columnName;
-                alias = null;
-            }   
-
-            var refToCol = dbFactory.BuildColumn(refColumn.Ref, columnName, columnType, alias);
-            refToCol.IsJoinKey = isJoinKey;
-            refColumn.Ref.RefSelection[columnName] = refToCol;
         }
 
         public static DbOperator GetDbOperator(ExpressionType type)

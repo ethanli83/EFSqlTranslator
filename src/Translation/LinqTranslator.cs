@@ -117,16 +117,12 @@ namespace Translation
                 dbRef = _dbFactory.BuildRef(null);
                 dbRef.OwnerSelect = dbSelect;
                 
-                if (p.Type.IsAnonymouse())
-                {
-                    foreach(var selection in dbSelect.Selection)
-                        dbRef.RefSelection[selection.Alias] = selection;
-                }
-                else
-                {
-                    foreach(var groupBy in dbSelect.GroupBys.GroupBys)
-                        dbRef.RefSelection[groupBy.Key] = groupBy.Value;
-                }
+                var collection = p.Type.IsGrouping() 
+                    ? dbSelect.GroupBys.AsEnumerable() 
+                    : dbSelect.Selection;
+
+                foreach(var selectable in collection)
+                    dbRef.RefSelection[selectable.GetAliasOrName()] = selectable;
             }
 
 
@@ -185,7 +181,7 @@ namespace Translation
                 if (dbSelect.GroupBys.IsSingleKey)
                 {
                     var kColumn = dbRef.RefSelection.First();
-                    var colum = _dbFactory.BuildColumn(kColumn.Value.Ref, kColumn.Key, m.Type);
+                    var colum = _dbFactory.BuildColumn(kColumn.Value.Ref, kColumn.Key, m.Type, m.Member.Name);
                     _state.ResultStack.Push(colum);
                 }
                 else
@@ -231,8 +227,23 @@ namespace Translation
                 var col = _dbFactory.BuildColumn(dbRef, m.Member.Name, m.Type);
                 _state.ResultStack.Push(col);
 
-                // if (refCol != null)
-                //     refCol.AddRefSelection(m.Member.Name, m.Type, _dbFactory, null, false);
+                // if the ref column is not now, and it is referring another ref column
+                // we need to make sure the column we translated is in the sub select which
+                // owns the ref column that referred by the current refColumn
+                if (refCol != null)
+                {
+                    refCol.IsReferred = true;
+                    if (refCol.RefTo != null)
+                        refCol.RefTo.AddColumnToReferedSubSelect(m.Member.Name, m.Type, _dbFactory);
+                }
+                // todo: check if there is a case where if refCol is null but the dbRef is
+                // referring a sub-select, we should not allow this to happen, as we always
+                // want to know for sure what the column's owner ref should be. if the ref col
+                // is null, then we need guest on what the column owner should be
+                // else if (dbRef.Referee is IDbSelect)
+                // {
+
+                // }
 
                 return m;
             }
@@ -321,7 +332,7 @@ namespace Translation
                 if (refCol != null && refCol.RefTo != null)
                 {
                     var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
-                    refCol.RefTo.AddRefSelection(fromKey.Name, fromKey.ValType, _dbFactory, alias, false);
+                    refCol.RefTo.AddColumnToReferedSubSelect(fromKey.Name, fromKey.ValType, _dbFactory, alias);
 
                     fromColumn.Name = alias;
                     fromColumn.Alias = string.Empty;

@@ -23,6 +23,11 @@ namespace Translation.App
                 var query1 = db.Posts.
                     Where(p => p.Content != null).
                     GroupBy(p => p.BlogId).
+                    Select(g => g.Key);
+
+                var query1_1 = db.Posts.
+                    Where(p => p.Content != null).
+                    GroupBy(p => p.BlogId).
                     Select(g => new { g.Key });
 
                 var query2 = db.Posts.
@@ -43,10 +48,14 @@ namespace Translation.App
 
                 var query4 = db.Posts.
                     Where(p => p.Content != null).
-                    Select(p => new { p.Blog }).
-                    Select(g => new { g.Blog.Url, g.Blog.User.UserName });
+                    Select(p => new { p.Blog, p.Content }).
+                    Select(p => new { p.Blog, p.Blog.User, p.Content }).
+                    Select(g => new { g.Blog.Url, g.User.UserName, g.Content }).
+                    GroupBy(g => g.Url).
+                    Select(g => g.Key);
 
-                db.Query(query2_1);
+                db.Query(query1_1);
+                //db.Query(query2_1);
             }
         }
     }

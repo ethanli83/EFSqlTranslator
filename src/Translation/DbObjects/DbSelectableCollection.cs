@@ -18,14 +18,26 @@ namespace Translation.DbObjects
 
         public void Add(IDbSelectable selectable)
         {
+            if (_selectables.Contains(selectable))
+                return;
+
             _selectables.Add(selectable);
             selectable.OwnerSelect = _owner;
+            //todo: check if need to update group by
             //dbSelect.GroupBys.Add(selectable);
         }
 
         public override string ToString()
         {
-            return string.Join(", ", _selectables);
+            if (!_selectables.Any())
+                return $"{_owner.From.Alias}.*";
+
+            var selection = from s in _selectables
+                            let rc = s as IDbRefColumn
+                            where rc == null || !rc.IsReferred
+                            select s.ToSelectionString();
+
+            return string.Join(", ", selection);
         }
 
         public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
