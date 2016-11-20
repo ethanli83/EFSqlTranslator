@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using Translation.DbObjects;
 
 namespace Translation.MethodTranslators
@@ -35,10 +32,10 @@ namespace Translation.MethodTranslators
             {
                 newSelectRef = _dbFactory.BuildRef(dbSelect);
                 dbSelect = _dbFactory.BuildSelect(newSelectRef);
-                newSelectRef.Alias = nameGenerator.GetAlias(dbSelect, "sq", true);
+                newSelectRef.Alias = nameGenerator.GenerateAlias(dbSelect, "sq", true);
             }
 
-            var groupBys = dbSelect.GroupBys = _dbFactory.BuildGroupBys();
+            var groupBys = dbSelect.GroupBys;
             groupBys.IsSingleKey = !(arguments is IDbList<DbKeyValue>);
 
             var selections = SqlTranslationHelper.ProcessSelection(arguments, _dbFactory);
@@ -50,6 +47,13 @@ namespace Translation.MethodTranslators
                 var refCol = newSelectable as IDbRefColumn;
                 if (refCol != null)
                 {
+                    refCol.OnGroupBy = true;
+
+                    // if we group on a ref column, we are actaully group by on the primary key
+                    // of the entity that ref column referring to. In the refering entity is actually
+                    // another ref column, then we will need to get the primay key recursive from RefTo
+                    // but this recursion will happen when we try to print the query, not here, or 
+                    // should it be here???
                     var dbTable = refCol.Ref.Referee as IDbTable;
                     if (dbTable != null)
                     {

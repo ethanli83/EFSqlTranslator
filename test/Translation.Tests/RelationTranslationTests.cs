@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Xunit;
-using Translation;
 using Translation.DbObjects.SqlObjects;
 using Translation.EF;
 

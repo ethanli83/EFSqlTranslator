@@ -75,7 +75,7 @@ namespace Translation
                 var dbRef = _dbFactory.BuildRef(dbTable);
 
                 var dbSelect = _dbFactory.BuildSelect(dbRef);
-                dbRef.Alias = _nameGenerator.GetAlias(dbSelect, dbTable.TableName);
+                dbRef.Alias = _nameGenerator.GenerateAlias(dbSelect, dbTable.TableName);
                 
                 _state.ResultStack.Push(dbSelect);
             }
@@ -167,10 +167,14 @@ namespace Translation
 
             if (m.Expression.Type.IsAnonymouse())
             {
-                var dbRef = (DbReference)_state.ResultStack.Pop();
-                var dbObj = dbRef.RefSelection[m.Member.Name];
-                _state.ResultStack.Push(dbObj);
-                return m;
+                var dbRef = (DbReference)_state.ResultStack.Peek();
+                if (dbRef.RefSelection.ContainsKey(m.Member.Name))
+                {
+                    var dbObj = dbRef.RefSelection[m.Member.Name];
+                   _state.ResultStack.Pop();
+                    _state.ResultStack.Push(dbObj);
+                    return m;
+                }
             }
 
             if (m.Expression.Type.IsGrouping())            
@@ -227,8 +231,8 @@ namespace Translation
                 var col = _dbFactory.BuildColumn(dbRef, m.Member.Name, m.Type);
                 _state.ResultStack.Push(col);
 
-                if (refCol != null)
-                    refCol.AddRefSelection(m.Member.Name, m.Type, _dbFactory, null, false);
+                // if (refCol != null)
+                //     refCol.AddRefSelection(m.Member.Name, m.Type, _dbFactory, null, false);
 
                 return m;
             }
@@ -243,91 +247,96 @@ namespace Translation
                 typeof(IQueryable<>).MakeGenericType(type).IsAssignableFrom(m.Type));
         }
 
+        /// Create a join for the relation
+        /// For parent relation, we create a join that joins to the parent table
+        /// For child relation, we will create a sub select that returns the child table,
+        /// and then joins to the sub select.
+        /// The reason for joining to sub select for child relation, is that we want to be
+        /// able to group on the join key, so that we will not repeat the parent row.
         private IDbJoin GetOrCreateJoin(EntityRelation relation, DbReference fromRef, IDbRefColumn refCol)
         {
             var dbSelect = fromRef.OwnerSelect;
             var tupleKey = Tuple.Create(dbSelect, relation);
 
-            if (!_state.CreatedJoins.ContainsKey(tupleKey))
-            {
-                var toEntity = relation.ToEntity;
-                var dbTable = _dbFactory.BuildTable(toEntity);
+            if (_state.CreatedJoins.ContainsKey(tupleKey))
+                return _state.CreatedJoins[tupleKey];
 
-                DbReference joinTo;
-                DbReference childRef = null;
-                IDbSelect childSelect = null;
-                if (!relation.IsChildRelation)
-                {
-                    var tableAlias = _nameGenerator.GetAlias(dbSelect, dbTable.TableName);
-                    joinTo = _dbFactory.BuildRef(dbTable, tableAlias);
-                }
-                else
-                {
-                    childRef = _dbFactory.BuildRef(dbTable);
-                    childSelect = _dbFactory.BuildSelect(childRef);
-                    childRef.Alias = _nameGenerator.GetAlias(childSelect, dbTable.TableName);
+            var toEntity = relation.ToEntity;
+            var dbTable = _dbFactory.BuildTable(toEntity);
 
-                    var tableAlias = _nameGenerator.GetAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
-                    joinTo = _dbFactory.BuildRef(childSelect, tableAlias);
-                }
-
-                var dbJoin = _dbFactory.BuildJoin(joinTo);
-                joinTo.OwnerSelect = dbSelect;
-                joinTo.OwnerJoin = dbJoin;
-
-                // build join condition
-                IDbBinary condition = null;
-                for (var i = 0; i < relation.FromKeys.Count; i++)
-                {
-                    var fromKey = relation.FromKeys[i];
-                    var toKey = relation.ToKeys[i];
-
-                    var fromColumn = _dbFactory.BuildColumn(fromRef, fromKey.Name, fromKey.ValType);
-                    var toColumn = _dbFactory.BuildColumn(joinTo, toKey.Name, toKey.ValType);
-
-                    if (childRef != null && childSelect != null)
-                    {
-                        var alias = _nameGenerator.GetAlias(childSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
-                        var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType, alias);
-                        childColumn.IsJoinKey = true;
-                        
-                        childSelect.GroupBys = _dbFactory.BuildGroupBys();
-                        childSelect.AddSelection(childColumn, _dbFactory);
-                        
-                        toColumn.Name = alias;
-                        toColumn.Alias = string.Empty;
-                    }
-
-                    if (refCol != null)
-                    {
-                        var alias = refCol.Ref.Referee is IDbSelect
-                            ? _nameGenerator.GetAlias(dbSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true)
-                            : null;
-
-                        refCol.AddRefSelection(fromKey.Name, fromKey.ValType, _dbFactory, alias, true);
-
-                        if (alias != null)
-                        {
-                            fromColumn.Name = alias;
-                            fromColumn.Alias = string.Empty;
-                        }
-                    }
-
-                    var binary = _dbFactory.BuildBinary(fromColumn, DbOperator.Equal, toColumn);
-                    condition = condition != null 
-                        ? _dbFactory.BuildBinary(condition, DbOperator.And, binary)
-                        : binary;
-                }
-
-                dbJoin.Condition = condition;
-                dbJoin.Type = !relation.IsChildRelation ? JoinType.Inner : JoinType.LeftOuter;
-
-
-                dbSelect.Joins.Add(dbJoin);
-                _state.CreatedJoins[tupleKey] = dbJoin;
-            }
+            DbReference joinTo;
+            DbReference childRef = null;
+            IDbSelect childSelect = null;
             
-            return _state.CreatedJoins[tupleKey];
+            // Create the join. For parent join, we just need to join to a Ref to the table
+            // For child relation, we will firstly create a sub select that return the child table
+            // and then join to then sub select
+            if (!relation.IsChildRelation)
+            {
+                var tableAlias = _nameGenerator.GenerateAlias(dbSelect, dbTable.TableName);
+                joinTo = _dbFactory.BuildRef(dbTable, tableAlias);
+            }
+            else
+            {
+                childRef = _dbFactory.BuildRef(dbTable);
+                childSelect = _dbFactory.BuildSelect(childRef);
+                childRef.Alias = _nameGenerator.GenerateAlias(childSelect, dbTable.TableName);
+
+                var tableAlias = _nameGenerator.GenerateAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
+                joinTo = _dbFactory.BuildRef(childSelect, tableAlias);
+            }
+
+            var dbJoin = _dbFactory.BuildJoin(joinTo, dbSelect);
+            dbSelect.Joins.Add(dbJoin);
+
+            // build join condition
+            IDbBinary condition = null;
+            for (var i = 0; i < relation.FromKeys.Count; i++)
+            {
+                var fromKey = relation.FromKeys[i];
+                var toKey = relation.ToKeys[i];
+
+                var fromColumn = _dbFactory.BuildColumn(fromRef, fromKey.Name, fromKey.ValType);
+                var toColumn = _dbFactory.BuildColumn(joinTo, toKey.Name, toKey.ValType);
+
+                // If we have created a sub for child relation, we need to the columns 
+                // that are used in join condition selected from the sub select.
+                if (childRef != null && childSelect != null)
+                {
+                    var alias = _nameGenerator.GenerateAlias(childSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
+                    var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType, alias, true);
+                    
+                    // We need to also put the join key in the group of the sub select.
+                    // This is to make sure the sub select is grouped by the key so that 
+                    // the parent (outer select) will not be repeated
+                    childSelect.Selection.Add(childColumn);
+                    
+                    toColumn.Name = alias;
+                    toColumn.Alias = string.Empty;
+                }
+
+                // if the relation is found on a ref column, which means the from key of the 
+                // join is not on a table but a derived select. In this case, we need to add
+                // the from key into the derived select, as we will be using it in the join
+                if (refCol != null && refCol.RefTo != null)
+                {
+                    var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
+                    refCol.RefTo.AddRefSelection(fromKey.Name, fromKey.ValType, _dbFactory, alias, false);
+
+                    fromColumn.Name = alias;
+                    fromColumn.Alias = string.Empty;
+                }
+
+                var binary = _dbFactory.BuildBinary(fromColumn, DbOperator.Equal, toColumn);
+                condition = condition != null 
+                    ? _dbFactory.BuildBinary(condition, DbOperator.And, binary)
+                    : binary;
+            }
+
+            dbJoin.Condition = condition;
+            dbJoin.Type = !relation.IsChildRelation ? JoinType.Inner : JoinType.LeftOuter;
+
+            return _state.CreatedJoins[tupleKey] = dbJoin;
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
@@ -465,7 +474,7 @@ namespace Translation
             private readonly Dictionary<string, int> _globalUniqueAliasNames = 
                 new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
 
-        public string GetAlias(IDbSelect dbSelect, string name, bool fullName = false)
+        public string GenerateAlias(IDbSelect dbSelect, string name, bool fullName = false)
         {
             int count;
             if (dbSelect == null)

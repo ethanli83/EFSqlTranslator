@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Translation.DbObjects;
 
 namespace Translation
 {
@@ -24,6 +23,8 @@ namespace Translation
 
         DbReference Ref { get; set; }
 
+        IDbSelect OwnerSelect { get; set; }
+
         string Alias { get; set; }
 
         bool IsJoinKey { get; set; }
@@ -41,7 +42,11 @@ namespace Translation
     {
         IDbRefColumn RefTo { get; set; }
 
-        IEnumerable<IDbSelectable>  GetRefSelection();
+        bool OnSelection { get; set; }
+
+        bool OnGroupBy { get; set; }
+
+        bool OnOrderBy { get; set; }
     }
 
     public class DbKeyValue : IDbObject
@@ -59,71 +64,6 @@ namespace Translation
         public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
         {
             return Value.GetChildren<T>(filterFunc);
-        }
-    }
-
-    public interface IDbSelect : IDbObject
-    {
-        // columns or expression that the query return as result columns
-        IList<IDbSelectable> Selection { get; set; }
-        
-        DbReference From { get; set; }
-        
-        IDbObject Where { get; set; }
-
-        IList<IDbJoin> Joins { get; set; }
-
-        IList<IDbSelectable> OrderBys { get; set; }
-        
-        DbGroupByCollection GroupBys { get; set; }
-    }
-
-    public class DbGroupByCollection : IDbObject
-    {
-        public IDictionary<string, IDbSelectable> GroupBys { get; set; } = 
-            new Dictionary<string, IDbSelectable>();
-
-        public void Add(IDbSelectable selectable)
-        {
-            var alias = GetAlias(selectable);
-            GroupBys.Add(alias, selectable);
-        }
-
-        private string GetAlias(IDbSelectable selectable)
-        {
-            var alias = selectable.Alias;
-            if (string.IsNullOrEmpty(alias))
-            {
-                var dbColumn = selectable as IDbColumn;
-                if (dbColumn != null)
-                    alias = dbColumn.Name;
-                else
-                    throw new InvalidOperationException("{key} does not have alias");
-            }
-            return alias;
-        }
-
-        public bool IsSingleKey { get; set; }
-
-        public bool Any()
-        {
-            return GroupBys.Any();
-        }
-
-        public bool Contains(IDbSelectable selectable)
-        {
-            var alias = GetAlias(selectable);
-            return GroupBys.ContainsKey(alias);
-        }
-
-        public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
-        {
-            return GroupBys.Values.SelectMany(s => s.GetChildren<T>(filterFunc)).ToArray();
-        }
-
-        public override string ToString()
-        {
-            return string.Join(", ", GroupBys.Values);
         }
     }
 
@@ -167,68 +107,6 @@ namespace Translation
     public interface IDbKeyWord : IDbObject
     {
         string KeyWord { get; set; }
-    }
-
-    public class DbReference : IDbObject
-    {
-        public DbReference(IDbObject dbObject)
-        {
-            Referee = dbObject;
-        }
-
-        public IDbObject SelectExpression { get; set; }
-
-        public DbReference Ref { get; set; }
-
-        public IDbObject Referee { get; private set; }
-
-        // the select that contains the reference
-        public IDbSelect OwnerSelect { get; set; }
-
-        // the join that joining to this reference
-        public IDbJoin OwnerJoin { get; set; }
-        
-        public IDictionary<string, IDbSelectable> RefSelection { get; set; } = new Dictionary<string, IDbSelectable>();
-
-        //public IDbSelect OwnerSelect { get; set; }
-        public string Alias { get; set; }
-
-        public override string ToString()
-        {
-            if (Referee is IDbTable)
-                return $"{Referee} {Alias}";
-
-            var sb = new StringBuilder();
-
-            sb.AppendLine("(");
-
-            var refStr = Referee.ToString();
-            var lines = refStr.Split(new [] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            refStr = string.Join("\n    ", lines);
-
-            sb.AppendLine($"    {refStr}");
-            sb.Append($") {Alias}");
-
-            return sb.ToString();
-        }
-
-        public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
-        {
-            T[] result;
-            if (this is T)
-            {
-                var obj = (T)(object)this;
-                result = filterFunc != null 
-                    ? filterFunc(obj) ? new T[] { obj } : new T[0] 
-                    : new T[] { obj };
-            }
-            else
-            {
-                result = new T[0];
-            }
-
-            return result.Concat(Referee.GetChildren<T>(filterFunc)).ToArray();
-        }
     }
 
     public class DbType

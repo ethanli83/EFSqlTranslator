@@ -33,14 +33,15 @@ namespace Translation.DbObjects.SqlObjects
             return dbSelect;
         }
 
-        public IDbColumn BuildColumn(DbReference dbRef, string colName, Type type, string alias = "")
+        public IDbColumn BuildColumn(DbReference dbRef, string colName, Type type, string alias = "", bool isJoinKey = false)
         {
             return new SqlColumn 
             {
                 Name = colName,
                 Ref = dbRef,
                 ValType = BuildType(type),
-                Alias = alias
+                Alias = alias,
+                IsJoinKey = isJoinKey
             };
         }
 
@@ -123,14 +124,19 @@ namespace Translation.DbObjects.SqlObjects
             };
         }
 
-        public IDbJoin BuildJoin(DbReference joinTo, IDbBinary condition = null, JoinType joinType = JoinType.Inner)
+        public IDbJoin BuildJoin(DbReference joinTo, IDbSelect dbSelect, IDbBinary condition = null, JoinType joinType = JoinType.Inner)
         {
-            return new SqlJoin
+            var dbJoin = new SqlJoin
             {
                 To = joinTo,
                 Condition = condition,
                 Type = joinType
             };
+
+            joinTo.OwnerSelect = dbSelect;
+            joinTo.OwnerJoin = dbJoin;
+
+            return dbJoin;
         }
 
         public IDbList<T> BuildList<T>(params T[] objs) where T : IDbObject
@@ -154,11 +160,6 @@ namespace Translation.DbObjects.SqlObjects
                     Ref = dbRef,
                     Alias = alias
                 };
-        }
-
-        public DbGroupByCollection BuildGroupBys()
-        {
-            return new DbGroupByCollection();
         }
     }
 

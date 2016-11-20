@@ -27,7 +27,7 @@ namespace Translation.MethodTranslators
             var toSelect = (IDbSelect)state.ResultStack.Pop();
             var fromSelect = (IDbSelect)state.ResultStack.Pop();
 
-            var toSelectRef = _dbFactory.BuildRef(toSelect, nameGenerator.GetAlias(fromSelect, "sq", true));
+            var toSelectRef = _dbFactory.BuildRef(toSelect, nameGenerator.GenerateAlias(fromSelect, "sq", true));
 
             // create result selection for final select
             UpdateSelection(fromSelect, selection, toSelectRef);
@@ -35,20 +35,20 @@ namespace Translation.MethodTranslators
             // create join to inner select
             foreach(var joinKey in joinCondition.GetChildren<IDbColumn>(c => c.Ref.OwnerSelect == toSelect))
             {
-                var alias = nameGenerator.GetAlias(toSelect, joinKey.Name + "_jk", true);
+                var alias = nameGenerator.GenerateAlias(toSelect, joinKey.Name + "_jk", true);
                 var innerCol = _dbFactory.BuildColumn(joinKey);
                 innerCol.Alias = alias;
-                toSelect.AddSelection(innerCol, _dbFactory);
+                toSelect.Selection.Add(innerCol);
                 
                 joinKey.Ref = toSelectRef;
                 joinKey.Name = alias;
                 joinKey.Alias = string.Empty;
             }
 
-            var dbJoin = _dbFactory.BuildJoin(toSelectRef, joinCondition, (JoinType)joinType.Val);
+            var dbJoin = _dbFactory.BuildJoin(toSelectRef, fromSelect, joinCondition, (JoinType)joinType.Val);
             fromSelect.Joins.Add(dbJoin);
 
-            var finalSelectRef = _dbFactory.BuildRef(fromSelect, nameGenerator.GetAlias(null, "sq", true));
+            var finalSelectRef = _dbFactory.BuildRef(fromSelect, nameGenerator.GenerateAlias(null, "sq", true));
             var finalSelect = _dbFactory.BuildSelect(finalSelectRef);
 
             state.ResultStack.Push(finalSelect);
@@ -65,17 +65,14 @@ namespace Translation.MethodTranslators
             }
 
             var keyValue = selection as DbKeyValue;
+            selection = keyValue != null ? keyValue.Value : selection;             
+            
+            var selectable = GetSelectable(fromSelect, selection, toSelectRef);
+
             if (keyValue != null)
-            {
-                var selectable = GetSelectable(fromSelect, keyValue.Value, toSelectRef);
                 selectable.Alias = keyValue.Key;
-                fromSelect.AddSelection(selectable, _dbFactory);
-            }
-            else
-            {
-                var selectable = GetSelectable(fromSelect, selection, toSelectRef);
-                fromSelect.AddSelection(selectable, _dbFactory);
-            }
+
+            fromSelect.Selection.Add(selectable);
         }
 
         private IDbSelectable GetSelectable(IDbSelect fromSelect, IDbObject selection, DbReference toSelectRef)
@@ -89,7 +86,7 @@ namespace Translation.MethodTranslators
                     var toSelect = (IDbSelect)toSelectRef.Referee;
                     toRefCol = _dbFactory.BuildRefColumn(dbRef);
                     
-                    toSelect.AddSelection(toRefCol, _dbFactory);
+                    toSelect.Selection.Add(toRefCol);
                     dbRef = toSelectRef;
                 }
 
@@ -104,7 +101,7 @@ namespace Translation.MethodTranslators
                 if (column.Ref.OwnerSelect != fromSelect)
                 {
                     var toSelect = (IDbSelect)toSelectRef.Referee;
-                    toSelect.AddSelection(column, _dbFactory);
+                    toSelect.Selection.Add(column);
                     
                     column = _dbFactory.BuildColumn(column);
                     column.Ref = toSelectRef;

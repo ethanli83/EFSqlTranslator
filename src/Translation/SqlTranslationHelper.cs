@@ -42,15 +42,6 @@ namespace Translation
                    type == typeof(IGrouping<,>).MakeGenericType(type.GenericTypeArguments);
         }
 
-        /// add selectable to the select and also check if the selectable is 
-        /// also required to be added on group by
-        public static void AddSelection(this IDbSelect dbSelect, IDbSelectable selectable, IDbObjectFactory dbFactory)
-        {
-            dbSelect.Selection.Add(selectable);
-            if (dbSelect.GroupBys != null && !dbSelect.GroupBys.Contains(selectable))
-                dbSelect.GroupBys.Add(selectable);
-        }
-
         /// update all joins that are related to dbRef to be left outer join
         /// this is required by method such as Select or GroupBy 
         public static void UpdateJoinType(DbReference dbRef)
@@ -107,22 +98,14 @@ namespace Translation
                 var oCol = (IDbColumn)selectable;
                 newSelectable = dbFactory.BuildColumn(oCol);
                 newSelectable.Ref = dbRef;
-
-                if (dbRef.Referee is IDbSelect 
-                    && oCol.Ref.OwnerSelect != null 
-                    && !oCol.Ref.OwnerSelect.Selection.Contains(oCol))
-                {
-                    oCol.Alias = null;
-                    oCol.Ref.OwnerSelect.AddSelection(oCol, dbFactory);
-                }
             }
             else if (selectable is IDbRefColumn)
             {
                 var oRefCol = (IDbRefColumn)selectable;
                 var oSelect = oRefCol.Ref.OwnerSelect;
 
-                if (!oSelect.Selection.Contains(oRefCol))
-                    oSelect.AddSelection(oRefCol, dbFactory);
+                // if (!oSelect.Selection.Contains(oRefCol))
+                //     oSelect.AddSelection(oRefCol, dbFactory);
                 
                 newSelectable = dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
             }

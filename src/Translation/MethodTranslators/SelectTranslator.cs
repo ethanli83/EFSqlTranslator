@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using Translation.DbObjects;
 
 namespace Translation.MethodTranslators
@@ -19,7 +16,6 @@ namespace Translation.MethodTranslators
             plugIns.RegisterMethodTranslator("select", this);
         }
 
-
         public override void Translate(
             MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator)
         {
@@ -35,7 +31,7 @@ namespace Translation.MethodTranslators
             {
                 newSelectRef = _dbFactory.BuildRef(dbSelect);
                 dbSelect = _dbFactory.BuildSelect(newSelectRef);
-                newSelectRef.Alias = nameGenerator.GetAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
+                newSelectRef.Alias = nameGenerator.GenerateAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
             }
             
             // put selections onto the select
@@ -44,8 +40,8 @@ namespace Translation.MethodTranslators
             {
                 SqlTranslationHelper.UpdateJoinType(selectable.Ref);
 
-                var newSelection = SqlTranslationHelper.GetOrCreateSelectable(selectable, newSelectRef, _dbFactory);
-                dbSelect.AddSelection(newSelection, _dbFactory);
+                var newSelectable = SqlTranslationHelper.GetOrCreateSelectable(selectable, newSelectRef, _dbFactory);
+                dbSelect.Selection.Add(newSelectable);
             }
 
             state.ResultStack.Push(dbSelect);

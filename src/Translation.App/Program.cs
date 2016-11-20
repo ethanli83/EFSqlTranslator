@@ -33,7 +33,7 @@ namespace Translation.App
                 var query2_1 = db.Posts.
                     Where(p => p.Content != null).
                     GroupBy(p => new { p.Blog }).
-                    Select(g => new { g.Key.Blog.Url, g.Key.Blog.User.UserName });
+                    Select(g => new { g.Key.Blog.User.UserId });
 
                 var query3 = db.Posts.
                     Where(p => p.Content != null).
@@ -43,8 +43,8 @@ namespace Translation.App
 
                 var query4 = db.Posts.
                     Where(p => p.Content != null).
-                    Select(p => new { p.Blog, p.User }).
-                    Select(x => new { x.Blog.Url, x.User.UserId, u = x.Blog.User.UserName });
+                    Select(p => new { p.Blog }).
+                    Select(g => new { g.Blog.Url, g.Blog.User.UserName });
 
                 db.Query(query2_1);
             }
@@ -60,8 +60,18 @@ namespace Translation.App
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
                 Console.WriteLine(sql);
-                var results = connection.Query(sql);
-                return results.OfType<T>();
+                
+                try
+                {
+                    var results = connection.Query(sql);
+                    return results.OfType<T>();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("NOT WORKING!!");
+                    Console.WriteLine(e);
+                    return null;
+                }
             }
         }
     }
