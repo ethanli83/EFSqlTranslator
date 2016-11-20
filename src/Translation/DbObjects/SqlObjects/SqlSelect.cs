@@ -24,6 +24,8 @@ namespace Translation.DbObjects.SqlObjects
         
         public DbGroupByCollection GroupBys { get; private set; } = new DbGroupByCollection();
 
+        public bool IsWrapingSelect { get; set; }
+
         public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
         {
             return base.GetChildren<T>(filterFunc);
@@ -60,6 +62,40 @@ namespace Translation.DbObjects.SqlObjects
             }
 
             return sb.ToString();
+        }
+
+        public IDbSelect Optimize()
+        {
+            var dbSelect = Unwrap(this);
+            return dbSelect;
+        }
+
+        private static IDbSelect Unwrap(IDbSelect dbSelect)
+        {
+            if (dbSelect.Selection.All(s => s is IDbColumn) && 
+                dbSelect.From.Referee is IDbSelect &&
+                dbSelect.Where == null && 
+                !dbSelect.Joins.Any() && !dbSelect.OrderBys.Any() && !dbSelect.GroupBys.Any())
+            {
+                var unwrapedSelect = dbSelect.From.Referee as IDbSelect;
+                if (!dbSelect.Selection.Any())
+                    return Unwrap(unwrapedSelect);
+
+                // re add columns with outer select's order
+                var colDict = unwrapedSelect.Selection.
+                    ToDictionary(s => s.GetAliasOrName(), s => s);
+
+                unwrapedSelect.Selection.Clear();
+                foreach(var column in dbSelect.Selection.Cast<IDbColumn>())
+                {
+                    var innnerCol = colDict[column.Name];
+                    unwrapedSelect.Selection.Add(innnerCol);
+                }
+
+                return Unwrap(unwrapedSelect);
+            }
+
+            return dbSelect;
         }
     }
 }

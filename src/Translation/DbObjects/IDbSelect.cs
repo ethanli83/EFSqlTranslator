@@ -18,5 +18,9 @@ namespace Translation.DbObjects
         IList<IDbSelectable> OrderBys { get; }
         
         DbGroupByCollection GroupBys { get; }
+
+        bool IsWrapingSelect { get; set; }
+
+        IDbSelect Optimize();
     }
 }

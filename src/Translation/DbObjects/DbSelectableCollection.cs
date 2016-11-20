@@ -23,8 +23,14 @@ namespace Translation.DbObjects
 
             _selectables.Add(selectable);
             selectable.OwnerSelect = _owner;
-            //todo: check if need to update group by
-            //dbSelect.GroupBys.Add(selectable);
+            
+            if (_owner.GroupBys.Any() && !_owner.GroupBys.Contains(selectable))
+                _owner.GroupBys.Add(selectable);
+        }
+
+        public void Clear()
+        {
+            _selectables.Clear();
         }
 
         public override string ToString()

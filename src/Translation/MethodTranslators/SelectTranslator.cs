@@ -32,6 +32,7 @@ namespace Translation.MethodTranslators
 
             var newSelectRef = _dbFactory.BuildRef(dbSelect);
             var newSelect = _dbFactory.BuildSelect(newSelectRef);
+
             newSelectRef.Alias = nameGenerator.GenerateAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
 
             foreach(var selectable in selections)

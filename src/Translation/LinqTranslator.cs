@@ -55,9 +55,12 @@ namespace Translation
 
         internal IDbScript GetResult()
         {
-            var dbSelect = _state.ResultStack.Pop();
+            var dbSelect = _state.ResultStack.Pop() as IDbSelect;
+            dbSelect = dbSelect.Optimize();
+
             var script = _dbFactory.BuildScript();
             script.Scripts.Add(dbSelect);
+            
             return script;
         }
 
