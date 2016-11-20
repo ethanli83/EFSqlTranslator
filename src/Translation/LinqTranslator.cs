@@ -324,6 +324,9 @@ namespace Translation
                     // This is to make sure the sub select is grouped by the key so that 
                     // the parent (outer select) will not be repeated
                     childSelect.Selection.Add(childColumn);
+
+                    // todo: remove this, and get translator handler to add group bys
+                    childSelect.GroupBys.Add(childColumn);
                     
                     toColumn.Name = alias;
                     toColumn.Alias = string.Empty;
