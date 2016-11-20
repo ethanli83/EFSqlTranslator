@@ -31,28 +31,19 @@ namespace Translation.MethodTranslators
             foreach(var selectable in selections)
             {
                 SqlTranslationHelper.UpdateJoinType(selectable.Ref);
-                
-                var refCol = selectable as IDbRefColumn;
-                // todo: check why the column needs to be created here
-                // if (refCol != null)
-                // {
-                //     refCol.OnGroupBy = true;
+                SqlTranslationHelper.UpdateOnSelection(selectable, onGrouping: true);
 
-                //     // if we group on a ref column, we are actaully group by on the primary key
-                //     // of the entity that ref column referring to. In the refering entity is actually
-                //     // another ref column, then we will need to get the primay key recursive from RefTo
-                //     // but this recursion will happen when we try to print the query, not here, or 
-                //     // should it be here???
-                //     var dbTable = refCol.Ref.Referee as IDbTable;
-                //     if (dbTable != null)
-                //     {
-                //         foreach(var pk in dbTable.PrimaryKeys)
-                //             refCol.AddRefSelection(pk.Name, pk.ValType.DotNetType, _dbFactory, null, false);
-                //     }
-                // }
+                var refCol = selectable as IDbRefColumn;
+                // if we group on a ref column, we are actaully group by on the primary key
+                // of the entity that ref column referring to. In the refering entity is actually
+                // another ref column, then we will need to get the primay key recursive from RefTo
+                if (refCol != null && refCol.RefTo != null)
+                {
+                    foreach(var pk in refCol.GetPrimaryKeys())
+                        refCol.RefTo.AddColumnToReferedSubSelect(pk.Name, pk.ValType, _dbFactory);
+                }
                 
                 dbSelect.GroupBys.Add(selectable);
-                //dbSelect.AddSelection(newSelectable, _dbFactory);
             }
 
             state.ResultStack.Push(dbSelect);

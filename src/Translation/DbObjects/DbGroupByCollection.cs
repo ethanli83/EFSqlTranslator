@@ -23,7 +23,11 @@ namespace Translation.DbObjects
 
         public override string ToString()
         {
-            return string.Join(", ", _groupBys);
+            var groupbys = from groupBy in _groupBys
+                           let refCol = groupBy as IDbRefColumn
+                           select refCol == null ? new [] { groupBy } : refCol.GetPrimaryKeys();
+                           
+            return string.Join(", ", groupbys.SelectMany(g => g));
         }
 
         public IEnumerator<IDbSelectable> GetEnumerator()

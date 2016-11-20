@@ -63,13 +63,17 @@ namespace Translation.DbObjects.SqlObjects
 
         public IDbRefColumn BuildRefColumn(DbReference dbRef, string alias = null, IDbRefColumn fromRefColumn = null)
         {
-            return new SqlRefColumn 
+            var refCol = new SqlRefColumn 
             {
                 Ref = dbRef,
                 Alias = alias,
-                RefTo = fromRefColumn,
-                IsReferred = fromRefColumn != null ? fromRefColumn.IsReferred : false 
+                RefTo = fromRefColumn 
             };
+
+            if (fromRefColumn != null)
+                refCol.IsReferred = fromRefColumn.IsReferred;
+
+            return refCol;
         }
 
         public IDbTable BuildTable(EntityInfo entityInfo)

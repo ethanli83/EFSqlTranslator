@@ -17,6 +17,27 @@ namespace Translation.DbObjects.SqlObjects
 
         public bool IsReferred { get; set; }
 
+        public IDbColumn[] GetPrimaryKeys()
+        {
+            IDbColumn[] pks;
+            if (RefTo != null)
+            {
+                pks =  RefTo.GetPrimaryKeys().ToArray();
+            }
+            else
+            {
+                var dbTable = Ref.Referee as IDbTable;
+                pks = dbTable != null
+                    ? dbTable.PrimaryKeys.ToArray()
+                    : new IDbColumn[0];
+            }
+
+            foreach(var pk in pks)
+                pk.Ref = Ref;
+
+            return pks;
+        }
+
         public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
         {
             return base.GetChildren<T>(filterFunc).

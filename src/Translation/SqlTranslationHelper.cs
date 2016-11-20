@@ -117,6 +117,16 @@ namespace Translation
             return newSelectable;
         }
 
+        public static void UpdateOnSelection(IDbSelectable selectable, bool onSelection = false, bool onGrouping = false)
+        {
+            var refColumn = selectable as IDbRefColumn;
+            if (refColumn == null)
+                return;
+            
+            refColumn.OnSelection = onSelection;
+            refColumn.OnGroupBy = onGrouping;
+        }
+
         public static DbOperator GetDbOperator(ExpressionType type)
         {
             switch (type)

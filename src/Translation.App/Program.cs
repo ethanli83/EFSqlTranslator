@@ -48,14 +48,14 @@ namespace Translation.App
 
                 var query4 = db.Posts.
                     Where(p => p.Content != null).
-                    Select(p => new { p.Blog, p.Content }).
-                    Select(p => new { p.Blog, p.Blog.User, p.Content }).
-                    Select(g => new { g.Blog.Url, g.User.UserName, g.Content }).
-                    GroupBy(g => g.Url).
-                    Select(g => g.Key);
+                    Select(p => new { p.Blog }).
+                    GroupBy(g => new { g.Blog, g.Blog.Url }).
+                    Select(p => new { p.Key.Blog, p.Key.Blog.User, p.Key.Url }).
+                    Select(g => new { g.Blog.Name, g.User.UserName, g.Url });
 
-                db.Query(query1_1);
-                //db.Query(query2_1);
+                db.Query(query2_1);
+                db.Query(query3);
+                db.Query(query4);
             }
         }
     }

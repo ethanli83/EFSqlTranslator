@@ -8,6 +8,12 @@ namespace Translation
         public static void AddColumnToReferedSubSelect(
             this IDbRefColumn refColumn, string colName, Type colType, IDbObjectFactory factory, string alias = null)
         {
+            refColumn.AddColumnToReferedSubSelect(colName, factory.BuildType(colType), factory, alias);    
+        }
+
+        public static void AddColumnToReferedSubSelect(
+            this IDbRefColumn refColumn, string colName, DbType colType, IDbObjectFactory factory, string alias = null)
+        {
             if (refColumn.RefTo != null)
             {
                 refColumn.RefTo.AddColumnToReferedSubSelect(colName, colType, factory, alias);

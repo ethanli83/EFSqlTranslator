@@ -34,7 +34,7 @@ namespace Translation.DbObjects
 
             var selection = from s in _selectables
                             let rc = s as IDbRefColumn
-                            where rc == null || !rc.IsReferred
+                            where rc == null || (!rc.IsReferred && !rc.OnSelection)
                             select s.ToSelectionString();
 
             return string.Join(", ", selection);

@@ -56,7 +56,7 @@ namespace Translation.DbObjects.SqlObjects
             if (GroupBys.Any())
             {
                 sb.AppendLine();
-                sb.Append($"group by {string.Join(", ", GroupBys)}");
+                sb.Append($"group by {GroupBys}");
             }
 
             return sb.ToString();
