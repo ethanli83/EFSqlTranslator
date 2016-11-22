@@ -11,7 +11,7 @@ namespace EFSqlTranslator.Translation
     public class LinqTranslator : ExpressionVisitor
     {
         private readonly IModelInfoProvider _infoProvider;
-        
+
         private readonly IDbObjectFactory _dbFactory;
 
         private readonly TranslationState _state;
@@ -21,7 +21,7 @@ namespace EFSqlTranslator.Translation
         private readonly TranslationPlugIns _plugIns = new TranslationPlugIns();
 
         public LinqTranslator(
-            IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, 
+            IModelInfoProvider infoProvider, IDbObjectFactory dbFactory,
             TranslationState state = null, IEnumerable<AbstractMethodTranslator> methodTranslators = null)
         {
             _infoProvider = infoProvider;
@@ -30,11 +30,11 @@ namespace EFSqlTranslator.Translation
 
             RegisterDefaultPlugIns();
 
-            if (methodTranslators != null)
-            {
-                foreach(var translator in methodTranslators)
-                    translator.Register(_plugIns);
-            }
+            if (methodTranslators == null)
+                return;
+
+            foreach(var translator in methodTranslators)
+                translator.Register(_plugIns);
         }
 
         private void RegisterDefaultPlugIns()
@@ -55,12 +55,12 @@ namespace EFSqlTranslator.Translation
 
         internal IDbScript GetResult()
         {
-            var dbSelect = _state.ResultStack.Pop() as IDbSelect;
+            var dbSelect = (IDbSelect)_state.ResultStack.Pop();
             dbSelect = dbSelect.Optimize();
 
             var script = _dbFactory.BuildScript();
             script.Scripts.Add(dbSelect);
-            
+
             return script;
         }
 
@@ -79,7 +79,7 @@ namespace EFSqlTranslator.Translation
 
                 var dbSelect = _dbFactory.BuildSelect(dbRef);
                 dbRef.Alias = _nameGenerator.GenerateAlias(dbSelect, dbTable.TableName);
-                
+
                 _state.ResultStack.Push(dbSelect);
             }
             else
@@ -119,9 +119,9 @@ namespace EFSqlTranslator.Translation
                 var dbSelect = _state.GetLastSelect();
                 dbRef = _dbFactory.BuildRef(null);
                 dbRef.OwnerSelect = dbSelect;
-                
-                var collection = p.Type.IsGrouping() 
-                    ? dbSelect.GroupBys.AsEnumerable() 
+
+                var collection = p.Type.IsGrouping()
+                    ? dbSelect.GroupBys.AsEnumerable()
                     : dbSelect.Selection;
 
                 foreach(var selectable in collection)
@@ -135,12 +135,12 @@ namespace EFSqlTranslator.Translation
                 if (dbRefs.ContainsKey(p))
                     dbRef = dbRefs[p];
             }
-            
+
             // if we can not find the parameter expression in the ParamterStack,
             // it means this is the first time we translates the parameter, so we
             // need to look for it in the most recently translated select
             // this is required because we may not always has select on the top
-            // of the stack, especially we translating arguments for method calls 
+            // of the stack, especially we translating arguments for method calls
             if (dbRef == null)
             {
                 // var dbSelect = (IDbSelect)_state.ResultStack.Peek();
@@ -176,10 +176,10 @@ namespace EFSqlTranslator.Translation
                 }
             }
 
-            if (m.Expression.Type.IsGrouping())            
+            if (m.Expression.Type.IsGrouping())
             {
                 var dbRef = (DbReference)_state.ResultStack.Pop();
-                
+
                 var dbSelect = dbRef.OwnerSelect;
                 if (dbSelect.GroupBys.IsSingleKey)
                 {
@@ -189,14 +189,14 @@ namespace EFSqlTranslator.Translation
                 }
                 else
                 {
-                    _state.ResultStack.Push(dbRef);   
+                    _state.ResultStack.Push(dbRef);
                 }
 
                 return m;
             }
 
             // if the member is a queryable entity, we need to translate it
-            // into a relation, which means a join 
+            // into a relation, which means a join
             var entityInfo = _infoProvider.FindEntityInfo(m.Type);
             if (entityInfo != null)
             {
@@ -212,13 +212,13 @@ namespace EFSqlTranslator.Translation
                 {
                     var newRefCol = _dbFactory.BuildRefColumn(dbJoin.To, m.Member.Name);
                     _state.ResultStack.Push(newRefCol);
-                }    
+                }
                 else if(relation.IsChildRelation)
                     _state.ResultStack.Push(dbJoin.To.Referee);
                 else
                     _state.ResultStack.Push(dbJoin.To);
 
-                return m;                     
+                return m;
             }
 
             if (typeInfo.Namespace.StartsWith("System"))
@@ -226,7 +226,7 @@ namespace EFSqlTranslator.Translation
                 var dbObj = _state.ResultStack.Pop();
                 var refCol = dbObj as IDbRefColumn;
                 var dbRef = refCol != null ? refCol.Ref : (DbReference)dbObj;
-                
+
                 var col = _dbFactory.BuildColumn(dbRef, m.Member.Name, m.Type);
                 _state.ResultStack.Push(col);
 
@@ -236,8 +236,7 @@ namespace EFSqlTranslator.Translation
                 if (refCol != null)
                 {
                     refCol.IsReferred = true;
-                    if (refCol.RefTo != null)
-                        refCol.RefTo.AddColumnToReferedSubSelect(m.Member.Name, m.Type, _dbFactory);
+                    refCol.RefTo?.AddColumnToReferedSubSelect(m.Member.Name, m.Type, _dbFactory);
                 }
                 // todo: check if there is a case where if refCol is null but the dbRef is
                 // referring a sub-select, we should not allow this to happen, as we always
@@ -252,13 +251,6 @@ namespace EFSqlTranslator.Translation
             }
 
             return base.VisitMember(m);
-        }
-
-        private bool IsQueryOnChildren(Type type, TypeInfo typeInfo, MemberExpression m)
-        {
-            return typeInfo.IsGenericType && (
-                typeof(IEnumerable<>).MakeGenericType(type).IsAssignableFrom(m.Type) ||
-                typeof(IQueryable<>).MakeGenericType(type).IsAssignableFrom(m.Type));
         }
 
         /// Create a join for the relation
@@ -281,7 +273,7 @@ namespace EFSqlTranslator.Translation
             DbReference joinTo;
             DbReference childRef = null;
             IDbSelect childSelect = null;
-            
+
             // Create the join. For parent join, we just need to join to a Ref to the table
             // For child relation, we will firstly create a sub select that return the child table
             // and then join to then sub select
@@ -313,29 +305,29 @@ namespace EFSqlTranslator.Translation
                 var fromColumn = _dbFactory.BuildColumn(fromRef, fromKey.Name, fromKey.ValType);
                 var toColumn = _dbFactory.BuildColumn(joinTo, toKey.Name, toKey.ValType);
 
-                // If we have created a sub for child relation, we need to the columns 
+                // If we have created a sub for child relation, we need to the columns
                 // that are used in join condition selected from the sub select.
                 if (childRef != null && childSelect != null)
                 {
                     var alias = _nameGenerator.GenerateAlias(childSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
                     var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType, alias, true);
-                    
+
                     // We need to also put the join key in the group of the sub select.
-                    // This is to make sure the sub select is grouped by the key so that 
+                    // This is to make sure the sub select is grouped by the key so that
                     // the parent (outer select) will not be repeated
                     childSelect.Selection.Add(childColumn);
 
                     // todo: remove this, and get translator handler to add group bys
                     childSelect.GroupBys.Add(childColumn);
-                    
+
                     toColumn.Name = alias;
                     toColumn.Alias = string.Empty;
                 }
 
-                // if the relation is found on a ref column, which means the from key of the 
+                // if the relation is found on a ref column, which means the from key of the
                 // join is not on a table but a derived select. In this case, we need to add
                 // the from key into the derived select, as we will be using it in the join
-                if (refCol != null && refCol.RefTo != null)
+                if (refCol?.RefTo != null)
                 {
                     var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
                     refCol.RefTo.AddColumnToReferedSubSelect(fromKey.Name, fromKey.ValType, _dbFactory, alias);
@@ -345,7 +337,7 @@ namespace EFSqlTranslator.Translation
                 }
 
                 var binary = _dbFactory.BuildBinary(fromColumn, DbOperator.Equal, toColumn);
-                condition = condition != null 
+                condition = condition != null
                     ? _dbFactory.BuildBinary(condition, DbOperator.And, binary)
                     : binary;
             }
@@ -359,7 +351,7 @@ namespace EFSqlTranslator.Translation
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             var caller = m.Object ?? m.Arguments.First();
-            var args = m.Arguments.Where(a => a != caller).ToArray(); 
+            var args = m.Arguments.Where(a => a != caller).ToArray();
 
             Visit(caller);
             VistMethodArguments(args);
@@ -404,8 +396,8 @@ namespace EFSqlTranslator.Translation
             }
 
             while(results.Count > 0)
-                _state.ResultStack.Push(results.Pop());                
-            
+                _state.ResultStack.Push(results.Pop());
+
             _state.ParamterStack.Push(pList);
             Visit(l.Body);
             _state.ParamterStack.Pop();
@@ -432,12 +424,12 @@ namespace EFSqlTranslator.Translation
             }
 
             var dbBinary = _dbFactory.BuildBinary(left, dbOptr, right);
-            
+
             if (dbOptr == DbOperator.Or)
             {
                 var dbRefs = dbBinary.GetChildren<DbReference>().Distinct();
                 foreach(var dbRef in dbRefs)
-                    SqlTranslationHelper.ProcessSelection(dbRef, _dbFactory);    
+                    SqlTranslationHelper.ProcessSelection(dbRef, _dbFactory);
             }
 
             _state.ResultStack.Push(dbBinary);
@@ -447,19 +439,13 @@ namespace EFSqlTranslator.Translation
 
     public class TranslationState
     {
-        private readonly Stack<IDbObject> _resultStack = new Stack<IDbObject>();
+        public Stack<IDbObject> ResultStack { get; } = new Stack<IDbObject>();
 
-        private readonly Stack<Dictionary<ParameterExpression, DbReference>> _paramterStack = 
+        public Stack<Dictionary<ParameterExpression, DbReference>> ParamterStack { get; } =
             new Stack<Dictionary<ParameterExpression, DbReference>>();
-        
-        private readonly Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> _createdJoins = 
+
+        public Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> CreatedJoins { get; } =
             new Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin>();
-
-        public Stack<IDbObject> ResultStack => _resultStack;
-
-        public Stack<Dictionary<ParameterExpression, DbReference>> ParamterStack => _paramterStack;
-
-        public Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> CreatedJoins => _createdJoins;
 
         public IDbSelect GetLastSelect()
         {
@@ -470,7 +456,7 @@ namespace EFSqlTranslator.Translation
             {
                 var dbObject = ResultStack.Pop();
                 results.Push(dbObject);
-                
+
                 dbSelect = dbObject as IDbSelect;
                 if (dbSelect != null)
                     break;
@@ -485,10 +471,10 @@ namespace EFSqlTranslator.Translation
 
     public class UniqueNameGenerator
     {
-        private readonly Dictionary<IDbSelect, Dictionary<string, int>> _uniqueAliasNames = 
+        private readonly Dictionary<IDbSelect, Dictionary<string, int>> _uniqueAliasNames =
             new Dictionary<IDbSelect, Dictionary<string, int>>();
 
-            private readonly Dictionary<string, int> _globalUniqueAliasNames = 
+            private readonly Dictionary<string, int> _globalUniqueAliasNames =
                 new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
 
         public string GenerateAlias(IDbSelect dbSelect, string name, bool fullName = false)
@@ -510,8 +496,8 @@ namespace EFSqlTranslator.Translation
                     ? ++uniqueNames[name]
                     : uniqueNames[name] = 0;
             }
-            
-            return !fullName 
+
+            return !fullName
                 ? $"{name.Substring(0, 1).ToLower()}{count}"
                 : $"{name}{count}";
         }
@@ -519,8 +505,8 @@ namespace EFSqlTranslator.Translation
 
     public class TranslationPlugIns
     {
-        private Dictionary<string, AbstractMethodTranslator> _methodTranslators = 
-            new Dictionary<string, AbstractMethodTranslator>(StringComparer.CurrentCultureIgnoreCase); 
+        private readonly Dictionary<string, AbstractMethodTranslator> _methodTranslators =
+            new Dictionary<string, AbstractMethodTranslator>(StringComparer.CurrentCultureIgnoreCase);
 
         public void RegisterMethodTranslator(string methodName, AbstractMethodTranslator translator)
         {
