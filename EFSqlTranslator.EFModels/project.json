@@ -12,11 +12,11 @@
         "Dapper": "1.50.2"
     },
     "frameworks": {
-        "netcoreapp1.0": {
+        "netcoreapp1.1": {
             "dependencies": {
                 "Microsoft.NETCore.App": {
                     "type": "platform",
-                    "version": "1.1"
+                    "version": "1.1.0"
                 },
                 "EFSqlTranslator.Translation": {
                     "target": "project"
