@@ -2,7 +2,8 @@ dist: trusty
 sudo: required
 language: csharp
 mono: none
-dotnet: 1.0.0-preview2-1-003177
+install:
+  - apt-get install dotnet-dev-1.0.0-preview3-004056
 script:
   - dotnet restore
   - dotnet build --configuration Debug ./EFSqlTranslator.Translation ./EFSqlTranslator.ConsoleApp ./EFSqlTranslator.EFModels ./EFSqlTranslator.Tests
