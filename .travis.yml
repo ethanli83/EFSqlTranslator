@@ -1,2 +1,4 @@
 language: csharp
 mono: none
+script:
+  - sudo dotnet build --configuration Debug ./EFSqlTranslator.Translation/project.json ./EFSqlTranslator.ConsoleApp/project.json ./EFSqlTranslator.EFModels/project.json ./EFSqlTranslator.Tests/project.json
