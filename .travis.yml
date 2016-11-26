@@ -4,4 +4,5 @@ language: csharp
 mono: none
 dotnet: 1.0.0-preview2-003131
 script:
+  - dotnet restore
   - dotnet build --configuration Debug ./EFSqlTranslator.Translation/project.json ./EFSqlTranslator.ConsoleApp/project.json ./EFSqlTranslator.EFModels/project.json ./EFSqlTranslator.Tests/project.json
