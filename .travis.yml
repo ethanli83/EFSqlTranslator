@@ -1,3 +1,2 @@
 language: csharp
-dotnet: 1.0.0-preview2-1-003177
 solution: EFSqlTranslator.sln
