@@ -31,6 +31,11 @@ namespace EFSqlTranslator.ConsoleApp
                     GroupBy(p => p.BlogId).
                     Select(g => new { g.Key });
 
+                var query1_2 = db.Posts.
+                    Where(p => p.Content != null).
+                    GroupBy(p => new { p.Blog.Url, p.User.UserName }).
+                    Select(g => new { g.Key.Url, g.Key.UserName });
+
                 var query2 = db.Posts.
                     Where(p => p.Content != null).
                     GroupBy(p => new { p.BlogId, p.User.UserName }).
@@ -54,6 +59,7 @@ namespace EFSqlTranslator.ConsoleApp
                     Select(p => new { p.Key.Blog, p.Key.Blog.User, p.Key.Url }).
                     Select(g => new { g.Blog.Name, g.User.UserName, g.Url });
 
+                db.Query(query1_2);
                 db.Query(query2_1);
                 db.Query(query3);
                 db.Query(query4);

@@ -111,5 +111,35 @@ from (
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
+
+        public void Test_Multiple_Select_Calls_After_Grouping()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Posts.
+                    Where(p => p.Content != null).
+                    Select(p => new { p.Blog }).
+                    GroupBy(g => new { g.Blog, g.Blog.Url }).
+                    Select(p => new { p.Key.Blog, p.Key.Blog.User, p.Key.Url }).
+                    Select(g => new { g.Blog.Name, g.User.UserName, g.Url });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select sq0.'Name', u0.'UserName', sq0.'Url' as 'Url'
+from (
+    select b0.*, b0.'Url', b0.'BlogId', b0.'UserId' as 'UserId_jk0', b0.'Name'
+    from Posts p0
+    left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
+    where p0.'Content' is not null
+) sq0
+left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'
+group by sq0.'BlogId', sq0.'Url', u0.'UserId', sq0.'Name', u0.'UserName'
+";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
     }
 }
