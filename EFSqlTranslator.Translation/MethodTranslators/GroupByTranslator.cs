@@ -30,7 +30,6 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             foreach(var selectable in selections)
             {
                 SqlTranslationHelper.UpdateJoinType(selectable.Ref);
-                SqlTranslationHelper.UpdateOnSelection(selectable, onGrouping: true);
 
                 var refCol = selectable as IDbRefColumn;
                 // if we group on a ref column, we are actaully group by on the primary key

@@ -10,14 +10,6 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         
         public string Name { get; set; }
 
-        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
-        {
-            var result = base.GetChildren<T>(filterFunc);
-            var refResult = Ref.GetChildren<T>(filterFunc);
-
-            return result.Concat(refResult).ToArray();
-        }
-
         public override string ToString()
         {
             var sb = new StringBuilder();

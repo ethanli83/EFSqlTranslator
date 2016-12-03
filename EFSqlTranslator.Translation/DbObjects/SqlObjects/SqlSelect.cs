@@ -12,30 +12,25 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             Selection = new DbSelectableCollection(this);
         }
 
-        public DbSelectableCollection Selection { get; private set; }
+        public DbSelectableCollection Selection { get; }
         
         public DbReference From { get; set; }
         
         public IDbObject Where { get; set; }
 
-        public IList<IDbJoin> Joins { get; private set; } = new List<IDbJoin>();
+        public IList<IDbJoin> Joins { get; } = new List<IDbJoin>();
 
-        public IList<IDbSelectable> OrderBys { get; private set; } = new List<IDbSelectable>();
+        public IList<IDbSelectable> OrderBys { get; } = new List<IDbSelectable>();
         
-        public DbGroupByCollection GroupBys { get; private set; } = new DbGroupByCollection();
+        public DbGroupByCollection GroupBys { get; } = new DbGroupByCollection();
 
         public bool IsWrapingSelect { get; set; }
-
-        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
-        {
-            return base.GetChildren<T>(filterFunc);
-        }
 
         public override string ToString()
         {
             var sb = new StringBuilder();
 
-            sb.Append("select " + Selection.ToString());
+            sb.Append($"select {Selection}");
 
             if (From != null)
             {

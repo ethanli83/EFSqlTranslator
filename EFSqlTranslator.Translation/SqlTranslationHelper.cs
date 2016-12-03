@@ -50,7 +50,10 @@ namespace EFSqlTranslator.Translation
             foreach(var dbJoin in joins)
             {
                 dbJoin.Type = JoinType.LeftOuter;
-                var relatedRefs = dbJoin.Condition.GetChildren<DbReference>(r => r != dbJoin.To);
+                var relatedRefs = dbJoin.Condition.GetOperands().
+                    Select(op => (op as IDbSelectable)?.Ref).
+                    Where(r => r != null && r != dbJoin.To);
+
                 foreach(var relatedRef in relatedRefs)
                     UpdateJoinType(relatedRef); 
             }
@@ -58,32 +61,30 @@ namespace EFSqlTranslator.Translation
 
         public static IDbSelectable[] ProcessSelection(IDbObject dbObj, IDbObjectFactory factory)
         {
-            if (dbObj is IDbList<DbKeyValue>)
+            var dbList = dbObj as IDbList<DbKeyValue>;
+            if (dbList != null)
             {
-                var keyVals = (IDbList<DbKeyValue>)dbObj;   
+                var keyVals = dbList;
                 return keyVals.SelectMany(kv => ProcessSelection(kv, factory)).ToArray();
             }
-            else if (dbObj is DbReference)
-            {
-                var dbRef = (DbReference)dbObj;
-                return new [] { factory.BuildRefColumn(dbRef) };
-            }
-            else if (dbObj is DbKeyValue)
-            {
-                var kv = (DbKeyValue)dbObj;
-                var dbRef = kv.Value as DbReference;
-                
-                var selectables = ProcessSelection(kv.Value, factory);
-                
-                foreach(var selectable in selectables)
-                    selectable.Alias = kv.Key;
 
-                return selectables;
-            }
-            else
+            var obj = dbObj as DbReference;
+            if (obj != null)
             {
-                return new [] { (IDbSelectable)dbObj };
+                var dbRef = obj;
+                return new IDbSelectable[] { factory.BuildRefColumn(dbRef) };
             }
+
+            var keyValue = dbObj as DbKeyValue;
+            if (keyValue == null)
+                return new[] {(IDbSelectable) dbObj};
+
+            var selectables = ProcessSelection(keyValue.Value, factory);
+
+            foreach(var selectable in selectables)
+                selectable.Alias = keyValue.Key;
+
+            return selectables;
         }
 
         public static IDbSelectable CreateNewSelectable(
@@ -93,38 +94,23 @@ namespace EFSqlTranslator.Translation
                 return selectable;
 
             IDbSelectable newSelectable = null;
-            if (selectable is IDbColumn)
+            var dbColumn = selectable as IDbColumn;
+            if (dbColumn != null)
             {
-                var oCol = (IDbColumn)selectable;
+                var oCol = dbColumn;
                 newSelectable = dbFactory.BuildColumn(dbRef, oCol.GetAliasOrName(), oCol.ValType);
             }
             else if (selectable is IDbRefColumn)
             {
                 var oRefCol = (IDbRefColumn)selectable;
-                var oSelect = oRefCol.Ref.OwnerSelect;
-                
+
                 newSelectable = dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
             }
-            else if (selectable is DbReference)
-            {
-                var oRef = (DbReference)selectable;
-                newSelectable = dbFactory.BuildRefColumn(dbRef, oRef.Alias);
-            }
-            
+
             if (newSelectable == null)
                 throw new InvalidOperationException();
 
             return newSelectable;
-        }
-
-        public static void UpdateOnSelection(IDbSelectable selectable, bool onSelection = false, bool onGrouping = false)
-        {
-            var refColumn = selectable as IDbRefColumn;
-            if (refColumn == null)
-                return;
-            
-            refColumn.OnSelection = onSelection;
-            refColumn.OnGroupBy = onGrouping;
         }
 
         public static DbOperator GetDbOperator(ExpressionType type)

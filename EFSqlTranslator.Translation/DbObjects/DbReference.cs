@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace EFSqlTranslator.Translation.DbObjects
@@ -16,7 +15,7 @@ namespace EFSqlTranslator.Translation.DbObjects
 
         public DbReference Ref { get; set; }
 
-        public IDbObject Referee { get; private set; }
+        public IDbObject Referee { get; }
 
         // the select that contains the reference
         public IDbSelect OwnerSelect { get; set; }
@@ -46,24 +45,6 @@ namespace EFSqlTranslator.Translation.DbObjects
             sb.Append($") {Alias}");
 
             return sb.ToString();
-        }
-
-        public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
-        {
-            T[] result;
-            if (this is T)
-            {
-                var obj = (T)(object)this;
-                result = filterFunc != null 
-                    ? filterFunc(obj) ? new T[] { obj } : new T[0] 
-                    : new T[] { obj };
-            }
-            else
-            {
-                result = new T[0];
-            }
-
-            return result.Concat(Referee.GetChildren<T>(filterFunc)).ToArray();
         }
     }
 }

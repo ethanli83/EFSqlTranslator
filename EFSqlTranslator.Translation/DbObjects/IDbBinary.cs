@@ -1,3 +1,5 @@
+using System;
+
 namespace EFSqlTranslator.Translation.DbObjects
 {
     public interface IDbBinary : IDbObject
@@ -5,5 +7,7 @@ namespace EFSqlTranslator.Translation.DbObjects
         IDbObject Left { get; set; }
         IDbObject Right { get; set; }
         DbOperator Operator { get; set; }
+
+        IDbObject[] GetOperands();
     }
 }

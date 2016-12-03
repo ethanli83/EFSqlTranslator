@@ -11,14 +11,6 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public JoinType Type { get; set; }
 
-        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
-        {
-            return base.GetChildren<T>(filterFunc).
-                Concat(To.GetChildren<T>(filterFunc)).
-                Concat(Condition.GetChildren<T>(filterFunc)).
-                ToArray();
-        }
-
         public override string ToString()
         {
             string typeStr;

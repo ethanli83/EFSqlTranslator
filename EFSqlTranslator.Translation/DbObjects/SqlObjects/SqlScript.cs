@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
@@ -18,15 +17,6 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             sb.AppendLine(string.Join(Environment.NewLine, Scripts));
 
             return sb.ToString();
-        }
-
-        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
-        {
-            return base.GetChildren<T>(filterFunc).
-                Concat(PreScripts.SelectMany(s => s.GetChildren<T>(filterFunc))).
-                Concat(Scripts.SelectMany(s => s.GetChildren<T>(filterFunc))).
-                Concat(PostScripts.SelectMany(s => s.GetChildren<T>(filterFunc))).
-                ToArray();
         }
     }
 }

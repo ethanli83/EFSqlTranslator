@@ -9,6 +9,14 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         public DbOperator Operator { get; set; }
         public IDbObject Right { get; set; }
 
+        public IDbObject[] GetOperands()
+        {
+            return new[] {Left, Right}.
+                Concat((Left as IDbBinary)?.GetOperands() ?? new IDbObject[0]).
+                Concat((Right as IDbBinary)?.GetOperands() ?? new IDbObject[0]).
+                ToArray();
+        }
+
         public override string ToString()
         {
             var left = Left.ToString();
@@ -16,14 +24,6 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             var optr = SqlTranslationHelper.GetSqlOperator(Operator);
 
             return $"{left} {optr} {right}";
-        }
-
-        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
-        {
-            return base.GetChildren<T>(filterFunc).
-                Concat(Left.GetChildren<T>(filterFunc)).
-                Concat(Right.GetChildren<T>(filterFunc)).
-                ToArray();
         }
     }
 }

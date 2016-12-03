@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,14 +37,6 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             return pks;
         }
 
-        public override T[] GetChildren<T>(Func<T, bool> filterFunc = null)
-        {
-            return base.GetChildren<T>(filterFunc).
-                Concat(Ref.GetChildren<T>(filterFunc)).
-                Concat(RefTo.GetChildren<T>(filterFunc)).
-                ToArray();
-        }
-
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -59,15 +50,15 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             {
                 if (!string.IsNullOrEmpty(Ref.Alias))
                     sb.Append($"{Ref.Alias}.");
-                sb.Append($"*");
+                sb.Append("*");
             }
 
             return sb.ToString();
         }
 
-        public IEnumerable<IDbSelectable> GetRefSelection()
+        public IList<IDbSelectable> GetRefSelection()
         {
-            return Ref.RefSelection.Values.Select(c => { c.Ref = Ref; return c; });
+            return Ref.RefSelection.Values.Select(c => { c.Ref = Ref; return c; }).ToArray();
         }
 
         public override string ToSelectionString()
@@ -84,7 +75,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             {
                 if (!string.IsNullOrEmpty(Ref.Alias))
                     sb.Append($"{Ref.Alias}.");
-                sb.Append($"*");
+                sb.Append("*");
             }
 
             return sb.ToString();

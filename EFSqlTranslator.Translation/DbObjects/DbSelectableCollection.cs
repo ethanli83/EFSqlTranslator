@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,26 +38,19 @@ namespace EFSqlTranslator.Translation.DbObjects
                 return $"{_owner.From.Alias}.*";
 
             var selection = from s in _selectables
-                            let rc = s as IDbRefColumn
-                            where rc == null || (!rc.IsReferred && !rc.OnSelection)
-                            select s.ToSelectionString();
+                select s.ToSelectionString();
 
             return string.Join(", ", selection);
         }
 
-        public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
-        {
-            return _selectables.SelectMany(s => s.GetChildren<T>(filterFunc)).ToArray();
-        }
-
-        IEnumerator<IDbSelectable> IEnumerable<IDbSelectable>.GetEnumerator()
+        public IEnumerator<IDbSelectable> GetEnumerator()
         {
             return _selectables.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _selectables.GetEnumerator();
+            return ((IEnumerable) _selectables).GetEnumerator();
         }
     }
 }

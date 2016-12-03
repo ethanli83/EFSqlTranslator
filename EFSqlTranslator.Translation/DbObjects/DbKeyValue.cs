@@ -1,5 +1,3 @@
-using System;
-
 namespace EFSqlTranslator.Translation.DbObjects
 {
     public class DbKeyValue : IDbObject
@@ -13,10 +11,5 @@ namespace EFSqlTranslator.Translation.DbObjects
         public string Key { get; private set; }
 
         public IDbObject Value { get; private set; }
-
-        public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
-        {
-            return Value.GetChildren<T>(filterFunc);
-        }
     }
 }

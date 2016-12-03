@@ -55,7 +55,7 @@ namespace EFSqlTranslator.ConsoleApp
                     Select(g => new { g.Blog.Name, g.User.UserName, g.Url });
 
                 db.Query(query2_1);
-                //db.Query(query3);
+                db.Query(query3);
                 db.Query(query4);
             }
         }

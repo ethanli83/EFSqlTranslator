@@ -68,7 +68,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var dbJoin = dbSelect.Joins.Single(j => j.To.Referee == childSelect);
 
             IDbBinary whereClause = null;
-            foreach(var joinKey in dbJoin.GetChildren<IDbColumn>(c => c.Ref == dbJoin.To))
+            foreach(var joinKey in dbJoin.Condition.GetOperands().OfType<IDbColumn>().Where(c => c.Ref == dbJoin.To))
             {
                 var pkColumn = _dbFactory.BuildColumn(dbJoin.To, joinKey.Name, joinKey.ValType.DotNetType, joinKey.Alias);
                 var binary = _dbFactory.BuildBinary(pkColumn, DbOperator.IsNot, _dbFactory.BuildConstant(null));

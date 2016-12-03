@@ -22,10 +22,6 @@ namespace EFSqlTranslator.Translation
 
             var column = factory.BuildColumn(refColumn.Ref, colName, colType, alias);
             refColumn.OwnerSelect.Selection.Add(column);
-
-            // set it to true so that this ref column will not need to be output
-            // in the final result. 
-            refColumn.IsReferred = true;   
         }
 
         public static string GetAliasOrName(this IDbSelectable selectable)

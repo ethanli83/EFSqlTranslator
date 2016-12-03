@@ -25,8 +25,6 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             foreach(var selectable in selections)
             {
                 SqlTranslationHelper.UpdateJoinType(selectable.Ref);
-                SqlTranslationHelper.UpdateOnSelection(selectable, onSelection: true);
-
                 dbSelect.Selection.Add(selectable);
             }
 
@@ -38,8 +36,6 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             foreach(var selectable in selections)
             {
                 var newSelectable = SqlTranslationHelper.CreateNewSelectable(selectable, newSelectRef, _dbFactory);
-                SqlTranslationHelper.UpdateOnSelection(newSelectable, onSelection: true);
-
                 newSelect.Selection.Add(newSelectable);
             }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects;
 
@@ -34,7 +35,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             UpdateSelection(fromSelect, selection, toSelectRef);
 
             // create join to inner select
-            foreach(var joinKey in joinCondition.GetChildren<IDbColumn>(c => c.Ref.OwnerSelect == toSelect))
+            foreach(var joinKey in joinCondition.GetOperands().OfType<IDbColumn>().Where(c => c.Ref.OwnerSelect == toSelect))
             {
                 var alias = nameGenerator.GenerateAlias(toSelect, joinKey.Name + "_jk", true);
                 var innerCol = _dbFactory.BuildColumn(joinKey);

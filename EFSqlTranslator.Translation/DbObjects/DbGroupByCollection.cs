@@ -7,7 +7,7 @@ namespace EFSqlTranslator.Translation.DbObjects
 {
     public class DbGroupByCollection : IDbObject, IEnumerable<IDbSelectable>
     {
-        private List<IDbSelectable> _groupBys = new List<IDbSelectable>();
+        private readonly List<IDbSelectable> _groupBys = new List<IDbSelectable>();
 
         public void Add(IDbSelectable selectable)
         {
@@ -16,16 +16,11 @@ namespace EFSqlTranslator.Translation.DbObjects
 
         public bool IsSingleKey { get; set; }
 
-        public T[] GetChildren<T>(Func<T, bool> filterFunc = null) where T : IDbObject
-        {
-            return _groupBys.SelectMany(s => s.GetChildren<T>(filterFunc)).ToArray();
-        }
-
         public override string ToString()
         {
             var groupbys = from groupBy in _groupBys
                            let refCol = groupBy as IDbRefColumn
-                           select refCol == null ? new [] { groupBy } : refCol.GetPrimaryKeys();
+                           select refCol == null ? new [] { groupBy } : refCol.GetPrimaryKeys().Cast<IDbSelectable>();
                            
             return string.Join(", ", groupbys.SelectMany(g => g));
         }

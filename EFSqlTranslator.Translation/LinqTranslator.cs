@@ -233,11 +233,8 @@ namespace EFSqlTranslator.Translation
                 // if the ref column is not now, and it is referring another ref column
                 // we need to make sure the column we translated is in the sub select which
                 // owns the ref column that referred by the current refColumn
-                if (refCol != null)
-                {
-                    refCol.IsReferred = true;
-                    refCol.RefTo?.AddColumnToReferedSubSelect(m.Member.Name, m.Type, _dbFactory);
-                }
+                refCol?.RefTo?.AddColumnToReferedSubSelect(m.Member.Name, m.Type, _dbFactory);
+
                 // todo: check if there is a case where if refCol is null but the dbRef is
                 // referring a sub-select, we should not allow this to happen, as we always
                 // want to know for sure what the column's owner ref should be. if the ref col
@@ -427,7 +424,7 @@ namespace EFSqlTranslator.Translation
 
             if (dbOptr == DbOperator.Or)
             {
-                var dbRefs = dbBinary.GetChildren<DbReference>().Distinct();
+                var dbRefs = dbBinary.GetOperands().OfType<IDbSelectable>().Select(s => s.Ref);
                 foreach(var dbRef in dbRefs)
                     SqlTranslationHelper.ProcessSelection(dbRef, _dbFactory);
             }
