@@ -23,7 +23,7 @@ namespace EFSqlTranslator.Translation.DbObjects
             _selectables.Add(selectable);
             selectable.OwnerSelect = _owner;
             
-            if (_owner.GroupBys.Any() && !_owner.GroupBys.Contains(selectable))
+            if (_owner.GroupBys.Any())
                 _owner.GroupBys.Add(selectable);
         }
 

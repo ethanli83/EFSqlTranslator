@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +10,9 @@ namespace EFSqlTranslator.Translation.DbObjects
 
         public void Add(IDbSelectable selectable)
         {
+            if (_groupBys.Contains(selectable))
+                return;
+
             _groupBys.Add(selectable);
         }
 
@@ -18,11 +20,11 @@ namespace EFSqlTranslator.Translation.DbObjects
 
         public override string ToString()
         {
-            var groupbys = from groupBy in _groupBys
-                           let refCol = groupBy as IDbRefColumn
-                           select refCol == null ? new [] { groupBy } : refCol.GetPrimaryKeys().Cast<IDbSelectable>();
+            var groupbys = _groupBys.SelectMany(g =>
+                (g as IDbRefColumn)?.GetPrimaryKeysFromReferredQueryable()?.Cast<IDbSelectable>() ??
+                new[] {g});
                            
-            return string.Join(", ", groupbys.SelectMany(g => g));
+            return string.Join(", ", groupbys);
         }
 
         public IEnumerator<IDbSelectable> GetEnumerator()

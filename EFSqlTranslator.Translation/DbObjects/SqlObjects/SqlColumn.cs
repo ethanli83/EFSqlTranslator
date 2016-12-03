@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Text;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
@@ -14,7 +13,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             var sb = new StringBuilder();
             
-            if (!string.IsNullOrEmpty(Ref.Alias))
+            if (!string.IsNullOrEmpty(Ref?.Alias))
                 sb.Append($"{Ref.Alias}.");
 
             sb.Append($"'{Name}'");
@@ -24,26 +23,33 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public override string ToSelectionString()
         {
-            return !string.IsNullOrEmpty(Alias) ? $"{this} as '{Alias}'" : $"{this}";
+            return !string.IsNullOrEmpty(Alias) &&
+                   !Alias.Equals(Name, StringComparison.CurrentCultureIgnoreCase)
+                ? $"{this} as '{Alias}'"
+                : $"{this}";
         }
 
         protected bool Equals(SqlColumn other)
         {
-            return string.Equals(Name, other.Name) && Equals(ValType, other.ValType);
+            return base.Equals(other) && Equals(ValType, other.ValType) && string.Equals(Name, other.Name);
         }
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((SqlColumn) obj);
+            if (obj.GetType() != GetType()) return false;
+            return base.Equals(obj) && Equals((SqlColumn) obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return ((Name?.GetHashCode() ?? 0) * 397) ^ (ValType?.GetHashCode() ?? 0);
+                var hashCode = base.GetHashCode();
+                hashCode = (hashCode * 397) ^ (ValType?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (Name?.GetHashCode() ?? 0);
+                return hashCode;
             }
         }
     }

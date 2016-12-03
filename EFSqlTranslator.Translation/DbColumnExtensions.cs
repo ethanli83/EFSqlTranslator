@@ -1,29 +1,9 @@
-using System;
 using EFSqlTranslator.Translation.DbObjects;
 
 namespace EFSqlTranslator.Translation
 {
     public static class DbColumnExtensions
     {
-        public static void AddColumnToReferedSubSelect(
-            this IDbRefColumn refColumn, string colName, Type colType, IDbObjectFactory factory, string alias = null)
-        {
-            refColumn.AddColumnToReferedSubSelect(colName, factory.BuildType(colType), factory, alias);    
-        }
-
-        public static void AddColumnToReferedSubSelect(
-            this IDbRefColumn refColumn, string colName, DbType colType, IDbObjectFactory factory, string alias = null)
-        {
-            if (refColumn.RefTo != null)
-            {
-                refColumn.RefTo.AddColumnToReferedSubSelect(colName, colType, factory, alias);
-                colName = alias ?? colName;
-            }
-
-            var column = factory.BuildColumn(refColumn.Ref, colName, colType, alias);
-            refColumn.OwnerSelect.Selection.Add(column);
-        }
-
         public static string GetAliasOrName(this IDbSelectable selectable)
         {
             var column = selectable as IDbColumn;

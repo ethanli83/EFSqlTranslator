@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,77 +9,49 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
     {
         public IDbRefColumn RefTo { get; set; }
 
-        public bool OnSelection { get; set; }
-
-        public bool OnGroupBy { get; set; }
-
-        public bool OnOrderBy { get; set; }
-
-        public bool IsReferred { get; set; }
-
-        public IDbColumn[] GetPrimaryKeys()
+        public IDbColumn[] GetPrimaryKeysFromReferredQueryable()
         {
-            IDbColumn[] pks;
-            if (RefTo != null)
-            {
-                pks =  RefTo.GetPrimaryKeys().ToArray();
-            }
-            else
-            {
-                var dbTable = Ref.Referee as IDbTable;
-                pks = dbTable != null
-                    ? dbTable.PrimaryKeys.ToArray()
-                    : new IDbColumn[0];
-            }
+            var pks = RefTo?.GetPrimaryKeysFromReferredQueryable()?.ToArray() ??
+                      (Ref.Referee as IDbTable)?.PrimaryKeys ?? new IDbColumn[0];
 
             foreach(var pk in pks)
                 pk.Ref = Ref;
 
-            return pks;
+            return pks.ToArray();
+        }
+
+        public void AddToReferedSelect(string colName, Type colType, IDbObjectFactory factory, string alias = null)
+        {
+            AddToReferedSelect(colName, factory.BuildType(colType), factory, alias);
+        }
+
+        public void AddToReferedSelect(string colName, DbType colType, IDbObjectFactory factory, string alias = null)
+        {
+            if (RefTo != null)
+            {
+                RefTo.AddToReferedSelect(colName, colType, factory, alias);
+                colName = alias ?? colName;
+            }
+
+            var column = factory.BuildColumn(Ref, colName, colType, alias);
+            OwnerSelect.Selection.Add(column);
         }
 
         public override string ToString()
         {
             var sb = new StringBuilder();
             
-            var refToCols = GetRefSelection();
-            if (refToCols.Any())
-            {
-                sb.Append(string.Join(", ", refToCols));
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(Ref.Alias))
-                    sb.Append($"{Ref.Alias}.");
-                sb.Append("*");
-            }
+            if (!string.IsNullOrEmpty(Ref.Alias))
+                sb.Append($"{Ref.Alias}.");
+
+            sb.Append("*");
 
             return sb.ToString();
-        }
-
-        public IList<IDbSelectable> GetRefSelection()
-        {
-            return Ref.RefSelection.Values.Select(c => { c.Ref = Ref; return c; }).ToArray();
         }
 
         public override string ToSelectionString()
         {
-            var sb = new StringBuilder();
-            
-            var refToCols = GetRefSelection();
-            if (refToCols.Any())
-            {
-                var selection = refToCols.Where(r => !r.IsJoinKey).Select(v => v.ToSelectionString());
-                sb.Append(string.Join(", ", selection));
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(Ref.Alias))
-                    sb.Append($"{Ref.Alias}.");
-                sb.Append("*");
-            }
-
-            return sb.ToString();
+            return ToString();
         }
     }
 }

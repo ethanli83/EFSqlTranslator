@@ -5,7 +5,7 @@ using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using NUnit.Framework;
 
-namespace EFSqlTranslator.Tests
+namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
     public class ManualTranslationTests
@@ -28,7 +28,7 @@ namespace EFSqlTranslator.Tests
                 var sql = script.ToString();
 
                 const string expected = @"
-select p0.'PostId' as 'PId', sq0.'Name' as 'Name'
+select p0.'PostId' as 'PId', sq0.'Name'
 from Posts p0
 inner join Users u0 on p0.'UserId' = u0.'UserId'
 left outer join (

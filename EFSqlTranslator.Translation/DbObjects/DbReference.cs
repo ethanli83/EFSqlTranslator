@@ -11,10 +11,6 @@ namespace EFSqlTranslator.Translation.DbObjects
             Referee = dbObject;
         }
 
-        public IDbObject SelectExpression { get; set; }
-
-        public DbReference Ref { get; set; }
-
         public IDbObject Referee { get; }
 
         // the select that contains the reference
@@ -45,6 +41,29 @@ namespace EFSqlTranslator.Translation.DbObjects
             sb.Append($") {Alias}");
 
             return sb.ToString();
+        }
+
+        protected bool Equals(DbReference other)
+        {
+            return Equals(Referee, other.Referee) && string.Equals(Alias, other.Alias) && Equals(OwnerSelect, other.OwnerSelect);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((DbReference) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Referee?.GetHashCode() ?? 0;
+                hashCode = (hashCode * 397) ^ (Alias?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (OwnerSelect?.GetHashCode() ?? 0);
+                return hashCode;
+            }
         }
     }
 }

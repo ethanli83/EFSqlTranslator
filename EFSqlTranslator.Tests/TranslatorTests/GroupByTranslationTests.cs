@@ -4,7 +4,7 @@ using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using NUnit.Framework;
 
-namespace EFSqlTranslator.Tests
+namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
     public class GroupByTranslationTests
@@ -46,7 +46,7 @@ group by p0.'BlogId'";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.'Url' as 'Url', u0.'UserName' as 'UserName'
+select b0.'Url', u0.'UserName'
 from Posts p0
 left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
 left outer join Users u0 on p0.'UserId' = u0.'UserId'
@@ -71,7 +71,7 @@ group by b0.'Url', u0.'UserName'";
                 var sql = script.ToString();
 
                 const string expected = @"
-select u0.'UserId' as 'UserId'
+select u0.'UserId'
 from Posts p0
 left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
 left outer join Users u0 on b0.'UserId' = u0.'UserId'
@@ -97,7 +97,7 @@ group by b0.'BlogId', u0.'UserId'";
                 var sql = script.ToString();
 
                 const string expected = @"
-select sq0.'Url' as 'Url', u0.'UserName' as 'UserName'
+select sq0.'Url', u0.'UserName'
 from (
     select b0.*, u0.*, b0.'BlogId', b0.'Url', b0.'UserId' as 'UserId_jk0'
     from Posts p0

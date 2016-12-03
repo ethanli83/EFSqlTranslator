@@ -174,10 +174,10 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
     {
         public string Convert(Type type)
         {
-            if (type == typeof(Int32))
+            if (type == typeof(int))
                 return "int";
             
-            if (type == typeof(String))
+            if (type == typeof(string))
                 return "nvarchar";
 
             if (type == typeof(JoinType))

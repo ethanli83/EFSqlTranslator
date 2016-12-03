@@ -4,7 +4,7 @@ using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using NUnit.Framework;
 
-namespace EFSqlTranslator.Tests
+namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
     public class RelationTranslationTests

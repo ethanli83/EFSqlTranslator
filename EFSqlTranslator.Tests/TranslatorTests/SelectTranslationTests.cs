@@ -4,7 +4,7 @@ using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using NUnit.Framework;
 
-namespace EFSqlTranslator.Tests
+namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
     public class SelectTranslationTests
@@ -22,7 +22,7 @@ namespace EFSqlTranslator.Tests
                 var sql = script.ToString();
                 
                 const string expected = @"
-select p0.'Content' as 'Content', u1.'UserName' as 'UserName'
+select p0.'Content', u1.'UserName'
 from Posts p0
 inner join Users u0 on p0.'UserId' = u0.'UserId'
 left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
@@ -45,7 +45,7 @@ where u0.'UserName' is not null";
                 var sql = script.ToString();
                 
                 const string expected = @"
-select b0.*, u1.'UserName' as 'UserName'
+select b0.*, u1.'UserName'
 from Posts p0
 inner join Users u0 on p0.'UserId' = u0.'UserId'
 left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
@@ -21,6 +22,28 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             sb.Append(TableName);
             
             return sb.ToString();
+        }
+
+        protected bool Equals(SqlTable other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return string.Equals(Namespace, other.Namespace) && string.Equals(TableName, other.TableName);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((SqlTable) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Namespace?.GetHashCode() ?? 0) * 397) ^ (TableName?.GetHashCode() ?? 0);
+            }
         }
     }
 }

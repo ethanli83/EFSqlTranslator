@@ -87,30 +87,20 @@ namespace EFSqlTranslator.Translation
             return selectables;
         }
 
-        public static IDbSelectable CreateNewSelectable(
-            IDbSelectable selectable, DbReference dbRef, IDbObjectFactory dbFactory)
+        public static IDbSelectable CreateNewSelectable(IDbSelectable selectable, DbReference dbRef, IDbObjectFactory dbFactory)
         {
             if (dbRef == null)
                 return selectable;
 
-            IDbSelectable newSelectable = null;
-            var dbColumn = selectable as IDbColumn;
-            if (dbColumn != null)
-            {
-                var oCol = dbColumn;
-                newSelectable = dbFactory.BuildColumn(dbRef, oCol.GetAliasOrName(), oCol.ValType);
-            }
-            else if (selectable is IDbRefColumn)
-            {
-                var oRefCol = (IDbRefColumn)selectable;
+            var oCol =  selectable as IDbColumn;
+            if (oCol != null)
+                return dbFactory.BuildColumn(dbRef, oCol.GetAliasOrName(), oCol.ValType);
 
-                newSelectable = dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
-            }
+            var oRefCol = selectable as IDbRefColumn;
+            if (oRefCol != null)
+                return dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
 
-            if (newSelectable == null)
-                throw new InvalidOperationException();
-
-            return newSelectable;
+            throw new InvalidOperationException($"Can not recognise {selectable}");
         }
 
         public static DbOperator GetDbOperator(ExpressionType type)

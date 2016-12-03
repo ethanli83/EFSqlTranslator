@@ -35,10 +35,10 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 // if we group on a ref column, we are actaully group by on the primary key
                 // of the entity that ref column referring to. In the refering entity is actually
                 // another ref column, then we will need to get the primay key recursive from RefTo
-                if (refCol != null && refCol.RefTo != null)
+                if (refCol?.RefTo != null)
                 {
-                    foreach(var pk in refCol.GetPrimaryKeys())
-                        refCol.RefTo.AddColumnToReferedSubSelect(pk.Name, pk.ValType, _dbFactory);
+                    foreach(var pk in refCol.GetPrimaryKeysFromReferredQueryable())
+                        refCol.RefTo.AddToReferedSelect(pk.Name, pk.ValType, _dbFactory);
                 }
                 
                 dbSelect.GroupBys.Add(selectable);
