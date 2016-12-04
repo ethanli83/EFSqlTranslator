@@ -1,9 +1,9 @@
+using System;
+
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
     public class SqlSelectable : SqlObject, IDbSelectable 
     {
-        public IDbObject SelectExpression { get; set; }
-
         public DbReference Ref { get; set; }
 
         public IDbSelect OwnerSelect { get; set; }
@@ -14,9 +14,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public override string ToString()
         {
-            return string.IsNullOrEmpty(Alias) 
-                ? $"{SelectExpression}"
-                : $"{SelectExpression} as '{Alias}'";
+            throw new NotImplementedException();
         }
 
         public virtual string ToSelectionString()
@@ -29,7 +27,6 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             return string.Equals(Alias, other.Alias) &&
                    Equals(OwnerSelect, other.OwnerSelect) &&
                    Equals(Ref, other.Ref) &&
-                   Equals(SelectExpression, other.SelectExpression) &&
                    IsJoinKey == other.IsJoinKey;
         }
 
@@ -48,7 +45,6 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 var hashCode = Alias?.GetHashCode() ?? 0;
                 hashCode = (hashCode * 397) ^ (OwnerSelect?.GetHashCode() ?? 0);
                 hashCode = (hashCode * 397) ^ (Ref?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ (SelectExpression?.GetHashCode() ?? 0);
                 hashCode = (hashCode * 397) ^ IsJoinKey.GetHashCode();
                 return hashCode;
             }

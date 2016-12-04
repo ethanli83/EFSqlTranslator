@@ -21,7 +21,6 @@ namespace EFSqlTranslator.Translation.DbObjects
         
         public IDictionary<string, IDbSelectable> RefSelection { get; set; } = new Dictionary<string, IDbSelectable>();
 
-        //public IDbSelect OwnerSelect { get; set; }
         public string Alias { get; set; }
 
         public override string ToString()

@@ -37,8 +37,8 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 // another ref column, then we will need to get the primay key recursive from RefTo
                 if (refCol?.RefTo != null)
                 {
-                    foreach(var pk in refCol.GetPrimaryKeysFromReferredQueryable())
-                        refCol.RefTo.AddToReferedSelect(pk.Name, pk.ValType, _dbFactory);
+                    foreach(var pk in refCol.GetPrimaryKeys())
+                        refCol.RefTo.AddToReferedSelect(_dbFactory, pk.Name, pk.ValType);
                 }
                 
                 dbSelect.GroupBys.Add(selectable);

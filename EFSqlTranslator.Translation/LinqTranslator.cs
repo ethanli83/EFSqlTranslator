@@ -233,7 +233,7 @@ namespace EFSqlTranslator.Translation
                 // if the ref column is not now, and it is referring another ref column
                 // we need to make sure the column we translated is in the sub select which
                 // owns the ref column that referred by the current refColumn
-                refCol?.RefTo?.AddToReferedSelect(m.Member.Name, m.Type, _dbFactory);
+                refCol?.RefTo?.AddToReferedSelect(_dbFactory, m.Member.Name, m.Type);
 
                 // todo: check if there is a case where if refCol is null but the dbRef is
                 // referring a sub-select, we should not allow this to happen, as we always
@@ -327,7 +327,7 @@ namespace EFSqlTranslator.Translation
                 if (refCol?.RefTo != null)
                 {
                     var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
-                    refCol.RefTo.AddToReferedSelect(fromKey.Name, fromKey.ValType, _dbFactory, alias);
+                    refCol.RefTo.AddToReferedSelect(_dbFactory, fromKey.Name, fromKey.ValType, alias);
 
                     fromColumn.Name = alias;
                     fromColumn.Alias = string.Empty;

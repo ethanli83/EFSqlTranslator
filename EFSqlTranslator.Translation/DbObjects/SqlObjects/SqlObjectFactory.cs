@@ -28,19 +28,21 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             {
                 From = dbReference
             };
-            
+
             dbReference.OwnerSelect = dbSelect;
             return dbSelect;
         }
 
-        public IDbColumn BuildColumn(DbReference dbRef, string colName, Type type, string alias = null, bool isJoinKey = false)
+        public IDbColumn BuildColumn(
+            DbReference dbRef, string colName, Type type, string alias = null, bool isJoinKey = false)
         {
             return BuildColumn(dbRef, colName, BuildType(type), alias, isJoinKey);
         }
 
-        public IDbColumn BuildColumn(DbReference dbRef, string colName, DbType type, string alias = null, bool isJoinKey = false)
+        public IDbColumn BuildColumn(
+            DbReference dbRef, string colName, DbType type, string alias = null, bool isJoinKey = false)
         {
-            return new SqlColumn 
+            return new SqlColumn
             {
                 Name = colName,
                 Ref = dbRef,
@@ -52,7 +54,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public IDbColumn BuildColumn(IDbColumn column)
         {
-            return new SqlColumn 
+            return new SqlColumn
             {
                 Name = column.Name,
                 Ref = column.Ref,
@@ -63,11 +65,11 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public IDbRefColumn BuildRefColumn(DbReference dbRef, string alias = null, IDbRefColumn fromRefColumn = null)
         {
-            var refCol = new SqlRefColumn 
+            var refCol = new SqlRefColumn
             {
                 Ref = dbRef,
                 Alias = alias,
-                RefTo = fromRefColumn 
+                RefTo = fromRefColumn
             };
 
             return refCol;
@@ -86,7 +88,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public DbType BuildType(Type type, params object[] parameters)
         {
-            return new DbType 
+            return new DbType
             {
                 DotNetType = type,
                 TypeName = _typeConvertor.Convert(type),
@@ -131,7 +133,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
         }
 
-        public IDbJoin BuildJoin(DbReference joinTo, IDbSelect dbSelect, IDbBinary condition = null, JoinType joinType = JoinType.Inner)
+        public IDbJoin BuildJoin(
+            DbReference joinTo, IDbSelect dbSelect, IDbBinary condition = null,
+            JoinType joinType = JoinType.Inner)
         {
             var dbJoin = new SqlJoin
             {
@@ -150,23 +154,22 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             return new SqlList<T>(objs);
         }
-        
+
         public IDbKeyWord BuildKeyWord(string keyWord)
         {
             return new SqlKeyWord
-                {
-                    KeyWord = keyWord
-                };
+            {
+                KeyWord = keyWord
+            };
         }
 
         public IDbSelectable BuildSelection(DbReference dbRef, IDbObject selectExpression, string alias = null)
         {
             return new SqlSelectable
-                {
-                    SelectExpression = selectExpression,
-                    Ref = dbRef,
-                    Alias = alias
-                };
+            {
+                Ref = dbRef,
+                Alias = alias
+            };
         }
     }
 
@@ -176,13 +179,13 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             if (type == typeof(int))
                 return "int";
-            
+
             if (type == typeof(string))
                 return "nvarchar";
 
             if (type == typeof(JoinType))
                 return "<<JoinType>>";
-            
+
             throw new NotImplementedException($"{type.Name} not supported.");
         }
     }
