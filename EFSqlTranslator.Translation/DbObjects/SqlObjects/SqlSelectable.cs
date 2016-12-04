@@ -12,6 +12,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public bool IsJoinKey { get; set; }
 
+        public bool IsAggregation { get; set; }
+
         public override string ToString()
         {
             throw new NotImplementedException();
@@ -19,7 +21,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public virtual string ToSelectionString()
         {
-            return ToString();
+            return string.IsNullOrEmpty(Alias) ? $"{this}" : $"{this} as {Alias}";
         }
 
         protected bool Equals(SqlSelectable other)

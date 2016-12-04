@@ -42,11 +42,32 @@ namespace EFSqlTranslator.Translation
                    type == typeof(IGrouping<,>).MakeGenericType(type.GenericTypeArguments);
         }
 
+        public static void UpdateWhereClause(this IDbSelect dbSelect, IDbBinary whereClause, IDbObjectFactory dbFactory)
+        {
+            if (whereClause == null)
+                return;
+
+            dbSelect.Where = UpdateWhereClause(dbSelect.Where, whereClause, dbFactory);
+        }
+
+        public static IDbBinary UpdateWhereClause(IDbBinary whereClause, IDbBinary predicate, IDbObjectFactory dbFactory)
+        {
+            if (predicate == null)
+                return whereClause;
+
+            return whereClause != null
+                ? dbFactory.BuildBinary(whereClause, DbOperator.And, predicate)
+                : predicate;
+        }
+
         /// update all joins that are related to dbRef to be left outer join
         /// this is required by method such as Select or GroupBy 
         public static void UpdateJoinType(DbReference dbRef)
         {
-            var joins = dbRef.OwnerSelect.Joins.Where(j => j.To == dbRef);
+            var joins = dbRef?.OwnerSelect?.Joins.Where(j => ReferenceEquals(j.To, dbRef));
+            if (joins == null)
+                return;
+
             foreach(var dbJoin in joins)
             {
                 dbJoin.Type = JoinType.LeftOuter;
@@ -87,7 +108,8 @@ namespace EFSqlTranslator.Translation
             return selectables;
         }
 
-        public static IDbSelectable CreateNewSelectable(IDbSelectable selectable, DbReference dbRef, IDbObjectFactory dbFactory)
+        public static IDbSelectable CreateNewSelectableForWrappingSelect(
+            IDbSelectable selectable, DbReference dbRef, IDbObjectFactory dbFactory)
         {
             if (dbRef == null)
                 return selectable;
@@ -100,7 +122,7 @@ namespace EFSqlTranslator.Translation
             if (oRefCol != null)
                 return dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
 
-            throw new InvalidOperationException($"Can not recognise {selectable}");
+            return dbFactory.BuildColumn(selectable.Ref, selectable.Alias, typeof(string));
         }
 
         public static DbOperator GetDbOperator(ExpressionType type)
@@ -175,6 +197,20 @@ namespace EFSqlTranslator.Translation
                 default:
                     throw new NotSupportedException(optr.ToString());
             }
+        }
+    }
+
+    public static class ExpressionExtensions
+    {
+        public static Expression GetCaller(this MethodCallExpression m)
+        {
+            return m.Object ?? m.Arguments.First();
+        }
+
+        public static Expression[] GetArguments(this MethodCallExpression m)
+        {
+            var caller = m.GetCaller();
+            return m.Arguments.Where(a => a != caller).ToArray();
         }
     }
 }

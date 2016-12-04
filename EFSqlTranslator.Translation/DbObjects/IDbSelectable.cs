@@ -10,6 +10,8 @@ namespace EFSqlTranslator.Translation.DbObjects
 
         bool IsJoinKey { get; set; }
 
+        bool IsAggregation { get; set; }
+
         string ToSelectionString();
     }
 }

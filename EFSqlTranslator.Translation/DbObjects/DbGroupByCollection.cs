@@ -10,7 +10,8 @@ namespace EFSqlTranslator.Translation.DbObjects
 
         public void Add(IDbSelectable selectable)
         {
-            if (_groupBys.Contains(selectable, SqlSelectableComparerInstance))
+            if (selectable.IsAggregation ||
+                _groupBys.Contains(selectable, SqlSelectableComparerInstance))
                 return;
 
             _groupBys.Add(selectable);

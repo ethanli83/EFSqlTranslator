@@ -10,7 +10,7 @@ namespace EFSqlTranslator.Translation.DbObjects
         IDbSelect BuildSelect(DbReference dbReference);
         IDbSelect BuildSelect(IDbTable dbTable);
         IDbJoin BuildJoin(DbReference joinTo, IDbSelect dbSelect, IDbBinary condition = null, JoinType joinType = JoinType.Inner);
-        IDbSelectable BuildSelection(DbReference dbRef, IDbObject selectExpression, string alias = null);
+        IDbSelectable BuildSelectable(DbReference dbRef, string alias = null);
         IDbColumn BuildColumn(DbReference dbRef, string colName, Type type, string alias = null, bool isJoinKey = false);
         IDbColumn BuildColumn(DbReference dbRef, string colName, DbType type, string alias = null, bool isJoinKey = false);
         IDbColumn BuildColumn(IDbColumn column);
@@ -22,6 +22,9 @@ namespace EFSqlTranslator.Translation.DbObjects
         DbType BuildType(Type type, params object[] parameters);
         IDbConstant BuildConstant(object val);
         IDbKeyWord BuildKeyWord(string keyWord);
+        IDbFunc BuildFunc(string name, bool isAggregation, params IDbObject[] parameters);
+        IDbFunc BuildNullCheckFunc(params IDbObject[] parameters);
+        IDbCondition BuildCondition(Tuple<IDbBinary, IDbObject>[] conditions, IDbObject dbElse = null);
         IDbScript BuildScript();
     }
 }

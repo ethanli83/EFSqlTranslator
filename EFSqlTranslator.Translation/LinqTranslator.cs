@@ -44,6 +44,7 @@ namespace EFSqlTranslator.Translation
             new JoinTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new GroupByTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new SelectTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new CountTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
@@ -309,12 +310,16 @@ namespace EFSqlTranslator.Translation
                     var alias = _nameGenerator.GenerateAlias(childSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
                     var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType, alias, true);
 
-                    // We need to also put the join key in the group of the sub select.
-                    // This is to make sure the sub select is grouped by the key so that
-                    // the parent (outer select) will not be repeated
+                    /**
+                     * We need to also put the join key in the group of the sub select.
+                     * This is to make sure the sub select is grouped by the key so that
+                     * the parent (outer select) will not be repeated
+                     * This operation needs to happen here not in the aggregation method call.
+                     * The reason is that in aggregtion method calls we do not know which column
+                     * from the entity is used in relation, so they will not be able to create
+                     * the correct column
+                     */
                     childSelect.Selection.Add(childColumn);
-
-                    // todo: remove this, and get translator handler to add group bys
                     childSelect.GroupBys.Add(childColumn);
 
                     toColumn.Name = alias;
@@ -347,8 +352,8 @@ namespace EFSqlTranslator.Translation
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            var caller = m.Object ?? m.Arguments.First();
-            var args = m.Arguments.Where(a => a != caller).ToArray();
+            var caller = m.GetCaller();
+            var args = m.GetArguments();
 
             Visit(caller);
             VistMethodArguments(args);

@@ -9,7 +9,7 @@ namespace EFSqlTranslator.Translation.DbObjects
         
         DbReference From { get; set; }
         
-        IDbObject Where { get; set; }
+        IDbBinary Where { get; set; }
 
         IList<IDbJoin> Joins { get; }
 

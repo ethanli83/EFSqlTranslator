@@ -4,7 +4,7 @@ using System.Linq;
 using Dapper;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
-using EFSqlTranslator.Translation.DbObjects.SqlObjects;
+using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,51 +18,54 @@ namespace EFSqlTranslator.ConsoleApp
 
             using (var db = new BloggingContext())
             {
-                var query = db.Posts.
-                    Where(p => p.Blog.User.Comments.Any(c => c.CommentId > 20));
-
-                var query1 = db.Posts.
+                var query11 = db.Posts.
                     Where(p => p.Content != null).
                     GroupBy(p => p.BlogId).
-                    Select(g => g.Key);
+                    Select(g => new { cnt = g.Count() });
 
-                var query1_1 = db.Posts.
+                var query12 = db.Blogs.
+                    Where(b => b.Url != null).
+                    Select(b => new { cnt = b.Posts.Count() });
+
+                var query13 = db.Posts.
                     Where(p => p.Content != null).
                     GroupBy(p => p.BlogId).
-                    Select(g => new { g.Key });
+                    Select(g => new { cnt = g.Count(p => p.Blog.Url != null) });
 
-                var query1_2 = db.Posts.
-                    Where(p => p.Content != null).
-                    GroupBy(p => new { p.Blog.Url, p.User.UserName }).
-                    Select(g => new { g.Key.Url, g.Key.UserName });
+                var query14 = db.Blogs.
+                    Where(b => b.Url != null).
+                    Select(b => new
+                    {
+                        b.Url,
+                        b.User.UserId,
+                        cnt = b.Posts.Count(p => p.Content != null)
+                    });
 
-                var query2 = db.Posts.
-                    Where(p => p.Content != null).
-                    GroupBy(p => new { p.BlogId, p.User.UserName }).
-                    Select(g => new { g.Key.UserName });
+                var query15 = db.Blogs.
+                    Where(b => b.Url != null).
+                    Select(b => new
+                    {
+                        b.Url,
+                        b.User.UserId,
+                        cnt = b.Posts.Count(p => p.User.UserName != null)
+                    });
 
-                var query2_1 = db.Posts.
+                var query16 = db.Posts.
                     Where(p => p.Content != null).
                     GroupBy(p => new { p.Blog }).
-                    Select(g => new { g.Key.Blog.User.UserId });
+                    Select(g => new
+                    {
+                        g.Key.Blog.Url,
+                        g.Key.Blog.User.UserId,
+                        cnt = g.Count(p => p.User.UserName != null)
+                    });
 
-                var query3 = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => new { p.Blog, p.User }).
-                    GroupBy(x => new { x.Blog }).
-                    Select(x => new { x.Key.Blog.Url, x.Key.Blog.User.UserName });
-
-                var query4 = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => new { p.Blog }).
-                    GroupBy(g => new { g.Blog, g.Blog.Url }).
-                    Select(p => new { p.Key.Blog, p.Key.Blog.User, p.Key.Url }).
-                    Select(g => new { g.Blog.Name, g.User.UserName, g.Url });
-
-                db.Query(query1_2);
-                db.Query(query2_1);
-                db.Query(query3);
-                db.Query(query4);
+                db.Query(query11);
+                db.Query(query12);
+                db.Query(query13);
+                db.Query(query14);
+                db.Query(query15);
+                db.Query(query16);
             }
         }
     }
@@ -73,7 +76,7 @@ namespace EFSqlTranslator.ConsoleApp
         {
             using (var connection = new SqliteConnection(BloggingContext.ConnectionString))
             {
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
                 Console.WriteLine(sql);
                 

@@ -35,7 +35,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
 
             foreach(var selectable in selections)
             {
-                var newSelectable = SqlTranslationHelper.CreateNewSelectable(selectable, newSelectRef, _dbFactory);
+                var newSelectable = SqlTranslationHelper.CreateNewSelectableForWrappingSelect(selectable, newSelectRef, _dbFactory);
                 newSelect.Selection.Add(newSelectable);
             }
 

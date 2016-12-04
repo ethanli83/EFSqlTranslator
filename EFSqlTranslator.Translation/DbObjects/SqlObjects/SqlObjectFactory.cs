@@ -103,11 +103,15 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public IDbBinary BuildBinary(IDbObject left, DbOperator optr, IDbObject right)
         {
+            var l = (left as IDbSelectable)?.IsAggregation;
+            var r = (right as IDbSelectable)?.IsAggregation;
+
             return new SqlBinary
             {
                 Left = left,
                 Operator = optr,
-                Right = right
+                Right = right,
+                IsAggregation = (l.HasValue && l.Value) || (r.HasValue && r.Value)
             };
         }
 
@@ -118,6 +122,24 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 ValType = val == null ? null : BuildType(val.GetType()),
                 Val = val
             };
+        }
+
+        public IDbFunc BuildFunc(string name, bool isAggregation, params IDbObject[] parameters)
+        {
+            return new SqlFunc(name, parameters)
+            {
+                IsAggregation = isAggregation
+            };
+        }
+
+        public virtual IDbFunc BuildNullCheckFunc(params IDbObject[] parameters)
+        {
+            return new SqlFunc("isnull", parameters) {IsAggregation = true};
+        }
+
+        public IDbCondition BuildCondition(Tuple<IDbBinary, IDbObject>[] conditions, IDbObject dbElse = null)
+        {
+            return new SqlCondition(conditions, dbElse);
         }
 
         public IDbScript BuildScript()
@@ -163,7 +185,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
         }
 
-        public IDbSelectable BuildSelection(DbReference dbRef, IDbObject selectExpression, string alias = null)
+        public IDbSelectable BuildSelectable(DbReference dbRef, string alias = null)
         {
             return new SqlSelectable
             {

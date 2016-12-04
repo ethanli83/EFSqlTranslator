@@ -16,7 +16,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         
         public DbReference From { get; set; }
         
-        public IDbObject Where { get; set; }
+        public IDbBinary Where { get; set; }
 
         public IList<IDbJoin> Joins { get; } = new List<IDbJoin>();
 

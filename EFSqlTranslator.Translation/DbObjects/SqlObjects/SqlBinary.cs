@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
-    public class SqlBinary : SqlObject, IDbBinary
+    public class SqlBinary : SqlSelectable, IDbBinary
     {
         public IDbObject Left { get; set; }
         public DbOperator Operator { get; set; }
