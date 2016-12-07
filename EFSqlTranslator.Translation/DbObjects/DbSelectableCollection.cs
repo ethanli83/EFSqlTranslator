@@ -52,5 +52,13 @@ namespace EFSqlTranslator.Translation.DbObjects
         {
             return ((IEnumerable) _selectables).GetEnumerator();
         }
+
+        public void Remove(IDbRefColumn refCol)
+        {
+            if (!_selectables.Contains(refCol))
+                return;
+
+            _selectables.Remove(refCol);
+        }
     }
 }

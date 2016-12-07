@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
@@ -33,6 +35,7 @@ where u0.'UserName' is not null";
             }
         }
 
+        [Test]
         public void Test_Select_Ref_And_Columns()
         {
             using (var db = new TestingContext())
@@ -45,17 +48,17 @@ where u0.'UserName' is not null";
                 var sql = script.ToString();
                 
                 const string expected = @"
-select b0.*, u1.'UserName'
+select b0.*, u0.'UserName'
 from Posts p0
-inner join Users u0 on p0.'UserId' = u0.'UserId'
 left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-left outer join Users u1 on b0.'UserId' = u1.'UserId'
-where p0.'Content' is not null and u0.'UserName' is not null";
+left outer join Users u0 on p0.'UserId' = u0.'UserId'
+where p0.'Content' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
+        [Test]
         public void Test_Multiple_Select_Calls()
         {
             using (var db = new TestingContext())
@@ -69,20 +72,43 @@ where p0.'Content' is not null and u0.'UserName' is not null";
                 var sql = script.ToString();
                 
                 const string expected = @"
-select sq0.'Url' as 'Url', sq0.'Name' as 'Name', sq0.'UserName' as 'UserName'
-from (
-    select b0.*, u0.'UserName' as 'UserName'
-    from Posts p0
-    left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-    left outer join Users u0 on p0.'UserId' = u0.'UserId'
-    where p0.'Content' is not null
-) sq0";
+select b0.'Url', b0.'Name', u0.'UserName'
+from Posts p0
+left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
+left outer join Users u0 on p0.'UserId' = u0.'UserId'
+where p0.'Content' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        public void Test_Multiple_Select_Calls2()
+        [Test]
+        public void Test_Multiple_Select_Calls1()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Posts.
+                    Where(p => p.Content != null).
+                    Select(p => p.Blog).
+                    Select(b => b.Url);
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select b0.'Url'
+from Posts p0
+left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
+where p0.'Content' is not null";
+
+                Trace.WriteLine(sql);
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Test]
+        public void
+            Test_Multiple_Select_Calls2()
         {
             using (var db = new TestingContext())
             {
@@ -96,22 +122,20 @@ from (
                 var sql = script.ToString();
                 
                 const string expected = @"
-select sq0.'UserName' as 'UserName', sq0.'Url' as 'Url'
+select u0.'UserName', sq0.'Url'
 from (
-    select sq0.*, sq0.'Url' as 'Url'
-    from (
-        select b0.*, u0.*
-        from Posts p0
-        left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-        left outer join Users u0 on b0.'UserId' = u0.'UserId'
-        where p0.'Content' is not null
-    ) sq0
-) sq0";
+    select b0.'UserId' as 'UserId_jk0', b0.'Url'
+    from Posts p0
+    left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
+    where p0.'Content' is not null
+) sq0
+left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
+        [Test]
         public void Test_Multiple_Select_Calls_After_Grouping()
         {
             using (var db = new TestingContext())
@@ -127,16 +151,15 @@ from (
                 var sql = script.ToString();
 
                 const string expected = @"
-select sq0.'Name', u0.'UserName', sq0.'Url' as 'Url'
+select sq0.'Name', u0.'UserName', sq0.'Url'
 from (
-    select b0.*, b0.'Url', b0.'BlogId', b0.'UserId' as 'UserId_jk0', b0.'Name'
+    select b0.'Url', b0.'BlogId', b0.'UserId' as 'UserId_jk0', b0.'Name'
     from Posts p0
     left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
     where p0.'Content' is not null
 ) sq0
 left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'
-group by sq0.'BlogId', sq0.'Url', u0.'UserId', sq0.'Name', u0.'UserName'
-";
+group by sq0.'BlogId', sq0.'Url', u0.'UserId', sq0.'Name', u0.'UserName'";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

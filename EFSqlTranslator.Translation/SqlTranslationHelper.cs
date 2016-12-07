@@ -93,7 +93,7 @@ namespace EFSqlTranslator.Translation
             if (obj != null)
             {
                 var dbRef = obj;
-                return new IDbSelectable[] { factory.BuildRefColumn(dbRef) };
+                return new IDbSelectable[] { factory.BuildRefColumn(dbRef, dbRef.RefColumnAlias) };
             }
 
             var keyValue = dbObj as DbKeyValue;

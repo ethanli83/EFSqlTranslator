@@ -23,6 +23,13 @@ namespace EFSqlTranslator.Translation.DbObjects
 
         public string Alias { get; set; }
 
+        /// <summary>
+        /// RefColumnAlias is used as alias in case we need to create a ref column for this dbRef
+        /// </summary>
+        public string RefColumnAlias { get; set; }
+
+        public IDbRefColumn ReferredRefColumn { get; set; }
+
         public override string ToString()
         {
             if (Referee is IDbTable)

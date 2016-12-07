@@ -72,6 +72,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 RefTo = fromRefColumn
             };
 
+            if (dbRef != null)
+                dbRef.ReferredRefColumn = refCol;
+
             return refCol;
         }
 

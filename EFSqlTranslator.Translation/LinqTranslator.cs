@@ -5,11 +5,14 @@ using System.Linq.Expressions;
 using System.Reflection;
 using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.MethodTranslators;
+using NLog;
 
 namespace EFSqlTranslator.Translation
 {
     public class LinqTranslator : ExpressionVisitor
     {
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+
         private readonly IModelInfoProvider _infoProvider;
 
         private readonly IDbObjectFactory _dbFactory;
@@ -50,13 +53,20 @@ namespace EFSqlTranslator.Translation
         public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
         {
             var translator = new LinqTranslator(infoProvider, dbFactory);
+
             translator.Visit(exp);
-            return translator.GetResult();
+
+            var script = translator.GetResult();
+
+            if (Logger.IsDebugEnabled)
+                Logger.Debug(Tuple.Create(exp, script.ToString()));
+
+            return script;
         }
 
         internal IDbScript GetResult()
         {
-            var dbSelect = (IDbSelect)_state.ResultStack.Pop();
+            var dbSelect = _state.GetLastSelect();
             dbSelect = dbSelect.Optimize();
 
             var script = _dbFactory.BuildScript();
@@ -171,8 +181,12 @@ namespace EFSqlTranslator.Translation
                 if (dbRef.RefSelection.ContainsKey(m.Member.Name))
                 {
                     var dbObj = dbRef.RefSelection[m.Member.Name];
-                   _state.ResultStack.Pop();
+
+                    // pop out the dbRef from the stack, it was the result of
+                    // translate a parameter, and it is not required for following translation
+                    _state.ResultStack.Pop();
                     _state.ResultStack.Push(dbObj);
+
                     return m;
                 }
             }
@@ -208,7 +222,11 @@ namespace EFSqlTranslator.Translation
                 var fromEntity = _infoProvider.FindEntityInfo(m.Expression.Type);
                 var relation = fromEntity.GetRelation(m.Member.Name);
 
-                var dbJoin = GetOrCreateJoin(relation, fromRef, refCol);
+                var dbJoin = GetOrCreateJoin(relation, fromRef, refCol ?? fromRef.ReferredRefColumn);
+
+                // RefColumnAlias is used as alias in case we need to create a ref column for this dbRef
+                dbJoin.To.RefColumnAlias = m.Member.Name;
+
                 if (refCol != null)
                 {
                     var newRefCol = _dbFactory.BuildRefColumn(dbJoin.To, m.Member.Name);
@@ -231,19 +249,13 @@ namespace EFSqlTranslator.Translation
                 var col = _dbFactory.BuildColumn(dbRef, m.Member.Name, m.Type);
                 _state.ResultStack.Push(col);
 
+                //todo: this needs comments
+                refCol = refCol ?? dbRef.ReferredRefColumn;
+
                 // if the ref column is not now, and it is referring another ref column
                 // we need to make sure the column we translated is in the sub select which
                 // owns the ref column that referred by the current refColumn
                 refCol?.RefTo?.AddToReferedSelect(_dbFactory, m.Member.Name, m.Type);
-
-                // todo: check if there is a case where if refCol is null but the dbRef is
-                // referring a sub-select, we should not allow this to happen, as we always
-                // want to know for sure what the column's owner ref should be. if the ref col
-                // is null, then we need guest on what the column owner should be
-                // else if (dbRef.Referee is IDbSelect)
-                // {
-
-                // }
 
                 return m;
             }

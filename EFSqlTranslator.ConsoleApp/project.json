@@ -10,7 +10,8 @@
             "version": "1.0.0-preview2-final",
             "type": "build"
         },
-        "Dapper": "1.50.2"
+        "Dapper": "1.50.2",
+        "NLog": "5.0.0-bate3"
     },
     "frameworks": {
         "netcoreapp1.1": {

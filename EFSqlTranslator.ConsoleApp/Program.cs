@@ -7,6 +7,9 @@ using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 
 namespace EFSqlTranslator.ConsoleApp
 {
@@ -20,17 +23,24 @@ namespace EFSqlTranslator.ConsoleApp
             {
                 var query11 = db.Posts.
                     Where(p => p.Content != null).
-                    GroupBy(p => p.BlogId).
-                    Select(g => new { cnt = g.Count() });
+                    Select(p => p.Blog).
+                    Select(g => new { g.User, g.Url }).
+                    Select(g => new { g.User.UserName, g.Url });
 
-                var query12 = db.Blogs.
-                    Where(b => b.Url != null).
-                    Select(b => new { cnt = b.Posts.Count() });
+                var query12 = db.Posts.
+                    Where(p => p.Content != null).
+                    Select(p => new { p.Blog, p.User }).
+                    GroupBy(x => new { x.Blog }).
+                    Select(g => new
+                    {
+                        g.Key.Blog.Url,
+                        g.Key.Blog.User.UserName,
+                        Cnt = g.Count(x => x.User.UserName != "ethan")
+                    });
 
                 var query13 = db.Posts.
                     Where(p => p.Content != null).
-                    GroupBy(p => p.BlogId).
-                    Select(g => new { cnt = g.Count(p => p.Blog.Url != null) });
+                    Select(p => new { p.Blog, p.User.UserName });
 
                 var query14 = db.Blogs.
                     Where(b => b.Url != null).
@@ -79,7 +89,7 @@ namespace EFSqlTranslator.ConsoleApp
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
                 Console.WriteLine(sql);
-                
+
                 try
                 {
                     var results = connection.Query(sql);

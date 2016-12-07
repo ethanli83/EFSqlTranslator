@@ -55,7 +55,10 @@ namespace EFSqlTranslator.Translation
             }
 
             var column = factory.BuildColumn(refCol.Ref, colName, colType, alias);
-            refCol.OwnerSelect.Selection.Add(column);
+            var selection = refCol.OwnerSelect.Selection;
+
+            selection.Remove(refCol);
+            selection.Add(column);
         }
     }
 }
