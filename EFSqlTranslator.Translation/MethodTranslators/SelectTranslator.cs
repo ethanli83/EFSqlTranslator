@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects;
 
@@ -33,13 +34,32 @@ namespace EFSqlTranslator.Translation.MethodTranslators
 
             newSelectRef.Alias = nameGenerator.GenerateAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
 
+            selections = selections.Concat(dbSelect.Selection.Where(s => s.IsJoinKey)).ToArray();
             foreach(var selectable in selections)
             {
-                var newSelectable = SqlTranslationHelper.CreateNewSelectableForWrappingSelect(selectable, newSelectRef, _dbFactory);
+                var newSelectable = CreateNewSelectableForWrappingSelect(selectable, newSelectRef, _dbFactory);
+
                 newSelect.Selection.Add(newSelectable);
             }
 
             state.ResultStack.Push(newSelect);
+        }
+
+        private static IDbSelectable CreateNewSelectableForWrappingSelect(
+            IDbSelectable selectable, DbReference dbRef, IDbObjectFactory dbFactory)
+        {
+            if (dbRef == null)
+                return selectable;
+
+            var oCol =  selectable as IDbColumn;
+            if (oCol != null)
+                return dbFactory.BuildColumn(dbRef, oCol.GetAliasOrName(), oCol.ValType);
+
+            var oRefCol = selectable as IDbRefColumn;
+            if (oRefCol != null)
+                return dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
+
+            return dbFactory.BuildColumn(selectable.Ref, selectable.Alias, typeof(string));
         }
     }
 }

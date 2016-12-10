@@ -208,6 +208,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (type == typeof(string))
                 return "nvarchar";
 
+            if (type == typeof(double))
+                return "decimal";
+
             if (type == typeof(JoinType))
                 return "<<JoinType>>";
 

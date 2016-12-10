@@ -48,6 +48,7 @@ namespace EFSqlTranslator.Translation
             new GroupByTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new SelectTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new CountTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new AggregationTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)

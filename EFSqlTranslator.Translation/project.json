@@ -1,16 +1,13 @@
-{
+﻿{
   "version": "1.0.0-*",
   "buildOptions": {
     "debugType": "portable"
   },
   "dependencies": {
-    "Microsoft.EntityFrameworkCore.Sqlite": "1.0.0",
-    "Microsoft.EntityFrameworkCore.Design": {
-      "version": "1.0.0-preview2-final",
-      "type": "build"
-    },
     "Dapper": "1.50.2",
-    "NLog": "5.0.0-bate3"
+    "Microsoft.EntityFrameworkCore.Design": "1.1.0",
+    "Microsoft.EntityFrameworkCore.Sqlite": "1.1.0",
+    "NLog": "5.0.0-beta03"
   },
   "frameworks": {
     "netcoreapp1.1": {

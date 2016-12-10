@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using EFSqlTranslator.Translation.DbObjects;
 
 namespace EFSqlTranslator.Translation.MethodTranslators
 {
-    public class CountTranslator : AbstractMethodTranslator
+    public class CountTranslator : AggregationTranslatorBase
     {
-        public CountTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) 
+        public CountTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
             : base(infoProvider, dbFactory)
         {
         }
@@ -29,27 +29,9 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             else
                 childSelect = state.ResultStack.Pop() as IDbSelect;
 
-            var dbCountFunc = _dbFactory.BuildFunc("count", true, predicate);
-            var dbSelect = (IDbSelect)state.ResultStack.Peek();
+            var dbCountFunc = _dbFactory.BuildFunc(m.Method.Name.ToLower(), true, predicate);
 
-            if (childSelect == null)
-            {
-                state.ResultStack.Push(dbCountFunc);
-            }
-            else
-            {
-                var alias = nameGenerator.GenerateAlias(dbSelect, "count", true);
-                dbCountFunc.Alias = alias;
-                childSelect.Selection.Add(dbCountFunc);
-
-                var cRef = dbSelect.Joins.Single(j => ReferenceEquals(j.To.Referee, childSelect)).To;
-                var column = _dbFactory.BuildColumn(cRef, alias, m.Method.ReturnType);
-
-                var dbDefaultVal = _dbFactory.BuildConstant(Activator.CreateInstance(m.Method.ReturnType));
-                var dbIsNullFunc = _dbFactory.BuildNullCheckFunc(column, dbDefaultVal);
-
-                state.ResultStack.Push(dbIsNullFunc);
-            }
+            CreateAggregation(m, state, nameGenerator, childSelect, dbCountFunc);
         }
 
         private IDbObject BuildCondition(MethodCallExpression m, TranslationState state)

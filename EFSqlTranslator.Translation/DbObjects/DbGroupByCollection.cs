@@ -8,6 +8,8 @@ namespace EFSqlTranslator.Translation.DbObjects
     {
         private readonly List<IDbSelectable> _groupBys = new List<IDbSelectable>();
 
+        public bool IsSingleKey { get; set; }
+
         public void Add(IDbSelectable selectable)
         {
             if (selectable.IsAggregation ||
@@ -17,7 +19,13 @@ namespace EFSqlTranslator.Translation.DbObjects
             _groupBys.Add(selectable);
         }
 
-        public bool IsSingleKey { get; set; }
+        public void Remove(IDbSelectable selectable)
+        {
+            if (!_groupBys.Contains(selectable, SqlSelectableComparerInstance))
+                return;
+
+            _groupBys.Remove(selectable);
+        }
 
         public override string ToString()
         {

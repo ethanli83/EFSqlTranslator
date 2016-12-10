@@ -23,9 +23,11 @@ namespace EFSqlTranslator.ConsoleApp
             {
                 var query11 = db.Posts.
                     Where(p => p.Content != null).
-                    Select(p => p.Blog).
-                    Select(g => new { g.User, g.Url }).
-                    Select(g => new { g.User.UserName, g.Url });
+                    Select(p => new
+                    {
+                        Cnt = p.Blog.Posts.Count(bp => bp.User.UserName != null) + p.Comments.Average(c => c.CommentId)
+                    });
+
 
                 var query12 = db.Posts.
                     Where(p => p.Content != null).
@@ -35,12 +37,19 @@ namespace EFSqlTranslator.ConsoleApp
                     {
                         g.Key.Blog.Url,
                         g.Key.Blog.User.UserName,
-                        Cnt = g.Count(x => x.User.UserName != "ethan")
+                        Cnt = g.Sum(x => x.User.UserId + x.Blog.BlogId)
                     });
 
                 var query13 = db.Posts.
                     Where(p => p.Content != null).
-                    Select(p => new { p.Blog, p.User.UserName });
+                    Select(p => new { p.Blog, p.User }).
+                    GroupBy(x => new { x.Blog }).
+                    Select(g => new
+                    {
+                        g.Key.Blog.Url,
+                        g.Key.Blog.User.UserName,
+                        Cnt = g.Max(x => x.User.UserId)
+                    });
 
                 var query14 = db.Blogs.
                     Where(b => b.Url != null).
@@ -48,7 +57,7 @@ namespace EFSqlTranslator.ConsoleApp
                     {
                         b.Url,
                         b.User.UserId,
-                        cnt = b.Posts.Count(p => p.Content != null)
+                        cnt = b.Posts.Min(p => p.PostId)
                     });
 
                 var query15 = db.Blogs.
@@ -57,25 +66,14 @@ namespace EFSqlTranslator.ConsoleApp
                     {
                         b.Url,
                         b.User.UserId,
-                        cnt = b.Posts.Count(p => p.User.UserName != null)
-                    });
-
-                var query16 = db.Posts.
-                    Where(p => p.Content != null).
-                    GroupBy(p => new { p.Blog }).
-                    Select(g => new
-                    {
-                        g.Key.Blog.Url,
-                        g.Key.Blog.User.UserId,
-                        cnt = g.Count(p => p.User.UserName != null)
+                        cnt = b.Posts.Select(p => p.User.UserId).Average()
                     });
 
                 db.Query(query11);
-                db.Query(query12);
-                db.Query(query13);
-                db.Query(query14);
-                db.Query(query15);
-                db.Query(query16);
+//                db.Query(query12);
+//                db.Query(query13);
+//                db.Query(query14);
+//                db.Query(query15);
             }
         }
     }

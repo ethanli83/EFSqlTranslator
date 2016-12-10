@@ -27,6 +27,14 @@ namespace EFSqlTranslator.Translation.DbObjects
                 _owner.GroupBys.Add(selectable);
         }
 
+        public void Remove(IDbSelectable selectable)
+        {
+            if (!_selectables.Contains(selectable))
+                return;
+
+            _selectables.Remove(selectable);
+        }
+
         public void Clear()
         {
             _selectables.Clear();
@@ -51,14 +59,6 @@ namespace EFSqlTranslator.Translation.DbObjects
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable) _selectables).GetEnumerator();
-        }
-
-        public void Remove(IDbRefColumn refCol)
-        {
-            if (!_selectables.Contains(refCol))
-                return;
-
-            _selectables.Remove(refCol);
         }
     }
 }

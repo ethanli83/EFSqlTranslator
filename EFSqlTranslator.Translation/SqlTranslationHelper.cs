@@ -73,7 +73,7 @@ namespace EFSqlTranslator.Translation
                 dbJoin.Type = JoinType.LeftOuter;
                 var relatedRefs = dbJoin.Condition.GetOperands().
                     Select(op => (op as IDbSelectable)?.Ref).
-                    Where(r => r != null && r != dbJoin.To);
+                    Where(r => r != null && !ReferenceEquals(r, dbJoin.To));
 
                 foreach(var relatedRef in relatedRefs)
                     UpdateJoinType(relatedRef); 
@@ -106,23 +106,6 @@ namespace EFSqlTranslator.Translation
                 selectable.Alias = keyValue.Key;
 
             return selectables;
-        }
-
-        public static IDbSelectable CreateNewSelectableForWrappingSelect(
-            IDbSelectable selectable, DbReference dbRef, IDbObjectFactory dbFactory)
-        {
-            if (dbRef == null)
-                return selectable;
-
-            var oCol =  selectable as IDbColumn;
-            if (oCol != null)
-                return dbFactory.BuildColumn(dbRef, oCol.GetAliasOrName(), oCol.ValType);
-
-            var oRefCol = selectable as IDbRefColumn;
-            if (oRefCol != null)
-                return dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
-
-            return dbFactory.BuildColumn(selectable.Ref, selectable.Alias, typeof(string));
         }
 
         public static DbOperator GetDbOperator(ExpressionType type)
