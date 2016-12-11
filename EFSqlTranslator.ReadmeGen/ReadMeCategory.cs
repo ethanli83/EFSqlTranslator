@@ -23,7 +23,12 @@ namespace EFSqlTranslator.ReadmeGen
                 writer.WriteLine($"## {Roman(CategoryAttr.Index + 1)}. {CategoryAttr.Title}");
 
             if (!string.IsNullOrEmpty(CategoryAttr.Description))
+            {
                 writer.WriteLine(CategoryAttr.Description.Trim());
+
+                if (CategoryAttr.Description.IndexOf("\n", StringComparison.CurrentCultureIgnoreCase) >= 0)
+                    writer.WriteLine();
+            }
 
             var last = Entries.Last();
             foreach (var entry in Entries)

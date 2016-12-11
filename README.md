@@ -20,6 +20,7 @@ In this section, we will show you how relationships are translated. The basic ru
   2. If a relation is used in a Or binary expression, Select, or Group By then join type will be changed to Left Outer Join.
   3. Parent relation will be a join to the parent entity.
   4. Child relation will be converted into a sub-select, which then got joined to.
+
 ### 1. Join to a parent relation
 ```csharp
 // Linq expression:
@@ -75,6 +76,7 @@ In this section, we will show you multiple ways to select data. You can basicall
   1. Make an anonymous object by selecting columns from different table.
   2. Do multiple Selects to get the final output.
   3. Use relations in your Select method calls.
+
 ### 1. Select out only required columns
 ```csharp
 // Linq expression:
@@ -137,6 +139,7 @@ where p0.'Content' is not null
 Grouping is always used along with aggregations. In this section, we will demostrate number of
 ways that you can group your data. In the next section, you will then see how the group by works
 with aggregation methods.
+
 ### 1. Basic grouping on table column
 ```csharp
 // Linq expression:
@@ -215,6 +218,7 @@ group by sq0.'BlogId', sq0.'Url', u0.'UserName'
 ## V. Translating aggregtions
 In this section, we will give you several examples to show how the aggregation is translated.
 We will also demostrate few powerful aggregations that you can do with this libary.
+
 ### 1. Count on basic grouping
 ```csharp
 // Linq expression:
@@ -318,6 +322,7 @@ group by b0.'BlogId', b0.'Url', u0.'UserId'
 ## VI. Translating manual join
 This libary supports more complicated join. You can define your own join condition rather than
 have to be limited to column pairs.
+
 ### 1. Join on custom condition
 ```csharp
 // Linq expression:
