@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using AgileObjects.ReadableExpressions;
 using EFSqlTranslator.Tests;
 using EFSqlTranslator.Translation;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using NLog;
 using NLog.Config;
 
@@ -15,8 +16,15 @@ namespace EFSqlTranslator.ReadmeGen
 {
     internal class Program
     {
-        private static readonly Regex NameRegex = new Regex(@"^Microsoft.*\[EFSqlTranslator\.Tests\.(\w+)\]");
-        private static readonly Regex CommentsRegex = new Regex(@"\n\s.* Quoted to induce a closure:\n\s+");
+        private static readonly Regex QueryableNameRegex;
+        private static readonly Regex SingleLineCommentsRegex = new Regex(@"\s*//[^\r\n]+\s+");
+
+        static Program()
+        {
+            var queryableType = typeof(EntityQueryable<>);
+            var testsType = typeof(TestUtils).Namespace;
+            QueryableNameRegex = new Regex($@"^{Regex.Escape(queryableType.FullName)}\[{Regex.Escape(testsType)}\.(\w+)\]");
+        }
 
         private const string Beginning =
             @"# EFSqlTranslator [![Build Status](https://travis-ci.org/ethanli83/EFSqlTranslator.svg?branch=master)](https://travis-ci.org/ethanli83/EFSqlTranslator)
@@ -110,11 +118,8 @@ A standalone linq to sql translator that can be used with EF and Dapper.";
 
             var expStr = expression.ToReadableString();
 
-            var matchs = NameRegex.Match(expStr);
-            var name = matchs.Groups[1].Value;
-
-            expStr = NameRegex.Replace(expStr, $"db.{name}s");
-            expStr = CommentsRegex.Replace(expStr, "");
+            expStr = QueryableNameRegex.Replace(expStr, @"db.$1s");
+            expStr = SingleLineCommentsRegex.Replace(expStr, "");
 
             return new ReadMeTranslationEntry
             {
