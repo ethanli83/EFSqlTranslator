@@ -14,7 +14,7 @@ select b0.*
 from Blogs b0
 where ((b0.'Url' is not null) and (b0.'Name' like '%Ethan')) and ((b0.'UserId' > 1) or (b0.'UserId' < 100))
 ```
-## II. Translating relationsheips
+## II. Translating Relationsheips
 In this section, we will show you how relationships are translated. The basic rules are:
   1. All relations is translated into a inner join be default.
   2. If a relation is used in a Or binary expression, Select, or Group By then join type will be changed to Left Outer Join.
@@ -71,7 +71,7 @@ left outer join (
 ) sq0 on u0.'UserId' = sq0.'UserId_jk0'
 where sq0.'UserId_jk0' is not null
 ```
-## III. Translating selection
+## III. Translating Select
 In this section, we will show you multiple ways to select data. You can basically:
   1. Make an anonymous object by selecting columns from different table.
   2. Do multiple Selects to get the final output.
@@ -135,7 +135,7 @@ left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
 left outer join Users u0 on p0.'UserId' = u0.'UserId'
 where p0.'Content' is not null
 ```
-## IV. Translation of Group By
+## IV. Translating GroupBy
 Grouping is always used along with aggregations. In this section, we will demostrate number of
 ways that you can group your data. In the next section, you will then see how the group by works
 with aggregation methods.
@@ -215,7 +215,7 @@ from (
 left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'
 group by sq0.'BlogId', sq0.'Url', u0.'UserName'
 ```
-## V. Translating aggregtions
+## V. Translating Aggregtaions
 In this section, we will give you several examples to show how the aggregation is translated.
 We will also demostrate few powerful aggregations that you can do with this libary.
 
@@ -319,7 +319,7 @@ left outer join Users u1 on sq0.'UserId_jk0' = u1.'UserId'
 where p0.'Content' is not null
 group by b0.'BlogId', b0.'Url', u0.'UserId'
 ```
-## VI. Translating manual join
+## VI. Translating Manual Join
 This libary supports more complicated join. You can define your own join condition rather than
 have to be limited to column pairs.
 
