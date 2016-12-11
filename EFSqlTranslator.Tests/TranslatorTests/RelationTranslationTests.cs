@@ -13,10 +13,10 @@ namespace EFSqlTranslator.Tests.TranslatorTests
          Title = "Translating relationsheips",
          Description = @"
 In this section, we will show you how relationships are translated. The basic rules are:
-    1, All relations is translated into a inner join be default.
-    2, If a relation is used in a Or binary expression, Select, or Group By then join type will be changed to Left Outer Join.
-    3, Parent relation will be a join to the parent entity.
-    4, Child relation will be converted into a sub-select, which then got joined to."
+  1. All relations is translated into a inner join be default.
+  2. If a relation is used in a Or binary expression, Select, or Group By then join type will be changed to Left Outer Join.
+  3. Parent relation will be a join to the parent entity.
+  4. Child relation will be converted into a sub-select, which then got joined to."
      )]
     public class RelationTranslationTests
     {

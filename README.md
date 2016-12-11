@@ -16,10 +16,10 @@ where ((b0.'Url' is not null) and (b0.'Name' like '%Ethan')) and ((b0.'UserId' >
 ```
 ## II. Translating relationsheips
 In this section, we will show you how relationships are translated. The basic rules are:
-    1, All relations is translated into a inner join be default.
-    2, If a relation is used in a Or binary expression, Select, or Group By then join type will be changed to Left Outer Join.
-    3, Parent relation will be a join to the parent entity.
-    4, Child relation will be converted into a sub-select, which then got joined to.
+  1. All relations is translated into a inner join be default.
+  2. If a relation is used in a Or binary expression, Select, or Group By then join type will be changed to Left Outer Join.
+  3. Parent relation will be a join to the parent entity.
+  4. Child relation will be converted into a sub-select, which then got joined to.
 ### 1. Join to a parent relation
 ```csharp
 // Linq expression:
@@ -72,9 +72,9 @@ where sq0.'UserId_jk0' is not null
 ```
 ## III. Translating selection
 In this section, we will show you multiple ways to select data. You can basically:
-    1, Make an anonymous object by selecting columns from different table.
-    2, Do multiple Selects to get the final output.
-    3, Use relations in your Select method calls.
+  1. Make an anonymous object by selecting columns from different table.
+  2. Do multiple Selects to get the final output.
+  3. Use relations in your Select method calls.
 ### 1. Select out only required columns
 ```csharp
 // Linq expression:

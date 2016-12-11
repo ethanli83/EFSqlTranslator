@@ -14,9 +14,9 @@ namespace EFSqlTranslator.Tests.TranslatorTests
          Title = "Translating selection",
          Description = @"
 In this section, we will show you multiple ways to select data. You can basically:
-    1, Make an anonymous object by selecting columns from different table.
-    2, Do multiple Selects to get the final output.
-    3, Use relations in your Select method calls."
+  1. Make an anonymous object by selecting columns from different table.
+  2. Do multiple Selects to get the final output.
+  3. Use relations in your Select method calls."
      )]
     public class SelectTranslationTests
     {
