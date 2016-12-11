@@ -22,8 +22,8 @@ namespace EFSqlTranslator.ReadmeGen
         static Program()
         {
             var queryableType = typeof(EntityQueryable<>);
-            var testsType = typeof(TestUtils).Namespace;
-            QueryableNameRegex = new Regex($@"^{Regex.Escape(queryableType.FullName)}\[{Regex.Escape(testsType)}\.(\w+)\]");
+            var contextNamespace = typeof(TestingContext).Namespace;
+            QueryableNameRegex = new Regex($@"^{Regex.Escape(queryableType.FullName)}\[{Regex.Escape(contextNamespace)}\.(\w+)\]");
         }
 
         private const string Beginning =
