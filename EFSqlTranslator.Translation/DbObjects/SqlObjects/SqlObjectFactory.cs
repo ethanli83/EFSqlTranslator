@@ -106,15 +106,23 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public IDbBinary BuildBinary(IDbObject left, DbOperator optr, IDbObject right)
         {
-            var l = (left as IDbSelectable)?.IsAggregation;
-            var r = (right as IDbSelectable)?.IsAggregation;
+            var ls = (left as IDbSelectable)?.IsAggregation;
+            var rs = (right as IDbSelectable)?.IsAggregation;
+
+            var lb = (left as IDbBinary);
+            if (lb != null)
+                lb.UseParentheses = true;
+
+            var rb = (right as IDbBinary);
+            if (rb != null)
+                rb.UseParentheses = true;
 
             return new SqlBinary
             {
                 Left = left,
                 Operator = optr,
                 Right = right,
-                IsAggregation = (l.HasValue && l.Value) || (r.HasValue && r.Value)
+                IsAggregation = (ls.HasValue && ls.Value) || (rs.HasValue && rs.Value)
             };
         }
 

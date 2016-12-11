@@ -7,9 +7,21 @@ using NUnit.Framework;
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
+    [CategoryReadMe(
+         Index = 3,
+         Title = "Translation of Group By",
+         Description = @"
+Grouping is always used along with aggregations. In this section, we will demostrate number of
+ways that you can group your data. In the next section, you will then see how the group by works
+with aggregation methods."
+     )]
     public class GroupByTranslationTests
     {
         [Test]
+        [TranslationReadMe(
+             Index = 0,
+             Title = "Basic grouping on table column"
+         )]
         public void Test_GroupBy_On_Column()
         {
             using (var db = new TestingContext())
@@ -33,6 +45,10 @@ group by p0.'BlogId'";
         }
 
         [Test]
+        [TranslationReadMe(
+             Index = 1,
+             Title = "Using relationships in grouping"
+         )]
         public void Test_GroupBy_On_Multiple_Columns()
         {
             using (var db = new TestingContext())
@@ -58,6 +74,12 @@ group by b0.'Url', u0.'UserName'";
         }
 
         [Test]
+        [TranslationReadMe(
+             Index = 2,
+             Title = "Group on whole entity",
+             Description = @"
+This feature allows developers to write sophisticated aggregtion in a much simplier way."
+         )]
         public void Test_GroupBy_On_Entity()
         {
             using (var db = new TestingContext())
@@ -83,6 +105,10 @@ group by b0.'BlogId', u0.'UserId'";
         }
 
         [Test]
+        [TranslationReadMe(
+             Index = 3,
+             Title = "Mix of Select and Group method calls"
+         )]
         public void Test_GroupBy_On_Multiple_Entities()
         {
             using (var db = new TestingContext())
@@ -100,44 +126,6 @@ group by b0.'BlogId', u0.'UserId'";
 select sq0.'Url', u0.'UserName'
 from (
     select b0.'BlogId', b0.'Url', b0.'UserId' as 'UserId_jk0'
-    from Posts p0
-    left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-    left outer join Users u0 on p0.'UserId' = u0.'UserId'
-    where p0.'Content' is not null
-) sq0
-left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'
-group by sq0.'BlogId', sq0.'Url', u0.'UserName'";
-
-                TestUtils.AssertStringEqual(expected, sql);
-            }
-        }
-
-        [Test]
-        public void Test_GroupBy_On_Multiple_Entities2()
-        {
-            using (var db = new TestingContext())
-            {
-                var query = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => new { p.Blog, p.User }).
-                    GroupBy(x => new { x.Blog }).
-                    Select(g => new
-                    {
-                        g.Key.Blog.Url,
-                        g.Key.Blog.User.UserName,
-                        Cnt = g.Count(x => x.User.UserName != "ethan")
-                    });
-
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
-                var sql = script.ToString();
-
-                const string expected = @"
-select sq0.'Url', u0.'UserName', count(case
-    when sq0.'UserName' != 'ethan' then 1
-    else null
-end) as Cnt
-from (
-    select b0.'BlogId', b0.'Url', b0.'UserId' as 'UserId_jk0', u0.'UserName'
     from Posts p0
     left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
     left outer join Users u0 on p0.'UserId' = u0.'UserId'

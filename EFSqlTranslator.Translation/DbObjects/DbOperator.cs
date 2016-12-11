@@ -17,6 +17,7 @@ namespace EFSqlTranslator.Translation.DbObjects
         GreaterThanOrEqual,
         LessThan,
         LessThanOrEqual,
-        IsNot
+        IsNot,
+        Like
     }
 }

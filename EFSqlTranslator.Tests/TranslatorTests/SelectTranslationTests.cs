@@ -9,20 +9,59 @@ using NUnit.Framework;
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
+    [CategoryReadMe(
+         Index = 2,
+         Title = "Translating selection",
+         Description = @"
+In this section, we will show you multiple ways to select data. You can basically:
+    1, Make an anonymous object by selecting columns from different table.
+    2, Do multiple Selects to get the final output.
+    3, Use relations in your Select method calls."
+     )]
     public class SelectTranslationTests
     {
         [Test]
+        [TranslationReadMe(
+             Index = 0,
+             Title = "Select out only required columns"
+         )]
         public void Test_Translate_Select_Columns() 
         {
             using (var db = new TestingContext())
             {
                 var query = db.Posts.
                     Where(p => p.User.UserName != null).
-                    Select(p => new { p.Content, p.Blog.User.UserName });
+                    Select(p => new { p.Content, p.Title });
                 
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
                 
+                const string expected = @"
+select p0.'Content', p0.'Title'
+from Posts p0
+inner join Users u0 on p0.'UserId' = u0.'UserId'
+where u0.'UserName' is not null";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Test]
+        [TranslationReadMe(
+             Index = 1,
+             Title = "Select out required columns from related entity"
+         )]
+        public void Test_Translate_Select_Columns_With_Relations()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Posts.
+                    Where(p => p.User.UserName != null).
+                    Select(p => new { p.Content, p.Blog.User.UserName });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
                 const string expected = @"
 select p0.'Content', u1.'UserName'
 from Posts p0
@@ -30,6 +69,36 @@ inner join Users u0 on p0.'UserId' = u0.'UserId'
 left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
 left outer join Users u1 on b0.'UserId' = u1.'UserId'
 where u0.'UserName' is not null";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Test]
+        [TranslationReadMe(
+             Index = 2,
+             Title = "Make up selection with columns and expression"
+         )]
+        public void Test_Translate_Select_Columns_With_Expressions()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Posts.
+                    Where(p => p.Content != null).
+                    Select(p => new
+                    {
+                        TitleContent = p.Title + "|" + p.Content,
+                        Num = p.BlogId / p.User.UserId,
+                    });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select (p0.'Title' + '|') + p0.'Content' as TitleContent, p0.'BlogId' / u0.'UserId' as Num
+from Posts p0
+inner join Users u0 on p0.'UserId' = u0.'UserId'
+where p0.'Content' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
@@ -59,6 +128,11 @@ where p0.'Content' is not null";
         }
 
         [Test]
+        [TranslationReadMe(
+             Index = 3,
+             Title = "Multiple selections with selecting whole entity",
+             Description = "This will become really useful when combining with Group By."
+         )]
         public void Test_Multiple_Select_Calls()
         {
             using (var db = new TestingContext())

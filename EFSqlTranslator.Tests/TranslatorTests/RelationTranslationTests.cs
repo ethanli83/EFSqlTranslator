@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
@@ -7,9 +8,23 @@ using NUnit.Framework;
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
+    [CategoryReadMe(
+         Index = 1,
+         Title = "Translating relationsheips",
+         Description = @"
+In this section, we will show you how relationships are translated. The basic rules are:
+    1, All relations is translated into a inner join be default.
+    2, If a relation is used in a Or binary expression, Select, or Group By then join type will be changed to Left Outer Join.
+    3, Parent relation will be a join to the parent entity.
+    4, Child relation will be converted into a sub-select, which then got joined to."
+     )]
     public class RelationTranslationTests
     {
         [Test]
+        [TranslationReadMe(
+             Index = 0,
+             Title = "Join to a parent relation"
+         )]
         public void Test_Translate_Filter_On_Parent_Relation() 
         {
             using (var db = new TestingContext())
@@ -30,6 +45,10 @@ where b0.'Url' is not null ";
         }
 
         [Test]
+        [TranslationReadMe(
+             Index = 1,
+             Title = "Join to a child relation"
+         )]
         public void Test_Translate_Filter_On_Child_Relation()
         {
             using (var db = new TestingContext())
@@ -55,6 +74,10 @@ where sq0.'BlogId_jk0' is not null";
         }
 
         [Test]
+        [TranslationReadMe(
+             Index = 2,
+             Title = "Use relationships in a chain"
+         )]
         public void Test_Translate_Filter_On_Multi_Level_Relation() 
         {
             using (var db = new TestingContext())

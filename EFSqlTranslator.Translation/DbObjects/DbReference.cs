@@ -28,6 +28,10 @@ namespace EFSqlTranslator.Translation.DbObjects
         /// </summary>
         public string RefColumnAlias { get; set; }
 
+        /// <summary>
+        /// The ref column which is referring to this reference
+        /// all Select statement.
+        /// </summary>
         public IDbRefColumn ReferredRefColumn { get; set; }
 
         public override string ToString()

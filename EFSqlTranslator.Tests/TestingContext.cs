@@ -34,6 +34,8 @@ namespace EFSqlTranslator.Tests
         public User User { get; set; }
         
         public List<Post> Posts { get; set; }
+
+        public List<Comment> Comments { get; set; }
     }
 
     public class Post
@@ -74,9 +76,13 @@ namespace EFSqlTranslator.Tests
 
         public int UserId { get; set; }
 
+        public int BlogId { get; set; }
+
         public int PostId { get; set; }
 
         public User User { get; set; }
+
+        public Blog Blog { get; set; }
 
         public Post Post { get; set; }
     }

@@ -60,20 +60,21 @@ namespace EFSqlTranslator.ConsoleApp
                         cnt = b.Posts.Min(p => p.PostId)
                     });
 
-                var query15 = db.Blogs.
-                    Where(b => b.Url != null).
-                    Select(b => new
+                var query15 = db.Posts.
+                    Where(p => p.Content != null).
+                    GroupBy(p => new { p.Blog }).
+                    Select(g => new
                     {
-                        b.Url,
-                        b.User.UserId,
-                        cnt = b.Posts.Select(p => p.User.UserId).Average()
+                        g.Key.Blog.Url,
+                        g.Key.Blog.User.UserId,
+                        Cnt = g.Key.Blog.Posts.Count(p => p.User.UserName != null)
                     });
 
                 db.Query(query11);
-//                db.Query(query12);
-//                db.Query(query13);
-//                db.Query(query14);
-//                db.Query(query15);
+                db.Query(query12);
+                db.Query(query13);
+                db.Query(query14);
+                db.Query(query15);
             }
         }
     }

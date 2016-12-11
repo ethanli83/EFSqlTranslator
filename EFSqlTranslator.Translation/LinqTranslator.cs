@@ -49,6 +49,8 @@ namespace EFSqlTranslator.Translation
             new SelectTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new CountTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new AggregationTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new StartsWithTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new EndsWithTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
@@ -124,6 +126,11 @@ namespace EFSqlTranslator.Translation
 
         protected override Expression VisitParameter(ParameterExpression p)
         {
+            return VisitParameterInteral(p, false);
+        }
+
+        private Expression VisitParameterInteral(ParameterExpression p, bool ignoreParamStack)
+        {
             DbReference dbRef = null;
 
             if (p.Type.IsAnonymouse() || p.Type.IsGrouping())
@@ -136,12 +143,12 @@ namespace EFSqlTranslator.Translation
                     ? dbSelect.GroupBys.AsEnumerable()
                     : dbSelect.Selection;
 
-                foreach(var selectable in collection)
+                foreach (var selectable in collection)
                     dbRef.RefSelection[selectable.GetAliasOrName()] = selectable;
             }
 
 
-            if (dbRef == null && _state.ParamterStack.Count > 0)
+            if (dbRef == null && !ignoreParamStack && _state.ParamterStack.Count > 0)
             {
                 var dbRefs = _state.ParamterStack.Peek();
                 if (dbRefs.ContainsKey(p))
@@ -155,10 +162,11 @@ namespace EFSqlTranslator.Translation
             // of the stack, especially we translating arguments for method calls
             if (dbRef == null)
             {
-                // var dbSelect = (IDbSelect)_state.ResultStack.Peek();
-                // dbRef = dbSelect.Targets.First();
                 var dbSelect = _state.GetLastSelect();
-                var refCol = dbSelect.Selection.OfType<IDbRefColumn>().LastOrDefault();
+
+                var refCol = (_state.ResultStack.Peek() as IDbRefColumn) ??
+                             dbSelect.Selection.OfType<IDbRefColumn>().LastOrDefault();
+
                 dbRef = refCol != null ? refCol.Ref : dbSelect.From;
             }
 
@@ -250,7 +258,9 @@ namespace EFSqlTranslator.Translation
                 var col = _dbFactory.BuildColumn(dbRef, m.Member.Name, m.Type);
                 _state.ResultStack.Push(col);
 
-                //todo: this needs comments
+                // if we create a column whose DbRef is using by a RefColumn
+                // we need to make sure the column is added to the ref column's owner select
+                // This normally happen when we are accessing a column from a child relation
                 refCol = refCol ?? dbRef.ReferredRefColumn;
 
                 // if the ref column is not now, and it is referring another ref column
@@ -342,13 +352,22 @@ namespace EFSqlTranslator.Translation
                 // if the relation is found on a ref column, which means the from key of the
                 // join is not on a table but a derived select. In this case, we need to add
                 // the from key into the derived select, as we will be using it in the join
-                if (refCol?.RefTo != null)
+                if (fromRef.Referee is IDbSelect || refCol?.RefTo != null)
                 {
                     var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
-                    refCol.RefTo.AddToReferedSelect(_dbFactory, fromKey.Name, fromKey.ValType, alias);
-
                     fromColumn.Name = alias;
                     fromColumn.Alias = string.Empty;
+
+                    if (refCol?.RefTo != null)
+                    {
+                        refCol.RefTo?.AddToReferedSelect(_dbFactory, fromKey.Name, fromKey.ValType, alias);
+                    }
+                    else if (refCol != null)
+                    {
+                        var fromSelect = (IDbSelect)fromRef.Referee;
+                        var keyColumn = _dbFactory.BuildColumn(refCol.Ref, fromKey.Name, fromKey.ValType, alias);
+                        fromSelect.Selection.Add(keyColumn);
+                    }
                 }
 
                 var binary = _dbFactory.BuildBinary(fromColumn, DbOperator.Equal, toColumn);
@@ -358,7 +377,13 @@ namespace EFSqlTranslator.Translation
             }
 
             dbJoin.Condition = condition;
-            dbJoin.Type = !relation.IsChildRelation ? JoinType.Inner : JoinType.LeftOuter;
+
+            // all relations need to follow the join type
+            if (fromRef.OwnerJoin != null)
+                dbJoin.Type = fromRef.OwnerJoin.Type;
+
+            if (relation.IsChildRelation)
+                dbJoin.Type = JoinType.LeftOuter;
 
             return _state.CreatedJoins[tupleKey] = dbJoin;
         }
@@ -395,7 +420,8 @@ namespace EFSqlTranslator.Translation
             var results = new Stack<IDbObject>();
             foreach(var p in l.Parameters.Reverse())
             {
-                Visit(p);
+                VisitParameterInteral(p, true);
+
                 var dbRef = (DbReference)_state.ResultStack.Pop();
                 pList[p] = dbRef;
 
@@ -444,100 +470,11 @@ namespace EFSqlTranslator.Translation
             {
                 var dbRefs = dbBinary.GetOperands().OfType<IDbSelectable>().Select(s => s.Ref);
                 foreach(var dbRef in dbRefs)
-                    SqlTranslationHelper.ProcessSelection(dbRef, _dbFactory);
+                    SqlTranslationHelper.UpdateJoinType(dbRef);
             }
 
             _state.ResultStack.Push(dbBinary);
             return b;
-        }
-    }
-
-    public class TranslationState
-    {
-        public Stack<IDbObject> ResultStack { get; } = new Stack<IDbObject>();
-
-        public Stack<Dictionary<ParameterExpression, DbReference>> ParamterStack { get; } =
-            new Stack<Dictionary<ParameterExpression, DbReference>>();
-
-        public Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> CreatedJoins { get; } =
-            new Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin>();
-
-        public IDbSelect GetLastSelect()
-        {
-            IDbSelect dbSelect = null;
-
-            var results = new Stack<IDbObject>();
-            while(ResultStack.Count > 0)
-            {
-                var dbObject = ResultStack.Pop();
-                results.Push(dbObject);
-
-                dbSelect = dbObject as IDbSelect;
-                if (dbSelect != null)
-                    break;
-            }
-
-            while(results.Count > 0)
-                ResultStack.Push(results.Pop());
-
-            return dbSelect;
-        }
-    }
-
-    public class UniqueNameGenerator
-    {
-        private readonly Dictionary<IDbSelect, Dictionary<string, int>> _uniqueAliasNames =
-            new Dictionary<IDbSelect, Dictionary<string, int>>();
-
-            private readonly Dictionary<string, int> _globalUniqueAliasNames =
-                new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
-
-        public string GenerateAlias(IDbSelect dbSelect, string name, bool fullName = false)
-        {
-            int count;
-            if (dbSelect == null)
-            {
-                count = _globalUniqueAliasNames.ContainsKey(name)
-                ? ++_globalUniqueAliasNames[name]
-                : _globalUniqueAliasNames[name] = 0;
-            }
-            else
-            {
-                var uniqueNames = _uniqueAliasNames.ContainsKey(dbSelect)
-                ? _uniqueAliasNames[dbSelect]
-                : _uniqueAliasNames[dbSelect] = new Dictionary<string, int>();
-
-                 count = uniqueNames.ContainsKey(name)
-                    ? ++uniqueNames[name]
-                    : uniqueNames[name] = 0;
-            }
-
-            return !fullName
-                ? $"{name.Substring(0, 1).ToLower()}{count}"
-                : $"{name}{count}";
-        }
-    }
-
-    public class TranslationPlugIns
-    {
-        private readonly Dictionary<string, AbstractMethodTranslator> _methodTranslators =
-            new Dictionary<string, AbstractMethodTranslator>(StringComparer.CurrentCultureIgnoreCase);
-
-        public void RegisterMethodTranslator(string methodName, AbstractMethodTranslator translator)
-        {
-            _methodTranslators[methodName] = translator;
-        }
-
-        internal bool TranslateMethodCall(
-            MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator)
-        {
-            var method = m.Method;
-            if (!_methodTranslators.ContainsKey(method.Name))
-                return false;
-
-            var translator = _methodTranslators[method.Name];
-            translator.Translate(m, state, nameGenerator);
-            return true;
         }
     }
 }

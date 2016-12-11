@@ -62,7 +62,7 @@ namespace EFSqlTranslator.Translation
 
         /// update all joins that are related to dbRef to be left outer join
         /// this is required by method such as Select or GroupBy 
-        public static void UpdateJoinType(DbReference dbRef)
+        public static void UpdateJoinType(DbReference dbRef, JoinType joinType = JoinType.LeftOuter)
         {
             var joins = dbRef?.OwnerSelect?.Joins.Where(j => ReferenceEquals(j.To, dbRef));
             if (joins == null)
@@ -70,7 +70,7 @@ namespace EFSqlTranslator.Translation
 
             foreach(var dbJoin in joins)
             {
-                dbJoin.Type = JoinType.LeftOuter;
+                dbJoin.Type = joinType;
                 var relatedRefs = dbJoin.Condition.GetOperands().
                     Select(op => (op as IDbSelectable)?.Ref).
                     Where(r => r != null && !ReferenceEquals(r, dbJoin.To));
@@ -177,6 +177,8 @@ namespace EFSqlTranslator.Translation
                     return "<";
                 case DbOperator.LessThanOrEqual:
                     return "<=";
+                case DbOperator.Like:
+                    return "like";
                 default:
                     throw new NotSupportedException(optr.ToString());
             }

@@ -9,6 +9,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         public DbOperator Operator { get; set; }
         public IDbObject Right { get; set; }
 
+        public bool UseParentheses { get; set; }
+
         public IDbObject[] GetOperands()
         {
             return new[] {Left, Right}.
@@ -23,7 +25,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             var right = Right.ToString();
             var optr = SqlTranslationHelper.GetSqlOperator(Operator);
 
-            return $"{left} {optr} {right}";
+            var result = $"{left} {optr} {right}";
+            return UseParentheses ? $"({result})" : result;
         }
     }
 }

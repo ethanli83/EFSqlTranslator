@@ -21,21 +21,20 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             if (childSelect == null)
             {
                 state.ResultStack.Push(dbFunc);
+                return;
             }
-            else
-            {
-                var alias = nameGenerator.GenerateAlias(dbSelect, dbFunc.Name, true);
-                dbFunc.Alias = alias;
-                childSelect.Selection.Add(dbFunc);
 
-                var cRef = dbSelect.Joins.Single(j => ReferenceEquals(j.To.Referee, childSelect)).To;
-                var column = _dbFactory.BuildColumn(cRef, alias, m.Method.ReturnType);
+            var alias = nameGenerator.GenerateAlias(dbSelect, dbFunc.Name, true);
+            dbFunc.Alias = alias;
+            childSelect.Selection.Add(dbFunc);
 
-                var dbDefaultVal = _dbFactory.BuildConstant(Activator.CreateInstance(m.Method.ReturnType));
-                var dbIsNullFunc = _dbFactory.BuildNullCheckFunc(column, dbDefaultVal);
+            var cRef = dbSelect.Joins.Single(j => ReferenceEquals(j.To.Referee, childSelect)).To;
+            var column = _dbFactory.BuildColumn(cRef, alias, m.Method.ReturnType);
 
-                state.ResultStack.Push(dbIsNullFunc);
-            }
+            var dbDefaultVal = _dbFactory.BuildConstant(Activator.CreateInstance(m.Method.ReturnType));
+            var dbIsNullFunc = _dbFactory.BuildNullCheckFunc(column, dbDefaultVal);
+
+            state.ResultStack.Push(dbIsNullFunc);
         }
     }
 }
