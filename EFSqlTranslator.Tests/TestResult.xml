@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<test-run id="0" testcasecount="28" total="28" passed="22" failed="6" inconclusive="0" skipped="0" asserts="24" result="Failed" portable-engine-version="3.3.0.0" start-time="2016-12-11 11:01:52Z" end-time="2016-12-11 11:01:54Z" duration="1.260601">
+  <test-run id="0" testcasecount="28" total="28" passed="22" failed="6" inconclusive="0" skipped="0" asserts="24" result="Failed" portable-engine-version="3.3.0.0" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:54Z" duration="1.146828">
+    <test-suite type="Assembly" id="1036" name="EFSqlTranslator.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" fullname="EFSqlTranslator.Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" runstate="Runnable" testcasecount="28" result="Failed" site="Child" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:54Z" duration="1.103394" total="28" passed="22" failed="6" inconclusive="0" skipped="0" asserts="24">
+      <settings>
+        <setting name="WorkDirectory" value="/Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Tests" />
+      </settings>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1037" name="EFSqlTranslator" fullname="EFSqlTranslator" runstate="Runnable" testcasecount="28" result="Failed" site="Child" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:54Z" duration="1.093896" total="28" passed="22" failed="6" inconclusive="0" skipped="0" asserts="24">
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1038" name="Tests" fullname="EFSqlTranslator.Tests" runstate="Runnable" testcasecount="28" result="Failed" site="Child" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:54Z" duration="1.093630" total="28" passed="22" failed="6" inconclusive="0" skipped="0" asserts="24">
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="1040" name="SqlObjectsTests" fullname="EFSqlTranslator.Tests.SqlObjectsTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:53Z" duration="0.066898" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="2">
+            <test-suite type="TestFixture" id="1034" name="SqlObjectsEqualtyTests" fullname="EFSqlTranslator.Tests.SqlObjectsTests.SqlObjectsEqualtyTests" classname="EFSqlTranslator.Tests.SqlObjectsTests.SqlObjectsEqualtyTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:53Z" duration="0.063039" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="2">
+              <test-case id="1035" name="Test_Column_Equals" fullname="EFSqlTranslator.Tests.SqlObjectsTests.SqlObjectsEqualtyTests.Test_Column_Equals" methodname="Test_Column_Equals" classname="EFSqlTranslator.Tests.SqlObjectsTests.SqlObjectsEqualtyTests" runstate="Runnable" seed="1768398184" result="Passed" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:53Z" duration="0.023204" asserts="2" />
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestSuite" id="1039" name="TranslatorTests" fullname="EFSqlTranslator.Tests.TranslatorTests" runstate="Runnable" testcasecount="27" result="Failed" site="Child" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:54Z" duration="1.026360" total="27" passed="21" failed="6" inconclusive="0" skipped="0" asserts="22">
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1000" name="AggregationTranslationTests" fullname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests" classname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests" runstate="Runnable" testcasecount="7" result="Failed" site="Child" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:54Z" duration="0.901706" total="7" passed="6" failed="1" inconclusive="0" skipped="0" asserts="7">
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1001" name="Test_Basic" fullname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests.Test_Basic" methodname="Test_Basic" classname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests" runstate="Runnable" seed="727147580" result="Passed" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:53Z" duration="0.783334" asserts="1" />
+              <test-case id="1002" name="Test_Basic_Expression" fullname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests.Test_Basic_Expression" methodname="Test_Basic_Expression" classname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests" runstate="Runnable" seed="1249302735" result="Passed" start-time="2016-12-11 11:01:53Z" end-time="2016-12-11 11:01:54Z" duration="0.042713" asserts="1" />
+              <test-case id="1003" name="Test_Basic_With_Condition" fullname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests.Test_Basic_With_Condition" methodname="Test_Basic_With_Condition" classname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests" runstate="Runnable" seed="980568526" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.007747" asserts="1" />
+              <test-case id="1006" name="Test_Group_On_Entity_With_Condition" fullname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests.Test_Group_On_Entity_With_Condition" methodname="Test_Group_On_Entity_With_Condition" classname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests" runstate="Runnable" seed="549658499" result="Failed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.042457" asserts="1">
+                <failure>
+                  <message><![CDATA[  Expected string length 531 but was 489. Strings differ at index 277.
+  Expected: "...ct c0.'BlogId' as 'BlogId_jk0', c0.'UserId' as 'UserId_jk0..."
+  But was:  "...ct c0.'BlogId' as 'BlogId_jk0' from Comments c0 group by c..."
+  --------------------------------------------^
+]]></message>
+                  <stack-trace><![CDATA[at EFSqlTranslator.Tests.TestUtils.AssertStringEqual(String expected, String actual) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Tests/TestUtils.cs:line 13
+at EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests.Test_Group_On_Entity_With_Condition() in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Tests/TranslatorTests/AggregationTranslationTests.cs:line 227
+]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1007" name="Test_GroupBy_On_Multiple_Entities2" fullname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests.Test_GroupBy_On_Multiple_Entities2" methodname="Test_GroupBy_On_Multiple_Entities2" classname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests" runstate="Runnable" seed="1535187397" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.009635" asserts="1" />
+              <test-case id="1004" name="Test_On_Child_Relation" fullname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests.Test_On_Child_Relation" methodname="Test_On_Child_Relation" classname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests" runstate="Runnable" seed="1176328358" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.004729" asserts="1" />
+              <test-case id="1005" name="Test_On_Children_With_Condition" fullname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests.Test_On_Children_With_Condition" methodname="Test_On_Children_With_Condition" classname="EFSqlTranslator.Tests.TranslatorTests.AggregationTranslationTests" runstate="Runnable" seed="1338993541" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.004242" asserts="1" />
+            </test-suite>
+            <test-suite type="TestFixture" id="1008" name="AnyTranslationTests" fullname="EFSqlTranslator.Tests.TranslatorTests.AnyTranslationTests" classname="EFSqlTranslator.Tests.TranslatorTests.AnyTranslationTests" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.015860" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0">
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1009" name="Test_Any_With_Predicate" fullname="EFSqlTranslator.Tests.TranslatorTests.AnyTranslationTests.Test_Any_With_Predicate" methodname="Test_Any_With_Predicate" classname="EFSqlTranslator.Tests.TranslatorTests.AnyTranslationTests" runstate="Runnable" seed="1164575427" result="Failed" label="Error" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.007670" asserts="0">
+                <failure>
+                  <message><![CDATA[System.InvalidCastException : Unable to cast object of type 'EFSqlTranslator.Translation.DbObjects.SqlObjects.SqlSelect' to type 'EFSqlTranslator.Translation.DbObjects.IDbRefColumn'.]]></message>
+                  <stack-trace><![CDATA[   at EFSqlTranslator.Translation.MethodTranslators.AnyTranslator.Translate(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/MethodTranslators/AnyTranslator.cs:line 27
+   at EFSqlTranslator.Translation.TranslationPlugIns.TranslateMethodCall(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/TranslationPlugIns.cs:line 26
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 399
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VisitLambda[T](Expression`1 l) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 443
+   at System.Linq.Expressions.Expression`1.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at System.Linq.Expressions.ExpressionVisitor.VisitUnary(UnaryExpression node)
+   at System.Linq.Expressions.UnaryExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VistMethodArguments(Expression[] args) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 411
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 397
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 60
+   at EFSqlTranslator.Tests.TranslatorTests.AnyTranslationTests.Test_Any_With_Predicate() in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Tests/TranslatorTests/AnyTranslationTests.cs:line 19]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1010" name="Test_Any_Without_Predicate" fullname="EFSqlTranslator.Tests.TranslatorTests.AnyTranslationTests.Test_Any_Without_Predicate" methodname="Test_Any_Without_Predicate" classname="EFSqlTranslator.Tests.TranslatorTests.AnyTranslationTests" runstate="Runnable" seed="2101356930" result="Failed" label="Error" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.003536" asserts="0">
+                <failure>
+                  <message><![CDATA[System.InvalidCastException : Unable to cast object of type 'EFSqlTranslator.Translation.DbObjects.SqlObjects.SqlSelect' to type 'EFSqlTranslator.Translation.DbObjects.IDbRefColumn'.]]></message>
+                  <stack-trace><![CDATA[   at EFSqlTranslator.Translation.MethodTranslators.AnyTranslator.Translate(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/MethodTranslators/AnyTranslator.cs:line 27
+   at EFSqlTranslator.Translation.TranslationPlugIns.TranslateMethodCall(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/TranslationPlugIns.cs:line 26
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 399
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VisitLambda[T](Expression`1 l) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 443
+   at System.Linq.Expressions.Expression`1.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at System.Linq.Expressions.ExpressionVisitor.VisitUnary(UnaryExpression node)
+   at System.Linq.Expressions.UnaryExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VistMethodArguments(Expression[] args) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 411
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 397
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 60
+   at EFSqlTranslator.Tests.TranslatorTests.AnyTranslationTests.Test_Any_Without_Predicate() in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Tests/TranslatorTests/AnyTranslationTests.cs:line 44]]></stack-trace>
+                </failure>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1011" name="BasicTranslationTests" fullname="EFSqlTranslator.Tests.TranslatorTests.BasicTranslationTests" classname="EFSqlTranslator.Tests.TranslatorTests.BasicTranslationTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.004959" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="2">
+              <test-case id="1012" name="Test_Translate_Filter_On_Simple_Column" fullname="EFSqlTranslator.Tests.TranslatorTests.BasicTranslationTests.Test_Translate_Filter_On_Simple_Column" methodname="Test_Translate_Filter_On_Simple_Column" classname="EFSqlTranslator.Tests.TranslatorTests.BasicTranslationTests" runstate="Runnable" seed="1990505573" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.002085" asserts="1" />
+              <test-case id="1013" name="Test_Ues_Left_Join_If_In_Or_Condition" fullname="EFSqlTranslator.Tests.TranslatorTests.BasicTranslationTests.Test_Ues_Left_Join_If_In_Or_Condition" methodname="Test_Ues_Left_Join_If_In_Or_Condition" classname="EFSqlTranslator.Tests.TranslatorTests.BasicTranslationTests" runstate="Runnable" seed="1200736507" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.001477" asserts="1" />
+            </test-suite>
+            <test-suite type="TestFixture" id="1014" name="GroupByTranslationTests" fullname="EFSqlTranslator.Tests.TranslatorTests.GroupByTranslationTests" classname="EFSqlTranslator.Tests.TranslatorTests.GroupByTranslationTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.020208" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="4">
+              <test-case id="1015" name="Test_GroupBy_On_Column" fullname="EFSqlTranslator.Tests.TranslatorTests.GroupByTranslationTests.Test_GroupBy_On_Column" methodname="Test_GroupBy_On_Column" classname="EFSqlTranslator.Tests.TranslatorTests.GroupByTranslationTests" runstate="Runnable" seed="836552304" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.002745" asserts="1" />
+              <test-case id="1017" name="Test_GroupBy_On_Entity" fullname="EFSqlTranslator.Tests.TranslatorTests.GroupByTranslationTests.Test_GroupBy_On_Entity" methodname="Test_GroupBy_On_Entity" classname="EFSqlTranslator.Tests.TranslatorTests.GroupByTranslationTests" runstate="Runnable" seed="1690967136" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.003812" asserts="1" />
+              <test-case id="1016" name="Test_GroupBy_On_Multiple_Columns" fullname="EFSqlTranslator.Tests.TranslatorTests.GroupByTranslationTests.Test_GroupBy_On_Multiple_Columns" methodname="Test_GroupBy_On_Multiple_Columns" classname="EFSqlTranslator.Tests.TranslatorTests.GroupByTranslationTests" runstate="Runnable" seed="385633649" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.005646" asserts="1" />
+              <test-case id="1018" name="Test_GroupBy_On_Multiple_Entities" fullname="EFSqlTranslator.Tests.TranslatorTests.GroupByTranslationTests.Test_GroupBy_On_Multiple_Entities" methodname="Test_GroupBy_On_Multiple_Entities" classname="EFSqlTranslator.Tests.TranslatorTests.GroupByTranslationTests" runstate="Runnable" seed="1518468508" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.005170" asserts="1" />
+            </test-suite>
+            <test-suite type="TestFixture" id="1019" name="ManualTranslationTests" fullname="EFSqlTranslator.Tests.TranslatorTests.ManualTranslationTests" classname="EFSqlTranslator.Tests.TranslatorTests.ManualTranslationTests" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.011186" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1020" name="Test_Translate_Join_Select_Columns" fullname="EFSqlTranslator.Tests.TranslatorTests.ManualTranslationTests.Test_Translate_Join_Select_Columns" methodname="Test_Translate_Join_Select_Columns" classname="EFSqlTranslator.Tests.TranslatorTests.ManualTranslationTests" runstate="Runnable" seed="2046566762" result="Failed" label="Error" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.008168" asserts="0">
+                <failure>
+                  <message><![CDATA[System.InvalidCastException : Unable to cast object of type 'EFSqlTranslator.Translation.DbObjects.SqlObjects.SqlSelect' to type 'EFSqlTranslator.Translation.DbObjects.IDbRefColumn'.]]></message>
+                  <stack-trace><![CDATA[   at EFSqlTranslator.Translation.MethodTranslators.AnyTranslator.Translate(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/MethodTranslators/AnyTranslator.cs:line 27
+   at EFSqlTranslator.Translation.TranslationPlugIns.TranslateMethodCall(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/TranslationPlugIns.cs:line 26
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 399
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VisitLambda[T](Expression`1 l) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 443
+   at System.Linq.Expressions.Expression`1.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at System.Linq.Expressions.ExpressionVisitor.VisitUnary(UnaryExpression node)
+   at System.Linq.Expressions.UnaryExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VistMethodArguments(Expression[] args) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 411
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 397
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VistMethodArguments(Expression[] args) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 411
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 397
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 60
+   at EFSqlTranslator.Tests.TranslatorTests.ManualTranslationTests.Test_Translate_Join_Select_Columns() in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Tests/TranslatorTests/ManualJoinTranslationTests.cs:line 37]]></stack-trace>
+                </failure>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1021" name="RelationTranslationTests" fullname="EFSqlTranslator.Tests.TranslatorTests.RelationTranslationTests" classname="EFSqlTranslator.Tests.TranslatorTests.RelationTranslationTests" runstate="Runnable" testcasecount="3" result="Failed" site="Child" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.017218" total="3" passed="1" failed="2" inconclusive="0" skipped="0" asserts="1">
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1023" name="Test_Translate_Filter_On_Child_Relation" fullname="EFSqlTranslator.Tests.TranslatorTests.RelationTranslationTests.Test_Translate_Filter_On_Child_Relation" methodname="Test_Translate_Filter_On_Child_Relation" classname="EFSqlTranslator.Tests.TranslatorTests.RelationTranslationTests" runstate="Runnable" seed="1848356889" result="Failed" label="Error" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.006268" asserts="0">
+                <failure>
+                  <message><![CDATA[System.InvalidCastException : Unable to cast object of type 'EFSqlTranslator.Translation.DbObjects.SqlObjects.SqlSelect' to type 'EFSqlTranslator.Translation.DbObjects.IDbRefColumn'.]]></message>
+                  <stack-trace><![CDATA[   at EFSqlTranslator.Translation.MethodTranslators.AnyTranslator.Translate(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/MethodTranslators/AnyTranslator.cs:line 27
+   at EFSqlTranslator.Translation.TranslationPlugIns.TranslateMethodCall(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/TranslationPlugIns.cs:line 26
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 399
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VisitLambda[T](Expression`1 l) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 443
+   at System.Linq.Expressions.Expression`1.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at System.Linq.Expressions.ExpressionVisitor.VisitUnary(UnaryExpression node)
+   at System.Linq.Expressions.UnaryExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VistMethodArguments(Expression[] args) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 411
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 397
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 60
+   at EFSqlTranslator.Tests.TranslatorTests.RelationTranslationTests.Test_Translate_Filter_On_Child_Relation() in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Tests/TranslatorTests/RelationTranslationTests.cs:line 58]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1024" name="Test_Translate_Filter_On_Multi_Level_Relation" fullname="EFSqlTranslator.Tests.TranslatorTests.RelationTranslationTests.Test_Translate_Filter_On_Multi_Level_Relation" methodname="Test_Translate_Filter_On_Multi_Level_Relation" classname="EFSqlTranslator.Tests.TranslatorTests.RelationTranslationTests" runstate="Runnable" seed="877679342" result="Failed" label="Error" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.003986" asserts="0">
+                <failure>
+                  <message><![CDATA[System.InvalidCastException : Unable to cast object of type 'EFSqlTranslator.Translation.DbObjects.SqlObjects.SqlSelect' to type 'EFSqlTranslator.Translation.DbObjects.IDbRefColumn'.]]></message>
+                  <stack-trace><![CDATA[   at EFSqlTranslator.Translation.MethodTranslators.AnyTranslator.Translate(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/MethodTranslators/AnyTranslator.cs:line 27
+   at EFSqlTranslator.Translation.TranslationPlugIns.TranslateMethodCall(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/TranslationPlugIns.cs:line 26
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 399
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VisitLambda[T](Expression`1 l) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 443
+   at System.Linq.Expressions.Expression`1.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at System.Linq.Expressions.ExpressionVisitor.VisitUnary(UnaryExpression node)
+   at System.Linq.Expressions.UnaryExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.VistMethodArguments(Expression[] args) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 411
+   at EFSqlTranslator.Translation.LinqTranslator.VisitMethodCall(MethodCallExpression m) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 397
+   at System.Linq.Expressions.MethodCallExpression.Accept(ExpressionVisitor visitor)
+   at System.Linq.Expressions.ExpressionVisitor.Visit(Expression node)
+   at EFSqlTranslator.Translation.LinqTranslator.Visit(Expression e) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 83
+   at EFSqlTranslator.Translation.LinqTranslator.Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Translation/LinqTranslator.cs:line 60
+   at EFSqlTranslator.Tests.TranslatorTests.RelationTranslationTests.Test_Translate_Filter_On_Multi_Level_Relation() in /Users/ethanli/Projects/EFSqlTranslator/EFSqlTranslator.Tests/TranslatorTests/RelationTranslationTests.cs:line 87]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1022" name="Test_Translate_Filter_On_Parent_Relation" fullname="EFSqlTranslator.Tests.TranslatorTests.RelationTranslationTests.Test_Translate_Filter_On_Parent_Relation" methodname="Test_Translate_Filter_On_Parent_Relation" classname="EFSqlTranslator.Tests.TranslatorTests.RelationTranslationTests" runstate="Runnable" seed="2072807805" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.001413" asserts="1" />
+            </test-suite>
+            <test-suite type="TestFixture" id="1025" name="SelectTranslationTests" fullname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests" classname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.052783" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="8">
+              <test-case id="1030" name="Test_Multiple_Select_Calls" fullname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests.Test_Multiple_Select_Calls" methodname="Test_Multiple_Select_Calls" classname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests" runstate="Runnable" seed="1783906039" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.005230" asserts="1" />
+              <test-case id="1033" name="Test_Multiple_Select_Calls_After_Grouping" fullname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests.Test_Multiple_Select_Calls_After_Grouping" methodname="Test_Multiple_Select_Calls_After_Grouping" classname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests" runstate="Runnable" seed="2080542770" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.011386" asserts="1" />
+              <test-case id="1031" name="Test_Multiple_Select_Calls1" fullname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests.Test_Multiple_Select_Calls1" methodname="Test_Multiple_Select_Calls1" classname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests" runstate="Runnable" seed="88992598" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.011539" asserts="1" />
+              <test-case id="1032" name="Test_Multiple_Select_Calls2" fullname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests.Test_Multiple_Select_Calls2" methodname="Test_Multiple_Select_Calls2" classname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests" runstate="Runnable" seed="743700446" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.005406" asserts="1" />
+              <test-case id="1029" name="Test_Select_Ref_And_Columns" fullname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests.Test_Select_Ref_And_Columns" methodname="Test_Select_Ref_And_Columns" classname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests" runstate="Runnable" seed="2129229077" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.002944" asserts="1" />
+              <test-case id="1026" name="Test_Translate_Select_Columns" fullname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests.Test_Translate_Select_Columns" methodname="Test_Translate_Select_Columns" classname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests" runstate="Runnable" seed="1643658151" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.003213" asserts="1" />
+              <test-case id="1028" name="Test_Translate_Select_Columns_With_Expressions" fullname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests.Test_Translate_Select_Columns_With_Expressions" methodname="Test_Translate_Select_Columns_With_Expressions" classname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests" runstate="Runnable" seed="1899967662" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.003834" asserts="1" />
+              <test-case id="1027" name="Test_Translate_Select_Columns_With_Relations" fullname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests.Test_Translate_Select_Columns_With_Relations" methodname="Test_Translate_Select_Columns_With_Relations" classname="EFSqlTranslator.Tests.TranslatorTests.SelectTranslationTests" runstate="Runnable" seed="1548029471" result="Passed" start-time="2016-12-11 11:01:54Z" end-time="2016-12-11 11:01:54Z" duration="0.003521" asserts="1" />
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-run>
+</test-run>

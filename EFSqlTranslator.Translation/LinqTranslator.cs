@@ -238,14 +238,17 @@ namespace EFSqlTranslator.Translation
 
                 if (refCol != null)
                 {
-                    var newRefCol = _dbFactory.BuildRefColumn(dbJoin.To, m.Member.Name);
-                    _state.ResultStack.Push(newRefCol);
-                }
-                else if(relation.IsChildRelation)
-                    _state.ResultStack.Push(dbJoin.To.Referee);
-                else
-                    _state.ResultStack.Push(dbJoin.To);
+                    refCol = _dbFactory.BuildRefColumn(dbJoin.To, m.Member.Name);
 
+                    var subSelect = dbJoin.To.Referee as IDbSelect;
+                    if (subSelect != null)
+                        refCol.RefTo = subSelect.Selection.OfType<IDbRefColumn>().Single();
+
+                    _state.ResultStack.Push(refCol);
+                    return m;
+                }
+
+                _state.ResultStack.Push(relation.IsChildRelation ? dbJoin.To.Referee : dbJoin.To);
                 return m;
             }
 
@@ -342,6 +345,7 @@ namespace EFSqlTranslator.Translation
                      * from the entity is used in relation, so they will not be able to create
                      * the correct column
                      */
+                    childSelect.Selection.Add(_dbFactory.BuildRefColumn(childRef));
                     childSelect.Selection.Add(childColumn);
                     childSelect.GroupBys.Add(childColumn);
 

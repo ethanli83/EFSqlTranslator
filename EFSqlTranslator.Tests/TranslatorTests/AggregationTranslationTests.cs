@@ -216,9 +216,9 @@ from Posts p0
 left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
 left outer join Users u0 on b0.'UserId' = u0.'UserId'
 left outer join (
-    select c0.'BlogId' as 'BlogId_jk0', sq0.'UserId' as 'UserId_jk0'
+    select c0.'BlogId' as 'BlogId_jk0', c0.'UserId' as 'UserId_jk0'
     from Comments c0
-    group by c0.'BlogId', sq0.'UserId'
+    group by c0.'BlogId', c0.'UserId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
 left outer join Users u1 on sq0.'UserId_jk0' = u1.'UserId'
 where p0.'Content' is not null
