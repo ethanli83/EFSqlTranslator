@@ -10,7 +10,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
     [TestFixture]
     [CategoryReadMe(
          Index = 5,
-         Title = "Translating Manual J
+         Title = "Translating Manual Join",
          Description = @"
 This libary supports more complicated join. You can define your own join condition rather than
 have to be limited to column pairs."
