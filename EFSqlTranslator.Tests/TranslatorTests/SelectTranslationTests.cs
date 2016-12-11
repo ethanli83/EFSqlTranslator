@@ -181,8 +181,7 @@ where p0.'Content' is not null";
         }
 
         [Test]
-        public void
-            Test_Multiple_Select_Calls2()
+        public void Test_Multiple_Select_Calls2()
         {
             using (var db = new TestingContext())
             {

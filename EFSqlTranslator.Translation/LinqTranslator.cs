@@ -349,25 +349,27 @@ namespace EFSqlTranslator.Translation
                     toColumn.Alias = string.Empty;
                 }
 
-                // if the relation is found on a ref column, which means the from key of the
-                // join is not on a table but a derived select. In this case, we need to add
-                // the from key into the derived select, as we will be using it in the join
-                if (fromRef.Referee is IDbSelect || refCol?.RefTo != null)
+                // if the relation is found on a fromRef which is referring a sub-select,
+                // it means the from key of the join is not on a table but a derived select.
+                // In this case, we need to add the from key into the derived select, as we will
+                // be using it in the join
+                var fromSelect = fromRef.Referee as IDbSelect;
+                if (fromSelect != null)
                 {
                     var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
                     fromColumn.Name = alias;
                     fromColumn.Alias = string.Empty;
 
-                    if (refCol?.RefTo != null)
+                    // if the query refered by fromRef is not the same as the query referred by refCol
+                    // we need to add the join key on the select that referred by fromRef
+                    if (!ReferenceEquals(refCol.Ref, fromRef))
                     {
-                        refCol.RefTo?.AddToReferedSelect(_dbFactory, fromKey.Name, fromKey.ValType, alias);
-                    }
-                    else if (refCol != null)
-                    {
-                        var fromSelect = (IDbSelect)fromRef.Referee;
                         var keyColumn = _dbFactory.BuildColumn(refCol.Ref, fromKey.Name, fromKey.ValType, alias);
                         fromSelect.Selection.Add(keyColumn);
                     }
+
+                    // try to recursively add the join key to all connected sub select.
+                    refCol.RefTo?.AddToReferedSelect(_dbFactory, fromKey.Name, fromKey.ValType, alias);
                 }
 
                 var binary = _dbFactory.BuildBinary(fromColumn, DbOperator.Equal, toColumn);
