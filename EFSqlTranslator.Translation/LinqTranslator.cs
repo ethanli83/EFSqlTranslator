@@ -364,14 +364,6 @@ namespace EFSqlTranslator.Translation
                     fromColumn.Name = alias;
                     fromColumn.Alias = string.Empty;
 
-                    // if the query refered by fromRef is not the same as the query referred by refCol
-                    // we need to add the join key on the select that referred by fromRef
-                    if (!ReferenceEquals(refCol.Ref, fromRef))
-                    {
-                        var keyColumn = _dbFactory.BuildColumn(refCol.Ref, fromKey.Name, fromKey.ValType, alias);
-                        fromSelect.Selection.Add(keyColumn);
-                    }
-
                     // try to recursively add the join key to all connected sub select.
                     refCol.RefTo?.AddToReferedSelect(_dbFactory, fromKey.Name, fromKey.ValType, alias);
                 }
