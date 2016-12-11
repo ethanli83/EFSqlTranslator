@@ -9,7 +9,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
     [TestFixture]
     [CategoryReadMe(
          Index = 4,
-         Title = "Translating aggregtions",
+         Title = "Translating Aggregtaions",
          Description = @"
 In this section, we will give you several examples to show how the aggregation is translated.
 We will also demostrate few powerful aggregations that you can do with this libary."

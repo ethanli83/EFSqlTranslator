@@ -11,7 +11,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
     [TestFixture]
     [CategoryReadMe(
          Index = 2,
-         Title = "Translating selection",
+         Title = "Translating Select",
          Description = @"
 In this section, we will show you multiple ways to select data. You can basically:
   1. Make an anonymous object by selecting columns from different table.

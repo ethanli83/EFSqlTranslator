@@ -9,7 +9,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
     [TestFixture]
     [CategoryReadMe(
          Index = 3,
-         Title = "Translation of Group By",
+         Title = "Translating GroupBy",
          Description = @"
 Grouping is always used along with aggregations. In this section, we will demostrate number of
 ways that you can group your data. In the next section, you will then see how the group by works

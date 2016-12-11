@@ -10,7 +10,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
     [TestFixture]
     [CategoryReadMe(
          Index = 1,
-         Title = "Translating relationsheips",
+         Title = "Translating Relationsheips",
          Description = @"
 In this section, we will show you how relationships are translated. The basic rules are:
   1. All relations is translated into a inner join be default.
