@@ -2,6 +2,7 @@ using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects;
+using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using NUnit.Framework;
 
@@ -34,7 +35,7 @@ have to be limited to column pairs."
                         (p, b) => new { PId = p.PostId, b.Name },
                         JoinType.LeftOuter);
 
-                var script = LinqTranslator.Translate(query1.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var script = LinqTranslator.Translate(query1.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

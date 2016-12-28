@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
+using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using NUnit.Framework;
 
@@ -31,7 +32,7 @@ with aggregation methods."
                     GroupBy(p => p.BlogId).
                     Select(g => new { g.Key });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -58,7 +59,7 @@ group by p0.'BlogId'";
                     GroupBy(p => new { p.Blog.Url, p.User.UserName }).
                     Select(g => new { g.Key.Url, g.Key.UserName });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -89,7 +90,7 @@ This feature allows developers to write sophisticated aggregtion in a much simpl
                     GroupBy(p => new { p.Blog }).
                     Select(g => new { g.Key.Blog.User.UserId });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -119,7 +120,7 @@ group by b0.'BlogId', u0.'UserId'";
                     GroupBy(x => new { x.Blog }).
                     Select(x => new { x.Key.Blog.Url, x.Key.Blog.User.UserName });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

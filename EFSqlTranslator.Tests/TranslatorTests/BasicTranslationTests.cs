@@ -1,6 +1,7 @@
 using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
+using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using NUnit.Framework;
 
@@ -25,7 +26,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
                 var query = db.Blogs.
                     Where(b => b.Url != null && b.Name.StartsWith("Ethan") && (b.UserId > 1 || b.UserId < 100));
                 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
                 
                 const string expected = @"
@@ -45,7 +46,7 @@ where ((b0.'Url' is not null) and (b0.'Name' like '%Ethan')) and ((b0.'UserId' >
                 var query = db.Posts.
                 Where(p => p.User.UserName != null || p.Content != null);
                 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
                 
                 const string expected = @"

@@ -39,7 +39,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             return BuildColumn(dbRef, colName, BuildType(type), alias, isJoinKey);
         }
 
-        public IDbColumn BuildColumn(
+        public virtual IDbColumn BuildColumn(
             DbReference dbRef, string colName, DbType type, string alias = null, bool isJoinKey = false)
         {
             return new SqlColumn
@@ -59,7 +59,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 Name = column.Name,
                 Ref = column.Ref,
                 ValType = BuildType(column.ValType.DotNetType),
-                Alias = column.Alias
+                Alias = column.Alias,
+                Quote = column.Quote
             };
         }
 
