@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
@@ -211,6 +212,12 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
     {
         public string Convert(Type type)
         {
+            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                var gType = type.GenericTypeArguments.Single();
+                return Convert(gType);
+            }
+
             if (type == typeof(int))
                 return "int";
 
