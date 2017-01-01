@@ -58,5 +58,23 @@ where (u0.'UserName' is not null) or (p0.'Content' is not null)";
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
+
+        [Test]
+        public void Test_Nullable_Value_In_Condition()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs.
+                    Where(b => b.CommentCount > 10);
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select b0.* from Blogs b0 where b0.'CommentCount' > 10";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
     }
 }

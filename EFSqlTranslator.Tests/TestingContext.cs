@@ -30,6 +30,8 @@ namespace EFSqlTranslator.Tests
         public string Name { get; set; }
         
         public int UserId { get; set; }
+
+        public int? CommentCount { get; set; }
         
         public User User { get; set; }
         
