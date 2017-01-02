@@ -12,6 +12,12 @@ namespace EFSqlTranslator.Translation
             return column != null ?  column.Alias ?? column.Name : selectable.Alias;
         }
 
+        public static string GetNameOrAlias(this IDbSelectable selectable)
+        {
+            var column = selectable as IDbColumn;
+            return column?.Name ?? selectable?.Alias;
+        }
+
         /// <summary>
         /// Gets all primary keys from referenced tables. This function also
         /// recursively go throught all its RefTo ref columns. It is because the actual

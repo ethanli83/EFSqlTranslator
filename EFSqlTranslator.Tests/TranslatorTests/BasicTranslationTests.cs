@@ -76,5 +76,25 @@ select b0.* from Blogs b0 where b0.'CommentCount' > 10";
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
+
+        [Test]
+        public void Test_Query_Unwrapping()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs.
+                    Where(b => b.CommentCount > 10).
+                    Select(b => new { KKK = b.BlogId }).
+                    Select(b => new { K = b.KKK });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select b0.'BlogId' as 'K' from Blogs b0 where b0.'CommentCount' > 10";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
     }
 }

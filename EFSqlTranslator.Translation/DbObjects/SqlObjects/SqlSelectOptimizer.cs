@@ -24,7 +24,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 unwrapedSelect.Selection.Clear();
                 foreach (var selectable in dbSelect.Selection)
                 {
-                    var innnerCol = colDict[selectable.GetAliasOrName()];
+                    var innnerCol = colDict[selectable.GetNameOrAlias()];
+                    innnerCol.Alias = selectable.GetAliasOrName();
                     unwrapedSelect.Selection.Add(innnerCol);
                 }
 
