@@ -1,6 +1,8 @@
 # EFSqlTranslator [![Build Status](https://travis-ci.org/ethanli83/EFSqlTranslator.svg?branch=master)](https://travis-ci.org/ethanli83/EFSqlTranslator)
 
 A standalone linq to sql translator that can be used with EF and Dapper.
+
+You can now try the translator out on http://linqrunner.daydreamer.io/.
 ## I. Basic Translation
 This section demostrates how the basic linq expression is translated into sql.
 ### 1. Basic filtering on column values in where clause
