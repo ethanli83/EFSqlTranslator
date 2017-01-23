@@ -1,5 +1,5 @@
-<img src="https://github.com/ethanli83/LinqRunner/blob/master/LinqRunner.Client/src/img/Butterfly.png" align="left" height="40" width="40"/>
-# EFSqlTranslator [![Build Status](https://travis-ci.org/ethanli83/EFSqlTranslator.svg?branch=master)](https://travis-ci.org/ethanli83/EFSqlTranslator)
+
+# <img src="https://github.com/ethanli83/LinqRunner/blob/master/LinqRunner.Client/src/img/Butterfly.png" align="left" height="40" width="40"/>EFSqlTranslator [![Build Status](https://travis-ci.org/ethanli83/EFSqlTranslator.svg?branch=master)](https://travis-ci.org/ethanli83/EFSqlTranslator)
 
 A standalone linq to sql translator that can be used with EF and Dapper.
 
