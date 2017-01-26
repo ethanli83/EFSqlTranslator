@@ -287,7 +287,7 @@ namespace EFSqlTranslator.Translation
             var dbSelect = fromRef.OwnerSelect;
             var tupleKey = Tuple.Create(dbSelect, relation);
 
-            if (_state.CreatedJoins.ContainsKey(tupleKey))
+            if (!relation.IsChildRelation && _state.CreatedJoins.ContainsKey(tupleKey))
                 return _state.CreatedJoins[tupleKey];
 
             var toEntity = relation.ToEntity;
