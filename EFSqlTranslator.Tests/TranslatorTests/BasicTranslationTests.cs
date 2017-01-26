@@ -9,26 +9,28 @@ namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
     [CategoryReadMe(
-         Index = 0,
-         Title = @"Basic Translation",
-         Description = @"This section demostrates how the basic linq expression is translated into sql."
-     )]
+        Index = 0,
+        Title = @"Basic Translation",
+        Description = @"This section demostrates how the basic linq expression is translated into sql."
+    )]
     public class BasicTranslationTests
     {
         [Test]
         [TranslationReadMe(
-             Index = 0,
-             Title = "Basic filtering on column values in where clause")]
-        public void Test_Translate_Filter_On_Simple_Column() 
+            Index = 0,
+            Title = "Basic filtering on column values in where clause")]
+        public void Test_Translate_Filter_On_Simple_Column()
         {
             using (var db = new TestingContext())
             {
-                var query = db.Blogs.
-                    Where(b => b.Url != null && b.Name.StartsWith("Ethan") && (b.UserId > 1 || b.UserId < 100));
-                
+                var query = db.Blogs
+                    .Where(b => b.Url != null &&
+                                b.Name.StartsWith("Ethan") &&
+                                (b.UserId > 1 || b.UserId < 100));
+
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
-                
+
                 const string expected = @"
 select b0.*
 from Blogs b0
@@ -43,12 +45,11 @@ where ((b0.'Url' is not null) and (b0.'Name' like '%Ethan')) and ((b0.'UserId' >
         {
             using (var db = new TestingContext())
             {
-                var query = db.Posts.
-                Where(p => p.User.UserName != null || p.Content != null);
-                
+                var query = db.Posts.Where(p => p.User.UserName != null || p.Content != null);
+
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
-                
+
                 const string expected = @"
 select p0.*
 from Posts p0
@@ -64,8 +65,7 @@ where (u0.'UserName' is not null) or (p0.'Content' is not null)";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Blogs.
-                    Where(b => b.CommentCount > 10);
+                var query = db.Blogs.Where(b => b.CommentCount > 10);
 
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
@@ -82,10 +82,9 @@ select b0.* from Blogs b0 where b0.'CommentCount' > 10";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Blogs.
-                    Where(b => b.CommentCount > 10).
-                    Select(b => new { KKK = b.BlogId }).
-                    Select(b => new { K = b.KKK });
+                var query = db.Blogs.Where(b => b.CommentCount > 10)
+                    .Select(b => new {KKK = b.BlogId})
+                    .Select(b => new {K = b.KKK});
 
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
@@ -94,6 +93,24 @@ select b0.* from Blogs b0 where b0.'CommentCount' > 10";
 select b0.'BlogId' as 'K' from Blogs b0 where b0.'CommentCount' > 10";
 
                 TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Test]
+        public void Test_Query_Unwrapping2()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs.Select(b => b);
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select b0.* from Blogs b0";
+
+                TestUtils.AssertStringEqual(expected, sql);
+
             }
         }
     }

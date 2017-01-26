@@ -26,10 +26,11 @@ namespace EFSqlTranslator.ReadmeGen
             QueryableNameRegex = new Regex($@"^{Regex.Escape(queryableType.FullName)}\[{Regex.Escape(contextNamespace)}\.(\w+)\]");
         }
 
-        private const string Beginning =
-            @"# EFSqlTranslator [![Build Status](https://travis-ci.org/ethanli83/EFSqlTranslator.svg?branch=master)](https://travis-ci.org/ethanli83/EFSqlTranslator)
+        private const string Beginning = @"# <img src=""https://github.com/ethanli83/LinqRunner/blob/master/LinqRunner.Client/src/img/Butterfly.png"" align=""left"" height=""40"" width=""40""/>EFSqlTranslator [![Build Status](https://travis-ci.org/ethanli83/EFSqlTranslator.svg?branch=master)](https://travis-ci.org/ethanli83/EFSqlTranslator)
 
-A standalone linq to sql translator that can be used with EF and Dapper.";
+A standalone linq to sql translator that can be used with EF and Dapper.
+
+You can now try the translator out on http://linqrunner.daydreamer.io/.";
 
         public static void Main(string[] args)
         {

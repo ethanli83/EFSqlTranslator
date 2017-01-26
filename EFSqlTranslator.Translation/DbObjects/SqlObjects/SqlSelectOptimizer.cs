@@ -19,12 +19,18 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 }
 
                 // re add columns with outer select's order
-                var colDict = unwrapedSelect.Selection.ToDictionary(s => s.GetAliasOrName(), s => s);
+                // there are two ways to lookup the selectable in the unwraped select
+                // for normally column, we can use the name the column to search aginst the
+                // alais name in the unwrapped select
+                // for RefColumn, we can use the RefTo property to look for the column it refers to
+                var colDict = unwrapedSelect.Selection.
+                    Where(s => s.GetAliasOrName() != null).
+                    ToDictionary(s => s.GetAliasOrName(), s => s);
 
                 unwrapedSelect.Selection.Clear();
                 foreach (var selectable in dbSelect.Selection)
                 {
-                    var innnerCol = colDict[selectable.GetNameOrAlias()];
+                    var innnerCol = (selectable as IDbRefColumn)?.RefTo ?? colDict[selectable.GetNameOrAlias()];
                     innnerCol.Alias = selectable.GetAliasOrName();
                     unwrapedSelect.Selection.Add(innnerCol);
                 }

@@ -36,7 +36,7 @@ namespace EFSqlTranslator.ReadmeGen
             writer.WriteLine($"```sql\n-- Transalted Sql:\n{desc}{Sql.Trim()}\n```");
         }
 
-        private string GetComments(string desc, string commentPrefix)
+        private static string GetComments(string desc, string commentPrefix)
         {
             if (string.IsNullOrEmpty(desc))
                 return desc;
