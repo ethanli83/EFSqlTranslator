@@ -47,6 +47,8 @@ namespace EFSqlTranslator.Tests
         public string Title { get; set; }
         
         public string Content { get; set; }
+
+        public int LikeCount { get; set; }
         
         public int BlogId { get; set; }
 

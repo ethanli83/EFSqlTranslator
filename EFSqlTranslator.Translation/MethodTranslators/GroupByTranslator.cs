@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects;
 
@@ -42,6 +43,16 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 }
                 
                 dbSelect.GroupBys.Add(selectable);
+            }
+
+            // if the group by is a single expression like groupby(x => x.Children.Count())
+            // it will be translated into a expression and will not have alias
+            // in this case, we will need to give it an alias which will be used later
+            if (groupBys.IsSingleKey)
+            {
+                var column = groupBys.Single();
+                if (column.Alias == null)
+                    column.Alias = "Key";
             }
 
             state.ResultStack.Push(dbSelect);

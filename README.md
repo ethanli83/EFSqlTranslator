@@ -1,4 +1,3 @@
-
 # <img src="https://github.com/ethanli83/LinqRunner/blob/master/LinqRunner.Client/src/img/Butterfly.png" align="left" height="40" width="40"/>EFSqlTranslator [![Build Status](https://travis-ci.org/ethanli83/EFSqlTranslator.svg?branch=master)](https://travis-ci.org/ethanli83/EFSqlTranslator)
 
 A standalone linq to sql translator that can be used with EF and Dapper.
@@ -218,6 +217,27 @@ from (
 left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'
 group by sq0.'BlogId', sq0.'Url', u0.'UserName'
 ```
+
+### 5. Group On Aggregation
+```csharp
+// Linq expression:
+db.Blogs
+    .Where(b => b.Url != null)
+    .GroupBy(b => new { Cnt = b.Posts.Count(), Avg = b.Posts.Average(p => p.LikeCount) })
+    .Select(x => new { Cnt = x.Key.Cnt, Avg = x.Key.Avg, CommentCount = x.Sum(b => b.CommentCount) })
+```
+```sql
+-- Transalted Sql:
+select ifnull(sq0.'count0', 0) as Cnt, ifnull(sq0.'avg0', 0) as Avg, sum(b0.'CommentCount') as CommentCount
+from Blogs b0
+left outer join (
+    select p0.'BlogId' as 'BlogId_jk0', count(1) as count0, avg(p0.'LikeCount') as avg0
+    from Posts p0
+    group by p0.'BlogId'
+) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
+where b0.'Url' is not null
+group by ifnull(sq0.'count0', 0), ifnull(sq0.'avg0', 0)
+```
 ## V. Translating Aggregtaions
 In this section, we will give you several examples to show how the aggregation is translated.
 We will also demostrate few powerful aggregations that you can do with this libary.
@@ -286,7 +306,7 @@ db.Blogs.Where(b => b.Url != null).Select(b => new { Name = b.Name, cnt = b.Post
 ```
 ```sql
 -- Transalted Sql:
-select b0.'Name', isnull(sq0.'sum0', 0) as cnt
+select b0.'Name', ifnull(sq0.'sum0', 0) as cnt
 from Blogs b0
 left outer join (
     select p0.'BlogId' as 'BlogId_jk0', sum(p0.'PostId') as sum0

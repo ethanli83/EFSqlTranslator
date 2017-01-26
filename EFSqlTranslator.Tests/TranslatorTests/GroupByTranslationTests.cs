@@ -2,7 +2,6 @@
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using NUnit.Framework;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
@@ -134,6 +133,94 @@ from (
 ) sq0
 left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'
 group by sq0.'BlogId', sq0.'Url', u0.'UserName'";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Test]
+        public void Test_GroupBy_On_Aggregation()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs.
+                    Where(b => b.Url != null).
+                    GroupBy(b => new { Cnt = b.Posts.Count() }).
+                    Select(x => new { x.Key.Cnt });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select ifnull(sq0.'count0', 0) as Cnt
+from Blogs b0
+left outer join (
+    select p0.'BlogId' as 'BlogId_jk0', count(1) as count0
+    from Posts p0
+    group by p0.'BlogId'
+) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
+where b0.'Url' is not null
+group by ifnull(sq0.'count0', 0)";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Test]
+        public void Test_GroupBy_On_Aggregation2()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs.
+                    Where(b => b.Url != null).
+                    GroupBy(b => b.Posts.Count()).
+                    Select(x => new { x.Key, Sum = x.Sum(b => b.CommentCount) });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select ifnull(sq0.'count0', 0) as Key, sum(b0.'CommentCount') as Sum
+from Blogs b0
+left outer join (
+    select p0.'BlogId' as 'BlogId_jk0', count(1) as count0
+    from Posts p0
+    group by p0.'BlogId'
+) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
+where b0.'Url' is not null
+group by ifnull(sq0.'count0', 0)";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Test]
+        [TranslationReadMe(
+            Index = 4,
+            Title = "Group On Aggregation"
+        )]
+        public void Test_GroupBy_On_Aggregation3()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs.
+                    Where(b => b.Url != null).
+                    GroupBy(b => new { Cnt = b.Posts.Count(), Avg = b.Posts.Average(p => p.LikeCount) }).
+                    Select(x => new { x.Key.Cnt, x.Key.Avg, CommentCount = x.Sum(b => b.CommentCount) });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select ifnull(sq0.'count0', 0) as Cnt, ifnull(sq0.'avg0', 0) as Avg, sum(b0.'CommentCount') as CommentCount
+from Blogs b0
+left outer join (
+    select p0.'BlogId' as 'BlogId_jk0', count(1) as count0, avg(p0.'LikeCount') as avg0
+    from Posts p0
+    group by p0.'BlogId'
+) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
+where b0.'Url' is not null
+group by ifnull(sq0.'count0', 0), ifnull(sq0.'avg0', 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

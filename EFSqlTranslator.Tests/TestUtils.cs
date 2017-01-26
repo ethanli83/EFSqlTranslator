@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 
@@ -8,6 +9,8 @@ namespace EFSqlTranslator.Tests
     {
         public static void AssertStringEqual(string expected, string actual)
         {
+            Console.WriteLine(actual);
+
             expected = Regex.Replace(expected, @"[\n\r\s]+", " ").Trim();
             actual = Regex.Replace(actual, @"[\n\r\s]+", " ").Trim();
             Assert.AreEqual(expected, actual);

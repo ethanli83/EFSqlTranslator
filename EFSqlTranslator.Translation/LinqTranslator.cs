@@ -207,9 +207,9 @@ namespace EFSqlTranslator.Translation
                 var dbSelect = dbRef.OwnerSelect;
                 if (dbSelect.GroupBys.IsSingleKey)
                 {
-                    var kColumn = dbRef.RefSelection.First();
-                    var colum = _dbFactory.BuildColumn(kColumn.Value.Ref, kColumn.Key, m.Type, m.Member.Name);
-                    _state.ResultStack.Push(colum);
+                    var kColumn = dbSelect.GroupBys.Single();
+                    // var colum = _dbFactory.BuildColumn(kColumn.Value.Ref, kColumn.Key, m.Type, m.Member.Name);
+                    _state.ResultStack.Push(kColumn);
                 }
                 else
                 {
