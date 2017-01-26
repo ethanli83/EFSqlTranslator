@@ -94,7 +94,7 @@ where u0.'UserName' is not null";
                 var sql = script.ToString();
 
                 const string expected = @"
-select (p0.'Title' + '|') + p0.'Content' as TitleContent, p0.'BlogId' / u0.'UserId' as Num
+select (p0.'Title' + '|') + p0.'Content' as 'TitleContent', p0.'BlogId' / u0.'UserId' as 'Num'
 from Posts p0
 inner join Users u0 on p0.'UserId' = u0.'UserId'
 where p0.'Content' is not null";

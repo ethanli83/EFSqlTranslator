@@ -114,7 +114,7 @@ db.Posts.Where(p => p.Content != null).Select(p => new { TitleContent = p.Title 
 ```
 ```sql
 -- Transalted Sql:
-select (p0.'Title' + '|') + p0.'Content' as TitleContent, p0.'BlogId' / u0.'UserId' as Num
+select (p0.'Title' + '|') + p0.'Content' as 'TitleContent', p0.'BlogId' / u0.'UserId' as 'Num'
 from Posts p0
 inner join Users u0 on p0.'UserId' = u0.'UserId'
 where p0.'Content' is not null
@@ -228,10 +228,10 @@ db.Blogs
 ```
 ```sql
 -- Transalted Sql:
-select ifnull(sq0.'count0', 0) as Cnt, ifnull(sq0.'avg0', 0) as Avg, sum(b0.'CommentCount') as CommentCount
+select ifnull(sq0.'count0', 0) as 'Cnt', ifnull(sq0.'avg0', 0) as 'Avg', sum(b0.'CommentCount') as 'CommentCount'
 from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', count(1) as count0, avg(p0.'LikeCount') as avg0
+    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0', avg(p0.'LikeCount') as 'avg0'
     from Posts p0
     group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
@@ -252,7 +252,7 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-select count(1) as cnt
+select count(1) as 'cnt'
 from Posts p0
 where p0.'Content' is not null
 group by p0.'BlogId'
@@ -268,10 +268,10 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-select p0.'BlogId' as 'BId', count(1) as cnt, sum(u0.'UserId') * count(case
+select p0.'BlogId' as 'BId', count(1) as 'cnt', sum(u0.'UserId') * count(case
     when p0.'Content' like '%Ethan' then 1
     else null
-end) as Exp
+end) as 'Exp'
 from Posts p0
 inner join Users u0 on p0.'UserId' = u0.'UserId'
 where p0.'Content' is not null
@@ -291,7 +291,7 @@ db.Posts
 select p0.'BlogId' as 'BID', count(case
     when (b0.'Url' is not null) or (u0.'UserId' > 0) then 1
     else null
-end) as cnt
+end) as 'cnt'
 from Posts p0
 left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
 left outer join Users u0 on p0.'UserId' = u0.'UserId'
@@ -306,10 +306,10 @@ db.Blogs.Where(b => b.Url != null).Select(b => new { Name = b.Name, cnt = b.Post
 ```
 ```sql
 -- Transalted Sql:
-select b0.'Name', ifnull(sq0.'sum0', 0) as cnt
+select b0.'Name', ifnull(sq0.'sum0', 0) as 'cnt'
 from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', sum(p0.'PostId') as sum0
+    select p0.'BlogId' as 'BlogId_jk0', sum(p0.'PostId') as 'sum0'
     from Posts p0
     group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
@@ -329,7 +329,7 @@ db.Posts
 select b0.'Url', u0.'UserId', count(case
     when u1.'UserName' like '%Ethan' then 1
     else null
-end) as Cnt
+end) as 'Cnt'
 from Posts p0
 left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
 left outer join Users u0 on b0.'UserId' = u0.'UserId'
