@@ -195,6 +195,39 @@ group by ifnull(sq0.'count0', 0)";
         }
 
         [Test]
+        public void Test_GroupBy_On_Aggregation4()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs.
+                    Where(b => b.Url != null).
+                    GroupBy(b => b.Posts.Count()).
+                    Select(x => new { x.Key, Sum = x.Sum(b => b.Comments.Count()) });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select ifnull(sq0.'count0', 0) as 'Key', sum(ifnull(sq1.'count1', 0)) as 'Sum'
+from Blogs b0
+left outer join (
+    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0'
+    from Posts p0
+    group by p0.'BlogId'
+) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
+left outer join (
+    select c0.'BlogId' as 'BlogId_jk0', count(1) as 'count1'
+    from Comments c0
+    group by c0.'BlogId'
+) sq1 on b0.'BlogId' = sq1.'BlogId_jk0'
+where b0.'Url' is not null
+group by ifnull(sq0.'count0', 0)";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Test]
         [TranslationReadMe(
             Index = 4,
             Title = "Group On Aggregation"

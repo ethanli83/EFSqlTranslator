@@ -24,9 +24,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var predicate = BuildCondition(m, state);
 
             IDbSelect childSelect = null;
-            if (m.GetCaller().Type.IsGrouping())
-                state.ResultStack.Pop();
-            else
+            if (!m.GetCaller().Type.IsGrouping())
                 childSelect = state.ResultStack.Pop() as IDbSelect;
 
             var dbCountFunc = _dbFactory.BuildFunc(m.Method.Name.ToLower(), true, predicate);

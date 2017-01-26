@@ -22,12 +22,10 @@ namespace EFSqlTranslator.Translation.MethodTranslators
 
         public override void Translate(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator)
         {
-            var dbExpression = GetSumTarget(m, state);
+            var dbExpression = GetAggregationTarget(m, state);
 
             IDbSelect childSelect = null;
-            if (m.GetCaller().Type.IsGrouping())
-                state.ResultStack.Pop();
-            else
+            if (!m.GetCaller().Type.IsGrouping())
                 childSelect = state.ResultStack.Pop() as IDbSelect;
 
             // if the aggregation does not have expression, it means
@@ -56,7 +54,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             CreateAggregation(m, state, nameGenerator, childSelect, dbCountFunc);
         }
 
-        private static IDbSelectable GetSumTarget(MethodCallExpression m, TranslationState state)
+        private static IDbSelectable GetAggregationTarget(MethodCallExpression m, TranslationState state)
         {
             if (!m.GetArguments().Any())
                 return null;

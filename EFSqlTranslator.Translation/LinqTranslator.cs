@@ -208,7 +208,6 @@ namespace EFSqlTranslator.Translation
                 if (dbSelect.GroupBys.IsSingleKey)
                 {
                     var kColumn = dbSelect.GroupBys.Single();
-                    // var colum = _dbFactory.BuildColumn(kColumn.Value.Ref, kColumn.Key, m.Type, m.Member.Name);
                     _state.ResultStack.Push(kColumn);
                 }
                 else
@@ -392,6 +391,13 @@ namespace EFSqlTranslator.Translation
             var args = m.GetArguments();
 
             Visit(caller);
+
+            // remove unneed DbReference from stack, this is a side effect of translation of the caller
+            // we need to translate the caller to have the required select on the stack
+            // but we dont neeed other thing that come with it, such as the DbReference
+            while (_state.ResultStack.Count > 0 && _state.ResultStack.Peek() is DbReference)
+                _state.ResultStack.Pop();
+
             VistMethodArguments(args);
 
             if (!_plugIns.TranslateMethodCall(m, _state, _nameGenerator))
