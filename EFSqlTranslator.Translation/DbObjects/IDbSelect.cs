@@ -20,5 +20,7 @@ namespace EFSqlTranslator.Translation.DbObjects
         bool IsWrapingSelect { get; set; }
 
         IDbSelect Optimize();
+
+        string ToMergeKey();
     }
 }

@@ -28,9 +28,20 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public override string ToString()
         {
+            return BuildOutput();
+        }
+
+        public string ToMergeKey()
+        {
+            return BuildOutput(false);
+        }
+
+        private string BuildOutput(bool includeSelection = true)
+        {
             var sb = new StringBuilder();
 
-            sb.Append($"select {Selection}");
+            if (includeSelection)
+                sb.Append($"select {Selection}");
 
             if (From != null)
             {
@@ -63,6 +74,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             var dbSelect = SqlSelectOptimizer.UnwrapUnneededSelect(this);
             SqlSelectOptimizer.RemoveUnneededSelectAllColumn(dbSelect);
+            SqlSelectOptimizer.MergeChildJoins(dbSelect);
             return dbSelect;
         }
     }

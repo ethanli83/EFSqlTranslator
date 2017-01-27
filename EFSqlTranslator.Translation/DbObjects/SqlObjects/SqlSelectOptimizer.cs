@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
@@ -64,6 +65,41 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 subSelect = dbJoin.To.Referee as IDbSelect;
                 if (subSelect != null)
                     RemoveUnneededSelectAllColumn(subSelect, false);
+            }
+        }
+
+        public static void MergeChildJoins(IDbSelect dbSelect)
+        {
+            var joins = dbSelect.Joins.Where(j => j.To.Referee is IDbSelect).ToArray();
+            if (joins.Length == 0)
+                return;
+
+            foreach (var dbJoin in joins)
+                MergeChildJoins((IDbSelect)dbJoin.To.Referee);
+
+            var selectDict = new Dictionary<string, IDbJoin>();
+            foreach (var dbJoin in joins)
+            {
+                var childSelect = (IDbSelect)dbJoin.To.Referee;
+
+                var hashKey = childSelect.ToMergeKey();
+                if (selectDict.ContainsKey(hashKey))
+                {
+                    var mergedSelect = (IDbSelect)selectDict[hashKey].To.Referee;
+                    foreach (var selectable in childSelect.Selection)
+                        mergedSelect.Selection.Add(selectable);
+                }
+                else
+                {
+                    selectDict[hashKey] = dbJoin;
+                }
+            }
+
+            var lookUp = selectDict.Values.ToLookup(v => v);
+            foreach (var dbJoin in joins)
+            {
+                if (!lookUp.Contains(dbJoin))
+                    dbSelect.Joins.Remove(dbJoin);
             }
         }
     }

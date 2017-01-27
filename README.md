@@ -228,15 +228,15 @@ db.Blogs
 ```
 ```sql
 -- Transalted Sql:
-select ifnull(sq0.'count0', 0) as 'Cnt', ifnull(sq0.'avg0', 0) as 'Avg', sum(b0.'CommentCount') as 'CommentCount'
+select ifnull(sq0.'count0', 0) as 'Cnt', ifnull(sq1.'avg0', 0) as 'Avg', sum(b0.'CommentCount') as 'CommentCount'
 from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0', avg(p0.'LikeCount') as 'avg0'
+    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0', p0.'BlogId' as 'BlogId_jk0', avg(p0.'LikeCount') as 'avg0'
     from Posts p0
-    group by p0.'BlogId'
+    group by p0.'BlogId', p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
 where b0.'Url' is not null
-group by ifnull(sq0.'count0', 0), ifnull(sq0.'avg0', 0)
+group by ifnull(sq0.'count0', 0), ifnull(sq1.'avg0', 0)
 ```
 ## V. Translating Aggregtaions
 In this section, we will give you several examples to show how the aggregation is translated.
