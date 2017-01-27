@@ -79,6 +79,11 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             foreach (var dbJoin in joins)
                 MergeChildJoins((IDbSelect)dbJoin.To.Referee);
 
+            var colDict = dbSelect.Selection.
+                SelectMany(s => s.GetDbObjects<IDbColumn>()).
+                Distinct().
+                ToDictionary(s => s.GetAliasOrName(), s => s);
+
             var selectDict = new Dictionary<string, IDbJoin>();
             foreach (var dbJoin in joins)
             {
@@ -87,11 +92,17 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 var hashKey = childSelect.ToMergeKey();
                 if (selectDict.ContainsKey(hashKey))
                 {
-                    var mergedSelect = (IDbSelect)selectDict[hashKey].To.Referee;
+                    var mergedJoin = selectDict[hashKey];
+                    var mergedSelect = (IDbSelect)mergedJoin.To.Referee;
+
                     var colLookUp = mergedSelect.Selection.ToLookup(s => s.GetAliasOrName());
                     var columns = childSelect.Selection.Where(s => !colLookUp.Contains(s.GetAliasOrName()));
                     foreach (var selectable in columns)
+                    {
+                        var column = colDict[selectable.GetAliasOrName()];
+                        column.Ref = mergedJoin.To;
                         mergedSelect.Selection.Add(selectable);
+                    }
                 }
                 else
                 {
