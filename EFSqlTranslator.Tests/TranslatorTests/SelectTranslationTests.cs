@@ -236,5 +236,39 @@ group by sq0.'BlogId', sq0.'Url', u0.'UserId', sq0.'Name', u0.'UserName'";
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
+
+        [Test]
+        public void Test_Multiple_Aggregatons()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs.
+                    Select(b => new
+                    {
+                        Cnt1 = b.Posts.Count(p => p.LikeCount > 10),
+                        Cnt2 = b.Posts.Count(p => p.LikeCount < 50)
+                    });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select ifnull(sq0.'count0', 0) as 'Cnt1', ifnull(sq1.'count1', 0) as 'Cnt2'
+from Blogs b0
+left outer join (
+    select p0.'BlogId' as 'BlogId_jk0', count(case
+        when p0.'LikeCount' > 10 then 1
+        else null
+    end) as 'count0', count(case
+        when p0.'LikeCount' < 50 then 1
+        else null
+    end) as 'count1'
+    from Posts p0
+    group by p0.'BlogId'
+) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
     }
 }

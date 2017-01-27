@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Remotion.Linq.Clauses.ResultOperators;
+using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
@@ -86,7 +88,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 if (selectDict.ContainsKey(hashKey))
                 {
                     var mergedSelect = (IDbSelect)selectDict[hashKey].To.Referee;
-                    foreach (var selectable in childSelect.Selection)
+                    var colLookUp = mergedSelect.Selection.ToLookup(s => s.GetAliasOrName());
+                    var columns = childSelect.Selection.Where(s => !colLookUp.Contains(s.GetAliasOrName()));
+                    foreach (var selectable in columns)
                         mergedSelect.Selection.Add(selectable);
                 }
                 else
