@@ -30,10 +30,11 @@ namespace EFSqlTranslator.ReadmeGen
 
 A standalone linq to sql translator that can be used with EF and Dapper.
 
-You can now try the translator out on http://linqrunner.daydreamer.io/.";
+You can now try the translator out on http://linqrunner.daydreamer.io/.
 
-        private const string Ending = @"
-## VII. Basic Support of Include Method
+The libary is a nuget libary. To use the libary, use your nuget managment tool to install package [EFSqlTranslator.Translation](https://www.nuget.org/packages/EFSqlTranslator.Translation/) and [EFSqlTranslator.EFModels](https://www.nuget.org/packages/EFSqlTranslator.EFModels/)";
+
+        private const string Ending = @"## VII. Basic Support of Include Method
 The libary only has basic support for 'Include' method. It only works on query that returns full entity.
 This may not work if the query has custom selection. Also, you need to provide a map function. For
 more information of the mapping function, please checkout the 'Multi Mapping' section in the [Dapper](https://github.com/StackExchange/dapper-dot-net)'s github
@@ -85,10 +86,12 @@ var blogs = db.Query(
             using (var sw = new StreamWriter(fs))
             {
                 sw.WriteLine(Beginning);
+                sw.WriteLine();
 
                 foreach (var category in categories)
                     category.WriteTo(sw);
 
+                sw.WriteLine();
                 sw.WriteLine(Ending);
             }
         }
