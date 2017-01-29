@@ -14,7 +14,7 @@ db.Blogs.Where(b => ((b.Url != null) && b.Name.StartsWith("Ethan")) && ((b.UserI
 -- Transalted Sql:
 select b0.*
 from Blogs b0
-where ((b0.'Url' is not null) and (b0.'Name' like '%Ethan')) and ((b0.'UserId' > 1) or (b0.'UserId' < 100))
+where ((b0.'Url' is not null) and (b0.'Name' like 'Ethan%')) and ((b0.'UserId' > 1) or (b0.'UserId' < 100))
 ```
 ## II. Translating Relationsheips
 In this section, we will show you how relationships are translated. The basic rules are:
@@ -228,15 +228,15 @@ db.Blogs
 ```
 ```sql
 -- Transalted Sql:
-select ifnull(sq0.'count0', 0) as 'Cnt', ifnull(sq1.'avg0', 0) as 'Avg', sum(b0.'CommentCount') as 'CommentCount'
+select ifnull(sq0.'count0', 0) as 'Cnt', ifnull(sq0.'avg0', 0) as 'Avg', sum(b0.'CommentCount') as 'CommentCount'
 from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0', p0.'BlogId' as 'BlogId_jk0', avg(p0.'LikeCount') as 'avg0'
+    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0', avg(p0.'LikeCount') as 'avg0'
     from Posts p0
-    group by p0.'BlogId', p0.'BlogId'
+    group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
 where b0.'Url' is not null
-group by ifnull(sq0.'count0', 0), ifnull(sq1.'avg0', 0)
+group by ifnull(sq0.'count0', 0), ifnull(sq0.'avg0', 0)
 ```
 ## V. Translating Aggregtaions
 In this section, we will give you several examples to show how the aggregation is translated.
@@ -269,7 +269,7 @@ db.Posts
 ```sql
 -- Transalted Sql:
 select p0.'BlogId' as 'BId', count(1) as 'cnt', sum(u0.'UserId') * count(case
-    when p0.'Content' like '%Ethan' then 1
+    when p0.'Content' like 'Ethan%' then 1
     else null
 end) as 'Exp'
 from Posts p0
@@ -327,7 +327,7 @@ db.Posts
 ```sql
 -- Transalted Sql:
 select b0.'Url', u0.'UserId', count(case
-    when u1.'UserName' like '%Ethan' then 1
+    when u1.'UserName' like 'Ethan%' then 1
     else null
 end) as 'Cnt'
 from Posts p0
@@ -370,4 +370,28 @@ left outer join (
     ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
     where sq0.'BlogId_jk0' is not null
 ) sq0 on (p0.'BlogId' = sq0.'BlogId_jk0') and (u0.'UserName' = 'ethan')
+```
+
+## VII. Basic Support of Include Method
+The libary only has basic support for 'Include' method. It only works on query that returns full entity.
+This may not work if the query has custom selection. Also, you need to provide a map function. For
+more information of the mapping function, please checkout the 'Multi Mapping' section in the [Dapper](https://github.com/StackExchange/dapper-dot-net)'s github
+page.
+
+Here is a example on how to include a parent relation:
+
+```csharp
+var query = db.Blogs.
+    Where(b => b.User.UserName.StartsWith("ethan")).
+    Include(b => b.User);
+
+string sql;
+var blogs = db.Query(
+    query,
+    (b, u) => // the mapping function
+    {
+        b.User = u;
+        return b;
+    },
+    out sql);
 ```

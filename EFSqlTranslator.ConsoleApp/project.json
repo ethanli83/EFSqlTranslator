@@ -24,7 +24,10 @@
           "target": "project"
         }
       },
-      "imports": "dnxcore50"
+      "imports": [
+        "dotnet5.6",
+        "net452"
+      ]
     }
   },
   "tools": {
