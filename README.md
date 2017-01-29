@@ -4,7 +4,7 @@ A standalone linq to sql translator that can be used with EF and Dapper.
 
 You can now try the translator out on http://linqrunner.daydreamer.io/.
 
-The libary is a nuget libary. To use the libary, use your nuget managment tool to install package [EFSqlTranslator.Translation](https://www.nuget.org/packages/EFSqlTranslator.Translation/) and [EFSqlTranslator.EFModels](https://www.nuget.org/packages/EFSqlTranslator.EFModels/)
+The translator is a nuget libary. To use the libary, use your nuget managment tool to install package [EFSqlTranslator.Translation](https://www.nuget.org/packages/EFSqlTranslator.Translation/) and [EFSqlTranslator.EFModels](https://www.nuget.org/packages/EFSqlTranslator.EFModels/)
 
 ## I. Basic Translation
 This section demostrates how the basic linq expression is translated into sql.
