@@ -18,7 +18,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
         public override void Translate(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator)
         {
             var dbContants = (IDbConstant)state.ResultStack.Pop();
-            dbContants.Val = $"%{dbContants.Val}";
+            dbContants.Val = $"{dbContants.Val}%";
 
             var dbExpression = (IDbSelectable)state.ResultStack.Pop();
             var dbBinary = _dbFactory.BuildBinary(dbExpression, DbOperator.Like, dbContants);

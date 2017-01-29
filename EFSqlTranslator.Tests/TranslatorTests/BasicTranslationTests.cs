@@ -34,7 +34,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
                 const string expected = @"
 select b0.*
 from Blogs b0
-where ((b0.'Url' is not null) and (b0.'Name' like '%Ethan')) and ((b0.'UserId' > 1) or (b0.'UserId' < 100))";
+where ((b0.'Url' is not null) and (b0.'Name' like 'Ethan%')) and ((b0.'UserId' > 1) or (b0.'UserId' < 100))";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

@@ -15,6 +15,7 @@ namespace EFSqlTranslator.Translation
         public Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> CreatedJoins { get; } =
             new Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin>();
 
+        public List<string> IncludeSplits { get; } = new List<string>();
 
         public IDbSelect GetLastSelect()
         {

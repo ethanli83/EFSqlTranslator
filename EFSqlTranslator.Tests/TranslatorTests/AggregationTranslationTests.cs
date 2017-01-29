@@ -68,7 +68,7 @@ group by p0.'BlogId'";
 
                 const string expected = @"
 select p0.'BlogId' as 'BId', count(1) as 'cnt', sum(u0.'UserId') * count(case
-    when p0.'Content' like '%Ethan' then 1
+    when p0.'Content' like 'Ethan%' then 1
     else null
 end) as 'Exp'
 from Posts p0
@@ -210,7 +210,7 @@ where b0.'Url' is not null";
 
                 const string expected = @"
 select b0.'Url', u0.'UserId', count(case
-    when u1.'UserName' like '%Ethan' then 1
+    when u1.'UserName' like 'Ethan%' then 1
     else null
 end) as 'Cnt'
 from Posts p0

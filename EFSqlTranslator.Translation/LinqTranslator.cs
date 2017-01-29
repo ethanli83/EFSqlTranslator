@@ -51,6 +51,7 @@ namespace EFSqlTranslator.Translation
             new AggregationTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new StartsWithTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new EndsWithTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new IncludeTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
@@ -74,6 +75,9 @@ namespace EFSqlTranslator.Translation
 
             var script = _dbFactory.BuildScript();
             script.Scripts.Add(dbSelect);
+
+            foreach (var splitKey in _state.IncludeSplits)
+                script.IncludeSplitKeys.Add(splitKey);
 
             return script;
         }

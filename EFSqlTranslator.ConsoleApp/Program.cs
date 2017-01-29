@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using Dapper;
 using EFSqlTranslator.EFModels;
-using EFSqlTranslator.Translation;
-using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using NLog;
-using NLog.Config;
-using NLog.Targets;
 
 namespace EFSqlTranslator.ConsoleApp
 {
@@ -21,86 +13,77 @@ namespace EFSqlTranslator.ConsoleApp
 
             using (var db = new BloggingContext())
             {
-                var query11 = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => new
+                db.SaveChanges();
+
+                var query11 = db.Blogs.
+                    Where(b => b.User.UserName.StartsWith("ethan")).
+                    Include(b => b.User);
+
+                string sql;
+                var blogs = db.Query(
+                    query11,
+                    (b, u) =>
                     {
-                        Cnt = p.Blog.Posts.Count(bp => bp.User.UserName != null) + p.Comments.Average(c => c.CommentId)
-                    });
+                        b.User = u;
+                        return b;
+                    },
+                    out sql);
 
-
-                var query12 = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => new { p.Blog, p.User }).
-                    GroupBy(x => new { x.Blog }).
-                    Select(g => new
-                    {
-                        g.Key.Blog.Url,
-                        g.Key.Blog.User.UserName,
-                        Cnt = g.Sum(x => x.User.UserId + x.Blog.BlogId)
-                    });
-
-                var query13 = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => new { p.Blog, p.User }).
-                    GroupBy(x => new { x.Blog }).
-                    Select(g => new
-                    {
-                        g.Key.Blog.Url,
-                        g.Key.Blog.User.UserName,
-                        Cnt = g.Max(x => x.User.UserId)
-                    });
-
-                var query14 = db.Blogs.
-                    Where(b => b.Url != null).
-                    Select(b => new
-                    {
-                        b.Url,
-                        b.User.UserId,
-                        cnt = b.Posts.Min(p => p.PostId)
-                    });
-
-                var query15 = db.Posts.
-                    Where(p => p.Content != null).
-                    GroupBy(p => new { p.Blog }).
-                    Select(g => new
-                    {
-                        g.Key.Blog.Url,
-                        g.Key.Blog.User.UserId,
-                        Cnt = g.Key.Blog.Posts.Count(p => p.User.UserName != null)
-                    });
-
-                db.Query(query11);
-                db.Query(query12);
-                db.Query(query13);
-                db.Query(query14);
-                db.Query(query15);
+                foreach (var item in blogs)
+                {
+                    Console.WriteLine($"{item.BlogId}, {item.UserId}, {item.Url}, {item.User.UserName}");
+                }
             }
         }
-    }
 
-    public static class DbContextExtensions
-    {
-        public static IEnumerable<T> Query<T>(this DbContext db, IQueryable<T> query)
+        public static void UpdateData(BloggingContext db)
         {
-            using (var connection = new SqliteConnection(BloggingContext.ConnectionString))
+            db.Users.Add(new User
             {
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
-                var sql = script.ToString();
-                Console.WriteLine(sql);
+                UserId = 1,
+                UserName = "Ethan Li"
+            });
 
-                try
-                {
-                    var results = connection.Query(sql);
-                    return results.OfType<T>();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("NOT WORKING!!");
-                    Console.WriteLine(e);
-                    return null;
-                }
-            }
+            db.Users.Add(new User
+            {
+                UserId = 2,
+                UserName = "Feng Xu"
+            });
+
+            db.Blogs.Add(new Blog
+            {
+                BlogId = 1,
+                Url = "ethan1.com",
+                UserId = 1
+            });
+
+            db.Blogs.Add(new Blog
+            {
+                BlogId = 2,
+                Url = "ethan2.com",
+                UserId = 1
+            });
+
+            db.Blogs.Add(new Blog
+            {
+                BlogId = 3,
+                Url = "ethan3.com",
+                UserId = 1
+            });
+
+            db.Blogs.Add(new Blog
+            {
+                BlogId = 4,
+                Url = "xu1.com",
+                UserId = 2
+            });
+
+            db.Blogs.Add(new Blog
+            {
+                BlogId = 5,
+                Url = "xu2.com",
+                UserId = 2
+            });
         }
     }
 }
