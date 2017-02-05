@@ -61,7 +61,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 Ref = column.Ref,
                 ValType = BuildType(column.ValType.DotNetType),
                 Alias = column.Alias,
-                Quote = column.Quote
+                OutputOption = column.OutputOption
             };
         }
 

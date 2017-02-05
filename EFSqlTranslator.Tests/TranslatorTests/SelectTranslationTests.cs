@@ -37,8 +37,8 @@ In this section, we will show you multiple ways to select data. You can basicall
                 
                 const string expected = @"
 select p0.'Content', p0.'Title'
-from Posts p0
-inner join Users u0 on p0.'UserId' = u0.'UserId'
+from 'Posts' p0
+inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
 where u0.'UserName' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -63,10 +63,10 @@ where u0.'UserName' is not null";
 
                 const string expected = @"
 select p0.'Content', u1.'UserName'
-from Posts p0
-inner join Users u0 on p0.'UserId' = u0.'UserId'
-left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-left outer join Users u1 on b0.'UserId' = u1.'UserId'
+from 'Posts' p0
+inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
+left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
+left outer join 'Users' u1 on b0.'UserId' = u1.'UserId'
 where u0.'UserName' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -95,8 +95,8 @@ where u0.'UserName' is not null";
 
                 const string expected = @"
 select (p0.'Title' + '|') + p0.'Content' as 'TitleContent', p0.'BlogId' / u0.'UserId' as 'Num'
-from Posts p0
-inner join Users u0 on p0.'UserId' = u0.'UserId'
+from 'Posts' p0
+inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
 where p0.'Content' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -117,9 +117,9 @@ where p0.'Content' is not null";
                 
                 const string expected = @"
 select b0.*, u0.'UserName'
-from Posts p0
-left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-left outer join Users u0 on p0.'UserId' = u0.'UserId'
+from 'Posts' p0
+left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
+left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
 where p0.'Content' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -146,9 +146,9 @@ where p0.'Content' is not null";
                 
                 const string expected = @"
 select b0.'Url', b0.'Name', u0.'UserName'
-from Posts p0
-left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-left outer join Users u0 on p0.'UserId' = u0.'UserId'
+from 'Posts' p0
+left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
+left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
 where p0.'Content' is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -170,8 +170,8 @@ where p0.'Content' is not null";
 
                 const string expected = @"
 select b0.'Url'
-from Posts p0
-left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
+from 'Posts' p0
+left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
 where p0.'Content' is not null";
 
                 Trace.WriteLine(sql);
@@ -197,11 +197,11 @@ where p0.'Content' is not null";
 select u0.'UserName', sq0.'Url'
 from (
     select b0.'UserId' as 'UserId_jk0', b0.'Url'
-    from Posts p0
-    left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
+    from 'Posts' p0
+    left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
     where p0.'Content' is not null
 ) sq0
-left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'";
+left outer join 'Users' u0 on sq0.'UserId_jk0' = u0.'UserId'";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
@@ -226,11 +226,11 @@ left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'";
 select sq0.'Name', u0.'UserName', sq0.'Url'
 from (
     select b0.'Url', b0.'BlogId', b0.'UserId' as 'UserId_jk0', b0.'Name'
-    from Posts p0
-    left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
+    from 'Posts' p0
+    left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
     where p0.'Content' is not null
 ) sq0
-left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'
+left outer join 'Users' u0 on sq0.'UserId_jk0' = u0.'UserId'
 group by sq0.'BlogId', sq0.'Url', u0.'UserId', sq0.'Name', u0.'UserName'";
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -254,7 +254,7 @@ group by sq0.'BlogId', sq0.'Url', u0.'UserId', sq0.'Name', u0.'UserName'";
 
                 const string expected = @"
 select ifnull(sq0.'count0', 0) as 'Cnt1', ifnull(sq0.'count1', 0) as 'Cnt2'
-from Blogs b0
+from 'Blogs' b0
 left outer join (
     select p0.'BlogId' as 'BlogId_jk0', count(case
         when p0.'LikeCount' > 10 then 1
@@ -263,7 +263,7 @@ left outer join (
         when p0.'LikeCount' < 50 then 1
         else null
     end) as 'count1'
-    from Posts p0
+    from 'Posts' p0
     group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'";
 

@@ -36,7 +36,7 @@ with aggregation methods."
 
                 const string expected = @"
 select p0.'BlogId' as 'Key'
-from Posts p0
+from 'Posts' p0
 where p0.'Content' is not null
 group by p0.'BlogId'";
 
@@ -63,9 +63,9 @@ group by p0.'BlogId'";
 
                 const string expected = @"
 select b0.'Url', u0.'UserName'
-from Posts p0
-left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-left outer join Users u0 on p0.'UserId' = u0.'UserId'
+from 'Posts' p0
+left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
+left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
 where p0.'Content' is not null
 group by b0.'Url', u0.'UserName'";
 
@@ -94,9 +94,9 @@ This feature allows developers to write sophisticated aggregtion in a much simpl
 
                 const string expected = @"
 select u0.'UserId'
-from Posts p0
-left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-left outer join Users u0 on b0.'UserId' = u0.'UserId'
+from 'Posts' p0
+left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
+left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
 where p0.'Content' is not null
 group by b0.'BlogId', u0.'UserId'";
 
@@ -126,12 +126,12 @@ group by b0.'BlogId', u0.'UserId'";
 select sq0.'Url', u0.'UserName'
 from (
     select b0.'BlogId', b0.'Url', b0.'UserId' as 'UserId_jk0'
-    from Posts p0
-    left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-    left outer join Users u0 on p0.'UserId' = u0.'UserId'
+    from 'Posts' p0
+    left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
+    left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
     where p0.'Content' is not null
 ) sq0
-left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'
+left outer join 'Users' u0 on sq0.'UserId_jk0' = u0.'UserId'
 group by sq0.'BlogId', sq0.'Url', u0.'UserName'";
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -153,10 +153,10 @@ group by sq0.'BlogId', sq0.'Url', u0.'UserName'";
 
                 const string expected = @"
 select ifnull(sq0.'count0', 0) as 'Cnt'
-from Blogs b0
+from 'Blogs' b0
 left outer join (
     select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0'
-    from Posts p0
+    from 'Posts' p0
     group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
 where b0.'Url' is not null
@@ -181,10 +181,10 @@ group by ifnull(sq0.'count0', 0)";
 
                 const string expected = @"
 select ifnull(sq0.'count0', 0) as 'Key', sum(b0.'CommentCount') as 'Sum'
-from Blogs b0
+from 'Blogs' b0
 left outer join (
     select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0'
-    from Posts p0
+    from 'Posts' p0
     group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
 where b0.'Url' is not null
@@ -209,15 +209,15 @@ group by ifnull(sq0.'count0', 0)";
 
                 const string expected = @"
 select ifnull(sq0.'count0', 0) as 'Key', sum(ifnull(sq1.'count1', 0)) as 'Sum'
-from Blogs b0
+from 'Blogs' b0
 left outer join (
     select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0'
-    from Posts p0
+    from 'Posts' p0
     group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
 left outer join (
     select c0.'BlogId' as 'BlogId_jk0', count(1) as 'count1'
-    from Comments c0
+    from 'Comments' c0
     group by c0.'BlogId'
 ) sq1 on b0.'BlogId' = sq1.'BlogId_jk0'
 where b0.'Url' is not null
@@ -246,10 +246,10 @@ group by ifnull(sq0.'count0', 0)";
 
                 const string expected = @"
 select ifnull(sq0.'count0', 0) as 'Cnt', ifnull(sq0.'avg0', 0) as 'Avg', sum(b0.'CommentCount') as 'CommentCount'
-from Blogs b0
+from 'Blogs' b0
 left outer join (
     select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0', avg(p0.'LikeCount') as 'avg0'
-    from Posts p0
+    from 'Posts' p0
     group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
 where b0.'Url' is not null
@@ -283,19 +283,19 @@ group by ifnull(sq0.'count0', 0), ifnull(sq0.'avg0', 0)";
 
                 const string expected = @"
 select ifnull(sq0.'count0', 0) as 'Cnt', ifnull(sq1.'avg0', 0) as 'Avg', sum(b0.'CommentCount') as 'CommentCount'
-from Blogs b0
+from 'Blogs' b0
 left outer join (
     select p0.'BlogId' as 'BlogId_jk0', count(case
         when p0.'LikeCount' < 1000 then 1
         else null
     end) as 'count0'
-    from Posts p0
+    from 'Posts' p0
     where p0.'LikeCount' > 10
     group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
 left outer join (
     select p0.'BlogId' as 'BlogId_jk0', avg(p0.'LikeCount') as 'avg0'
-    from Posts p0
+    from 'Posts' p0
     group by p0.'BlogId'
 ) sq1 on b0.'BlogId' = sq1.'BlogId_jk0'
 where b0.'Url' is not null

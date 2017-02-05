@@ -33,7 +33,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
 
                 const string expected = @"
 select b0.*
-from Blogs b0
+from 'Blogs' b0
 where ((b0.'Url' is not null) and (b0.'Name' like 'Ethan%')) and ((b0.'UserId' > 1) or (b0.'UserId' < 100))";
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -52,8 +52,8 @@ where ((b0.'Url' is not null) and (b0.'Name' like 'Ethan%')) and ((b0.'UserId' >
 
                 const string expected = @"
 select p0.*
-from Posts p0
-left outer join Users u0 on p0.'UserId' = u0.'UserId'
+from 'Posts' p0
+left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
 where (u0.'UserName' is not null) or (p0.'Content' is not null)";
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -71,7 +71,7 @@ where (u0.'UserName' is not null) or (p0.'Content' is not null)";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.* from Blogs b0 where b0.'CommentCount' > 10";
+select b0.* from 'Blogs' b0 where b0.'CommentCount' > 10";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
@@ -90,7 +90,7 @@ select b0.* from Blogs b0 where b0.'CommentCount' > 10";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.'BlogId' as 'K' from Blogs b0 where b0.'CommentCount' > 10";
+select b0.'BlogId' as 'K' from 'Blogs' b0 where b0.'CommentCount' > 10";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
@@ -107,7 +107,7 @@ select b0.'BlogId' as 'K' from Blogs b0 where b0.'CommentCount' > 10";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.* from Blogs b0";
+select b0.* from 'Blogs' b0";
 
                 TestUtils.AssertStringEqual(expected, sql);
 

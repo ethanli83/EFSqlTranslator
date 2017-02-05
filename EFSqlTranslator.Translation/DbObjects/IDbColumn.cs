@@ -4,6 +4,5 @@ namespace EFSqlTranslator.Translation.DbObjects
     {
         DbType ValType { get; set; }
         string Name { get; set; }
-        string Quote { get; set; }
     }
 }

@@ -40,15 +40,15 @@ have to be limited to column pairs."
 
                 const string expected = @"
 select p0.'PostId' as 'PId', sq0.'Name'
-from Posts p0
-inner join Users u0 on p0.'UserId' = u0.'UserId'
+from 'Posts' p0
+inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
 left outer join (
     select b0.'Name', b0.'BlogId' as 'BlogId_jk0'
-    from Blogs b0
+    from 'Blogs' b0
     left outer join (
         select p0.'BlogId' as 'BlogId_jk0'
-        from Posts p0
-        inner join Users u0 on p0.'UserId' = u0.'UserId'
+        from 'Posts' p0
+        inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
         where u0.'UserName' is not null
         group by p0.'BlogId'
     ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'

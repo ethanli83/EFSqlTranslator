@@ -2,7 +2,6 @@
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using NUnit.Framework;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
@@ -36,7 +35,7 @@ We will also demostrate few powerful aggregations that you can do with this liba
 
                 const string expected = @"
 select count(1) as 'cnt'
-from Posts p0
+from 'Posts' p0
 where p0.'Content' is not null
 group by p0.'BlogId'";
 
@@ -71,8 +70,8 @@ select p0.'BlogId' as 'BId', count(1) as 'cnt', sum(u0.'UserId') * count(case
     when p0.'Content' like 'Ethan%' then 1
     else null
 end) as 'Exp'
-from Posts p0
-inner join Users u0 on p0.'UserId' = u0.'UserId'
+from 'Posts' p0
+inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
 where p0.'Content' is not null
 group by p0.'BlogId'";
 
@@ -106,9 +105,9 @@ select p0.'BlogId' as 'BID', count(case
     when (b0.'Url' is not null) or (u0.'UserId' > 0) then 1
     else null
 end) as 'cnt'
-from Posts p0
-left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-left outer join Users u0 on p0.'UserId' = u0.'UserId'
+from 'Posts' p0
+left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
+left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
 where p0.'Content' is not null
 group by p0.'BlogId'";
 
@@ -138,10 +137,10 @@ group by p0.'BlogId'";
 
                 const string expected = @"
 select b0.'Name', ifnull(sq0.'sum0', 0) as 'cnt'
-from Blogs b0
+from 'Blogs' b0
 left outer join (
     select p0.'BlogId' as 'BlogId_jk0', sum(p0.'PostId') as 'sum0'
-    from Posts p0
+    from 'Posts' p0
     group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
 where b0.'Url' is not null";
@@ -169,15 +168,15 @@ where b0.'Url' is not null";
 
                 const string expected = @"
 select b0.'Url', u0.'UserId', ifnull(sq0.'count0', 0) as 'cnt'
-from Blogs b0
-left outer join Users u0 on b0.'UserId' = u0.'UserId'
+from 'Blogs' b0
+left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
 left outer join (
     select p0.'BlogId' as 'BlogId_jk0', count(case
         when u0.'UserName' is not null then 1
         else null
     end) as 'count0'
-    from Posts p0
-    inner join Users u0 on p0.'UserId' = u0.'UserId'
+    from 'Posts' p0
+    inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
     group by p0.'BlogId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
 where b0.'Url' is not null";
@@ -213,15 +212,15 @@ select b0.'Url', u0.'UserId', count(case
     when u1.'UserName' like 'Ethan%' then 1
     else null
 end) as 'Cnt'
-from Posts p0
-left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-left outer join Users u0 on b0.'UserId' = u0.'UserId'
+from 'Posts' p0
+left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
+left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
 left outer join (
     select c0.'BlogId' as 'BlogId_jk0', c0.'UserId' as 'UserId_jk0'
-    from Comments c0
+    from 'Comments' c0
     group by c0.'BlogId', c0.'UserId'
 ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-left outer join Users u1 on sq0.'UserId_jk0' = u1.'UserId'
+left outer join 'Users' u1 on sq0.'UserId_jk0' = u1.'UserId'
 where p0.'Content' is not null
 group by b0.'BlogId', b0.'Url', u0.'UserId'";
 
@@ -255,12 +254,12 @@ select sq0.'Url', u0.'UserName', count(case
 end) as 'Cnt'
 from (
     select b0.'BlogId', b0.'Url', b0.'UserId' as 'UserId_jk0', u0.'UserName'
-    from Posts p0
-    left outer join Blogs b0 on p0.'BlogId' = b0.'BlogId'
-    left outer join Users u0 on p0.'UserId' = u0.'UserId'
+    from 'Posts' p0
+    left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
+    left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
     where p0.'Content' is not null
 ) sq0
-left outer join Users u0 on sq0.'UserId_jk0' = u0.'UserId'
+left outer join 'Users' u0 on sq0.'UserId_jk0' = u0.'UserId'
 group by sq0.'BlogId', sq0.'Url', u0.'UserName'";
 
                 TestUtils.AssertStringEqual(expected, sql);

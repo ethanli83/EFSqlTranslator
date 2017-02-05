@@ -9,8 +9,6 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         
         public string Name { get; set; }
 
-        public string Quote { get; set; } = "`";
-
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -18,7 +16,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (!string.IsNullOrEmpty(Ref?.Alias))
                 sb.Append($"{Ref.Alias}.");
 
-            sb.Append($"{Quote}{Name}{Quote}");
+            sb.Append($"{QuotationMark}{Name}{QuotationMark}");
 
             return sb.ToString();
         }

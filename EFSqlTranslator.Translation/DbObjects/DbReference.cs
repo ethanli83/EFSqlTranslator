@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EFSqlTranslator.Translation.DbObjects
 {
-    public class DbReference : IDbObject
+    public class DbReference : DbObject
     {
         public DbReference(IDbObject dbObject)
         {

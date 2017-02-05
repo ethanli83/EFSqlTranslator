@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace EFSqlTranslator.Translation.DbObjects
 {
-    public class DbGroupByCollection : IDbObject, IEnumerable<IDbSelectable>
+    public class DbGroupByCollection : DbObject, IEnumerable<IDbSelectable>
     {
         private readonly List<IDbSelectable> _groupBys = new List<IDbSelectable>();
 

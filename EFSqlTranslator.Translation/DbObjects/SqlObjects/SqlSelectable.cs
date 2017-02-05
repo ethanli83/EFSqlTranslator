@@ -21,7 +21,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public virtual string ToSelectionString()
         {
-            return string.IsNullOrEmpty(Alias) ? $"{this}" : $"{this} as '{Alias}'";
+            return string.IsNullOrEmpty(Alias) ? $"{this}" : $"{this} as {QuotationMark}{Alias}{QuotationMark}";
         }
 
         protected bool Equals(SqlSelectable other)

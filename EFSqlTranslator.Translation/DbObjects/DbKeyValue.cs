@@ -1,6 +1,6 @@
 namespace EFSqlTranslator.Translation.DbObjects
 {
-    public class DbKeyValue : IDbObject
+    public class DbKeyValue : DbObject
     {
         public DbKeyValue(string key, IDbObject val)
         {
