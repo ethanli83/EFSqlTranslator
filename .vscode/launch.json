@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceRoot}/src/Translation.App/bin/Debug/netcoreapp1.0/Translation.App.dll",
+            "program": "${workspaceRoot}/EFSqlTranslator.ConsoleApp/bin/Debug/netcoreapp1.1/EFSqlTranslator.ConsoleApp.dll",
             "args": [],
             "cwd": "${workspaceRoot}",
             "externalConsole": false,

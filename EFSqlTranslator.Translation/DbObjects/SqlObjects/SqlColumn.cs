@@ -31,7 +31,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         protected bool Equals(SqlColumn other)
         {
-            return base.Equals(other) && Equals(ValType, other.ValType) && string.Equals(Name, other.Name);
+            return Equals(Ref, other.Ref) && Equals(ValType, other.ValType) && string.Equals(this.GetAliasOrName(), other.GetAliasOrName());
         }
 
         public override bool Equals(object obj)
@@ -39,7 +39,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return base.Equals(obj) && Equals((SqlColumn) obj);
+            return Equals((SqlColumn) obj);
         }
 
         public override int GetHashCode()

@@ -6,6 +6,6 @@ namespace EFSqlTranslator.Translation.DbObjects
 
         IDbBinary Condition { get; set; }
 
-        JoinType Type { get; set; }
+        DbJoinType Type { get; set; }
     }
 }

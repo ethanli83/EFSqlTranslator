@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using EFSqlTranslator.EFModels;
+using EFSqlTranslator.Translation;
+using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace EFSqlTranslator.ConsoleApp
@@ -17,21 +20,30 @@ namespace EFSqlTranslator.ConsoleApp
 
                 var query11 = db.Blogs.
                     Where(b => b.User.UserName.StartsWith("ethan")).
-                    Include(b => b.User);
+                    Include(b => b.User).
+                    ThenInclude(u => u.Comments).
+                    Include(b => b.Posts).
+                    ThenInclude(p => p.Comments);
 
-                string sql;
-                var blogs = db.Query(
-                    query11,
-                    (b, u) =>
-                    {
-                        b.User = u;
-                        return b;
-                    },
-                    out sql);
+                var g = IncludeGraphBuilder.Build(query11.Expression);
 
-                foreach (var item in blogs)
+                var sql = "";
+                try
                 {
-                    Console.WriteLine($"{item.BlogId}, {item.UserId}, {item.Url}, {item.User.UserName}");
+                    var blogs = db.Query(
+                        query11,
+                        new EFModelInfoProvider(db),
+                        new SqliteObjectFactory(),
+                        out sql);
+
+                    foreach (var item in blogs)
+                    {
+                        Console.WriteLine($"{item.BlogId}, {item.UserId}, {item.Url}"); //, {item.User.UserName}
+                    }
+                }
+                finally
+                {
+                    Console.WriteLine(sql);
                 }
             }
         }

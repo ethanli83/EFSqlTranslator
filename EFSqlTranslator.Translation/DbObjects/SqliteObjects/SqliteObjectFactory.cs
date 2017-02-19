@@ -11,5 +11,10 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
             column.OutputOption.QuotationMark = "'";
             return column;
         }
+
+        public override IDbStatment BuildStatement(IDbObject script)
+        {
+            return new SqliteStatement(script);
+        }
     }
 }

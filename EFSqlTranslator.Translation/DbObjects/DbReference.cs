@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -43,11 +42,8 @@ namespace EFSqlTranslator.Translation.DbObjects
 
             sb.AppendLine("(");
 
-            var refStr = Referee.ToString();
-            var lines = refStr.Split(new [] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            refStr = string.Join("\n    ", lines);
+            sb.AppendLineWithSpace(Referee.ToString());
 
-            sb.AppendLine($"    {refStr}");
             sb.Append($") {Alias}");
 
             return sb.ToString();

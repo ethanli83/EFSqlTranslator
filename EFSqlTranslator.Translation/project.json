@@ -7,7 +7,7 @@
     "Dapper": "1.50.2",
     "Microsoft.EntityFrameworkCore.Design": "1.1.0",
     "Microsoft.EntityFrameworkCore.Sqlite": "1.1.0",
-    "NLog": "5.0.0-beta03"
+    "NLog": "5.0.0-beta06"
   },
   "frameworks": {
     "netcoreapp1.1": {

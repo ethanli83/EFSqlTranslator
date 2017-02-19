@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
+﻿namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
     public class SqlJoin : SqlObject, IDbJoin
     {
@@ -9,29 +6,29 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public IDbBinary Condition { get; set; }
 
-        public JoinType Type { get; set; }
+        public DbJoinType Type { get; set; }
 
         public override string ToString()
         {
             string typeStr;
             switch (Type)
             {
-                case JoinType.Inner:
+                case DbJoinType.Inner:
                     typeStr = "inner";
                     break;
-                case JoinType.Outer:
+                case DbJoinType.Outer:
                     typeStr = "outer";
                     break;
-                case JoinType.LeftInner:
+                case DbJoinType.LeftInner:
                     typeStr = "left inner";
                     break;
-                case JoinType.LeftOuter:
+                case DbJoinType.LeftOuter:
                     typeStr = "left outer";
                     break;
-                case JoinType.RightInner:
+                case DbJoinType.RightInner:
                     typeStr = "right inner";
                     break;
-                case JoinType.RightOuter:
+                case DbJoinType.RightOuter:
                     typeStr = "right outer";
                     break;
                 default:

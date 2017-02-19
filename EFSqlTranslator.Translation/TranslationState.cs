@@ -7,6 +7,10 @@ namespace EFSqlTranslator.Translation
 {
     public class TranslationState
     {
+        private readonly List<IDbObject> _preScripts = new List<IDbObject>();
+
+        private readonly List<IDbObject> _postScripts = new List<IDbObject>();
+
         public Stack<IDbObject> ResultStack { get; } = new Stack<IDbObject>();
 
         public Stack<Dictionary<ParameterExpression, DbReference>> ParamterStack { get; } =
@@ -15,7 +19,15 @@ namespace EFSqlTranslator.Translation
         public Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin> CreatedJoins { get; } =
             new Dictionary<Tuple<IDbSelect, EntityRelation>, IDbJoin>();
 
-        public List<string> IncludeSplits { get; } = new List<string>();
+        public void AddPreScript(IDbObject script)
+        {
+            _preScripts.Add(script);
+        }
+
+        public void AddPostScript(IDbObject script)
+        {
+            _postScripts.Add(script);
+        }
 
         public IDbSelect GetLastSelect()
         {
@@ -36,6 +48,21 @@ namespace EFSqlTranslator.Translation
                 ResultStack.Push(results.Pop());
 
             return dbSelect;
+        }
+
+        public IDbScript GetScript(IDbObjectFactory dbFactory)
+        {
+            var script = dbFactory.BuildScript();
+
+            script.PreScripts.AddRange(_preScripts);
+
+            var dbSelect = GetLastSelect();
+            dbSelect = dbSelect.Optimize();
+            script.Scripts.Add(dbSelect);
+
+            script.PostScripts.AddRange(_postScripts);
+
+            return script;
         }
     }
 }

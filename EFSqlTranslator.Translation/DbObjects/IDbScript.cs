@@ -4,12 +4,10 @@ namespace EFSqlTranslator.Translation.DbObjects
 {
     public interface IDbScript : IDbObject
     {
-        IList<IDbObject> PreScripts { get; }
+        List<IDbObject> PreScripts { get; }
 
-        IList<IDbObject> Scripts { get; }
+        List<IDbObject> Scripts { get; }
 
-        IList<IDbObject> PostScripts { get; }
-
-        IList<string> IncludeSplitKeys { get; }
+        List<IDbObject> PostScripts { get; }
     }
 }

@@ -67,6 +67,14 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 sb.Append($"group by {GroupBys}");
             }
 
+            if (OrderBys.Any())
+            {
+                sb.AppendLine();
+                sb.Append($"order by {string.Join(", ", OrderBys)}");
+            }
+
+            sb.AppendLine();
+
             return sb.ToString();
         }
 

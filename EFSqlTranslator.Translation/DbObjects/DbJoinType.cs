@@ -1,6 +1,6 @@
 namespace EFSqlTranslator.Translation.DbObjects
 {
-    public enum JoinType
+    public enum DbJoinType
     {
         Inner,
         Outer,

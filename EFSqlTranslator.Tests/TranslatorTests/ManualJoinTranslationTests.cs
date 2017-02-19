@@ -33,7 +33,7 @@ have to be limited to column pairs."
                         query, 
                         (p, b) => p.BlogId == b.BlogId && p.User.UserName == "ethan", 
                         (p, b) => new { PId = p.PostId, b.Name },
-                        JoinType.LeftOuter);
+                        DbJoinType.LeftOuter);
 
                 var script = LinqTranslator.Translate(query1.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();

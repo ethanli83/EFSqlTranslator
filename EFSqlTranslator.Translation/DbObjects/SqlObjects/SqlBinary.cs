@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects

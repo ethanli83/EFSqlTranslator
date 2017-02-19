@@ -15,6 +15,8 @@ namespace EFSqlTranslator.Tests
 
         public DbSet<Comment> Comments { get; set; }
 
+        public DbSet<Statistic> Statistics { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite(ConnectionString);
@@ -34,6 +36,8 @@ namespace EFSqlTranslator.Tests
         public int? CommentCount { get; set; }
         
         public User User { get; set; }
+
+        public Statistic Statistic { get; set; }
         
         public List<Post> Posts { get; set; }
 
@@ -89,5 +93,16 @@ namespace EFSqlTranslator.Tests
         public Blog Blog { get; set; }
 
         public Post Post { get; set; }
+    }
+
+    public class Statistic
+    {
+        public int StatisticId { get; set; }
+
+        public int ViewCount { get; set; }
+
+        public int BlogId { get; set; }
+
+        public Blog Blog { get; set; }
     }
 }

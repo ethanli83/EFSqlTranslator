@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Remotion.Linq.Clauses.ResultOperators;
-using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {

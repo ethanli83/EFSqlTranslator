@@ -47,7 +47,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 joinKey.Alias = string.Empty;
             }
 
-            var dbJoin = _dbFactory.BuildJoin(toSelectRef, fromSelect, joinCondition, (JoinType)joinType.Val);
+            var dbJoin = _dbFactory.BuildJoin(toSelectRef, fromSelect, joinCondition, (DbJoinType)joinType.Val);
             fromSelect.Joins.Add(dbJoin);
 
             var finalSelectRef = _dbFactory.BuildRef(fromSelect, nameGenerator.GenerateAlias(null, "sq", true));

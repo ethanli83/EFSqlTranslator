@@ -80,7 +80,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             return refCol;
         }
 
-        public IDbTable BuildTable(EntityInfo entityInfo)
+        public virtual IDbTable BuildTable(EntityInfo entityInfo)
         {
             return new SqlTable
             {
@@ -155,7 +155,23 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             return new SqlCondition(conditions, dbElse);
         }
 
-        public IDbScript BuildScript()
+        public virtual IDbTempTable BuildTempTable(EntityInfo entityInfo, IDbSelect sourceSelect = null)
+        {
+            return new SqlTempTable
+            {
+                Namespace = entityInfo.Namespace,
+                TableName = entityInfo.EntityName,
+                PrimaryKeys = entityInfo.Keys?.Select(k => BuildColumn(null, k.Name, k.ValType)).ToList(),
+                SourceSelect = sourceSelect
+            };
+        }
+
+        public virtual IDbStatment BuildStatement(IDbObject script)
+        {
+            return new SqlStatement(script);
+        }
+
+        public virtual IDbScript BuildScript()
         {
             return new SqlScript();
         }
@@ -170,13 +186,13 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public IDbJoin BuildJoin(
             DbReference joinTo, IDbSelect dbSelect, IDbBinary condition = null,
-            JoinType joinType = JoinType.Inner)
+            DbJoinType dbJoinType = DbJoinType.Inner)
         {
             var dbJoin = new SqlJoin
             {
                 To = joinTo,
                 Condition = condition,
-                Type = joinType
+                Type = dbJoinType
             };
 
             joinTo.OwnerSelect = dbSelect;
@@ -227,8 +243,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (type == typeof(double))
                 return "decimal";
 
-            if (type == typeof(JoinType))
-                return "<<JoinType>>";
+            if (type == typeof(DbJoinType))
+                return "<<DbJoinType>>";
 
             throw new NotImplementedException($"{type.Name} not supported.");
         }

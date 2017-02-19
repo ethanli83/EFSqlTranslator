@@ -5,8 +5,8 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "AgileObjects.ReadableExpressions": "1.8.1",
-    "NLog": "5.0.0-beta03"
+    "AgileObjects.ReadableExpressions": "1.8.2",
+    "NLog": "5.0.0-beta06"
   },
   "frameworks": {
     "netcoreapp1.1": {

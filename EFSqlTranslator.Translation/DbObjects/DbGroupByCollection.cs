@@ -26,6 +26,11 @@ namespace EFSqlTranslator.Translation.DbObjects
             _groupBys.Remove(selectable);
         }
 
+        public void Clear()
+        {
+            _groupBys.Clear();
+        }
+
         public override string ToString()
         {
             var groupbys = _groupBys.SelectMany(g =>

@@ -47,10 +47,10 @@ namespace EFSqlTranslator.Translation
             if (whereClause == null)
                 return;
 
-            dbSelect.Where = UpdateWhereClause(dbSelect.Where, whereClause, dbFactory);
+            dbSelect.Where = dbSelect.Where.UpdateBinary(whereClause, dbFactory);
         }
 
-        public static IDbBinary UpdateWhereClause(IDbBinary whereClause, IDbBinary predicate, IDbObjectFactory dbFactory)
+        public static IDbBinary UpdateBinary(this IDbBinary whereClause, IDbBinary predicate, IDbObjectFactory dbFactory)
         {
             if (predicate == null)
                 return whereClause;
@@ -62,7 +62,7 @@ namespace EFSqlTranslator.Translation
 
         /// update all joins that are related to dbRef to be left outer join
         /// this is required by method such as Select or GroupBy 
-        public static void UpdateJoinType(DbReference dbRef, JoinType joinType = JoinType.LeftOuter)
+        public static void UpdateJoinType(DbReference dbRef, DbJoinType dbJoinType = DbJoinType.LeftOuter)
         {
             var joins = dbRef?.OwnerSelect?.Joins.Where(j => ReferenceEquals(j.To, dbRef));
             if (joins == null)
@@ -70,7 +70,7 @@ namespace EFSqlTranslator.Translation
 
             foreach(var dbJoin in joins)
             {
-                dbJoin.Type = joinType;
+                dbJoin.Type = dbJoinType;
                 var relatedRefs = dbJoin.Condition.GetOperands().
                     Select(op => (op as IDbSelectable)?.Ref).
                     Where(r => r != null && !ReferenceEquals(r, dbJoin.To));
@@ -182,20 +182,6 @@ namespace EFSqlTranslator.Translation
                 default:
                     throw new NotSupportedException(optr.ToString());
             }
-        }
-    }
-
-    public static class ExpressionExtensions
-    {
-        public static Expression GetCaller(this MethodCallExpression m)
-        {
-            return m.Object ?? m.Arguments.First();
-        }
-
-        public static Expression[] GetArguments(this MethodCallExpression m)
-        {
-            var caller = m.GetCaller();
-            return m.Arguments.Where(a => a != caller).ToArray();
         }
     }
 }

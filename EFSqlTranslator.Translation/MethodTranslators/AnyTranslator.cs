@@ -39,7 +39,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 var pkColumn = _dbFactory.BuildColumn(dbJoin.To, joinKey.Name, joinKey.ValType.DotNetType, joinKey.Alias);
                 var binary = _dbFactory.BuildBinary(pkColumn, DbOperator.IsNot, _dbFactory.BuildConstant(null));
 
-                whereClause = SqlTranslationHelper.UpdateWhereClause(whereClause, binary, _dbFactory);
+                whereClause = SqlTranslationHelper.UpdateBinary(whereClause, binary, _dbFactory);
             }
 
             state.ResultStack.Push(whereClause);

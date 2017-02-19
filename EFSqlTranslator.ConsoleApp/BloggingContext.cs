@@ -33,7 +33,7 @@ namespace EFSqlTranslator.ConsoleApp
         
         public User User { get; set; }
         
-        public List<Post> Posts { get; set; }
+        public List<Post> Posts { get; set; } = new List<Post>();
     }
 
     public class Post
@@ -52,7 +52,7 @@ namespace EFSqlTranslator.ConsoleApp
 
         public Blog Blog { get; set; }
 
-        public List<Comment> Comments { get; set; }
+        public List<Comment> Comments { get; set; } = new List<Comment>();
     }
 
     public class User
@@ -61,11 +61,11 @@ namespace EFSqlTranslator.ConsoleApp
 
         public string UserName { get; set; }
 
-        public List<Blog> Blogs { get; set; }
+        public List<Blog> Blogs { get; set; } = new List<Blog>();
 
-        public List<Post> Posts { get; set; }
+        public List<Post> Posts { get; set; } = new List<Post>();
 
-        public List<Comment> Comments { get; set; }
+        public List<Comment> Comments { get; set; } = new List<Comment>();
     }
 
     public class Comment

@@ -13,7 +13,7 @@ namespace EFSqlTranslator.Translation
             IQueryable<TInner> inner,
             Expression<Func<TOuter, TInner,bool>> joinCondition,
             Expression<Func<TOuter, TInner, TResult>> resultSelector,
-            JoinType joinType = JoinType.Inner)
+            DbJoinType dbJoinType = DbJoinType.Inner)
         {
             var method = typeof(QueryableExtensions).GetMethod("Join");
             var callExpression = Expression.Call(
@@ -30,7 +30,7 @@ namespace EFSqlTranslator.Translation
                     inner.Expression,
                     Expression.Quote(joinCondition),
                     Expression.Quote(resultSelector),
-                    Expression.Constant(joinType)
+                    Expression.Constant(dbJoinType)
                 });
 
             return outer.Provider.CreateQuery<TResult>(callExpression);
@@ -41,7 +41,7 @@ namespace EFSqlTranslator.Translation
             IQueryable<TInner> inner,
             Expression<Func<TOuter, TInner,bool>> joinCondition,
             Expression<Func<TOuter, TInner, TResult>> resultSelector,
-            JoinType joinType = JoinType.Inner)
+            DbJoinType dbJoinType = DbJoinType.Inner)
         {   
             var method = typeof(QueryableExtensions).GetMethod("Join");
             var callExpression = Expression.Call(
@@ -58,7 +58,7 @@ namespace EFSqlTranslator.Translation
                         inner.Expression,
                         Expression.Quote(joinCondition),
                         Expression.Quote(resultSelector),
-                        Expression.Constant(joinType)
+                        Expression.Constant(dbJoinType)
                     });
                     
             return outer.Provider.CreateQuery<TResult>(callExpression);
