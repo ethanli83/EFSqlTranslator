@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.Serialization;
+using Remotion.Linq.Parsing.ExpressionVisitors.Transformation.PredefinedTransformations;
 
 namespace EFSqlTranslator.Translation
 {
@@ -29,6 +32,12 @@ namespace EFSqlTranslator.Translation
 
             var uExpr = expression as UnaryExpression;
             return uExpr != null ? uExpr.Operand.GetReturnType() : expression.Type;
+        }
+
+        public static Type GetReturnBaseType(this Expression expression)
+        {
+            var type = expression.GetReturnType();
+            return type.GetTypeInfo().IsGenericType ? type.GetGenericArguments().Single() : type;
         }
     }
 }

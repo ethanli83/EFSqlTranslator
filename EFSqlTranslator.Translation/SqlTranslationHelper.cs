@@ -7,10 +7,6 @@ namespace EFSqlTranslator.Translation
 {
     internal static class SqlTranslationHelper
     {
-        public const string JoinKeySuffix = "_jk";
-
-        public const string SubSelectPrefix = "sq";
-
         public static string GetSqlOperator(ExpressionType type)
         {
             return GetSqlOperator(GetDbOperator(type));

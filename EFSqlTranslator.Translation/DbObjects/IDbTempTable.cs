@@ -2,10 +2,12 @@ namespace EFSqlTranslator.Translation.DbObjects
 {
     public interface IDbTempTable : IDbTable
     {
+        string RowNumberColumnName { get; set; }
+
         IDbSelect SourceSelect { get; set; }
 
-        IDbObject GetCreateStatement(IDbObjectFactory factory, UniqueNameGenerator nameGenerator);
+        IDbObject GetCreateStatement(IDbObjectFactory factory);
 
-        IDbObject GetDropStatement(IDbObjectFactory factory, UniqueNameGenerator nameGenerator);
+        IDbObject GetDropStatement(IDbObjectFactory factory);
     }
 }

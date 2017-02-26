@@ -32,7 +32,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var newSelectRef = _dbFactory.BuildRef(dbSelect);
             var newSelect = _dbFactory.BuildSelect(newSelectRef);
 
-            newSelectRef.Alias = nameGenerator.GenerateAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
+            newSelectRef.Alias = nameGenerator.GenerateAlias(dbSelect, TranslationConstants.SubSelectPrefix, true);
 
             selections = selections.Concat(dbSelect.Selection.Where(s => s.IsJoinKey)).ToArray();
             foreach(var selectable in selections)

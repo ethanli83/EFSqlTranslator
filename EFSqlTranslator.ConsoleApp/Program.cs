@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using AgileObjects.ReadableExpressions;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
@@ -16,30 +18,31 @@ namespace EFSqlTranslator.ConsoleApp
 
             using (var db = new BloggingContext())
             {
-                db.SaveChanges();
+                if (db.Database.EnsureCreated())
+                {
+                    // Insert hash if created
+                    UpdateData(db);
+                    db.SaveChanges();
+                }
+            }
 
-                var query11 = db.Blogs.
-                    Where(b => b.User.UserName.StartsWith("ethan")).
-                    Include(b => b.User).
-                    ThenInclude(u => u.Comments).
-                    Include(b => b.Posts).
-                    ThenInclude(p => p.Comments);
-
-                var g = IncludeGraphBuilder.Build(query11.Expression);
+            using (var db = new BloggingContext())
+            {
+                var query = db.Posts
+                    .Where(p => p.Blog.Url != null)
+                    .Include(p => p.User)
+                    .ThenInclude(u => u.Comments)
+                    .ThenInclude(c => c.User)
+                    .Include(p => p.Blog);
 
                 var sql = "";
                 try
                 {
                     var blogs = db.Query(
-                        query11,
+                        query,
                         new EFModelInfoProvider(db),
                         new SqliteObjectFactory(),
                         out sql);
-
-                    foreach (var item in blogs)
-                    {
-                        Console.WriteLine($"{item.BlogId}, {item.UserId}, {item.Url}"); //, {item.User.UserName}
-                    }
                 }
                 finally
                 {
@@ -95,6 +98,22 @@ namespace EFSqlTranslator.ConsoleApp
                 BlogId = 5,
                 Url = "xu2.com",
                 UserId = 2
+            });
+
+            db.Posts.Add(new Post
+            {
+                PostId = 1,
+                Content = "Post 1",
+                BlogId = 1,
+                UserId = 1
+            });
+
+            db.Posts.Add(new Post
+            {
+                PostId = 2,
+                Content = "Post 2",
+                BlogId = 1,
+                UserId = 1
             });
         }
     }

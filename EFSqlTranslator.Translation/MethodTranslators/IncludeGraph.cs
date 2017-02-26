@@ -1,5 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
+using EFSqlTranslator.Translation.DbObjects;
 
 namespace EFSqlTranslator.Translation.MethodTranslators
 {
@@ -11,22 +13,26 @@ namespace EFSqlTranslator.Translation.MethodTranslators
         {
             var node = new IncludeNode
             {
-                Expression = expression
+                Expression = expression,
+                Graph = this
             };
 
             Root = node;
+            ScriptToNodes = new Dictionary<IDbObject, IncludeNode>();
         }
 
         public IncludeNode Root { get; }
+
+        public Dictionary<IDbObject, IncludeNode> ScriptToNodes { get; }
 
         public void AddInclude(Expression expression)
         {
             var node = new IncludeNode
             {
-                Expression = expression
+                Expression = expression,
+                Graph = this
             };
 
-            // _nodeDict.Add(script, node);
 
             _current = node;
 
@@ -37,7 +43,8 @@ namespace EFSqlTranslator.Translation.MethodTranslators
         {
             var node = new IncludeNode
             {
-                Expression = expression
+                Expression = expression,
+                Graph = this
             };
 
             if (_current == null)

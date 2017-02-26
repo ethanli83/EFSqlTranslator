@@ -12,17 +12,11 @@ namespace EFSqlTranslator.Translation
         public static IEnumerable<T> Query<T>(this DbContext db,
             IQueryable<T> query, IModelInfoProvider infoProvider, IDbObjectFactory factory, out string sql)
         {
-            using (var connection = db.Database.GetDbConnection())
-            {
-                var script = LinqTranslator.Translate(query.Expression, infoProvider, factory);
-                sql = script.ToString();
+            var executor = LinqExecutorMaker.Make(query, infoProvider, factory, db);
+            var result = executor.Execute();
 
-                Console.WriteLine(sql);
-
-
-                var results = connection.Query<T>(sql);
-                return results;
-            }
+            sql = executor.Script.ToString();
+            return result;
         }
 
         public static IEnumerable<dynamic> Query(this DbContext db,

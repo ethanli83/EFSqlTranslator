@@ -1,7 +1,7 @@
-﻿using EFSqlTranslator.Translation.DbObjects.MySqlObjects;
+﻿using System.Linq;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 
-namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
+namespace EFSqlTranslator.Translation.DbObjects.MySqlObjects
 {
     public class MySqlObjectFactory : SqlObjectFactory
     {
@@ -13,12 +13,11 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
             return column;
         }
 
-        public override IDbTempTable BuildTempTable(EntityInfo entityInfo, IDbSelect sourceSelect = null)
+        public override IDbTempTable BuildTempTable(string tableName, IDbSelect sourceSelect = null)
         {
             var sqlTable = new MySqlTempTable
             {
-                Namespace = entityInfo.Namespace,
-                TableName = entityInfo.EntityName,
+                TableName = tableName,
                 SourceSelect = sourceSelect,
                 OutputOption = {QuotationMark = "`"}
             };

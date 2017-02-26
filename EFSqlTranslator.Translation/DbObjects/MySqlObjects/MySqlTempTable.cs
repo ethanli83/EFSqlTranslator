@@ -6,7 +6,12 @@ namespace EFSqlTranslator.Translation.DbObjects.MySqlObjects
 {
     public class MySqlTempTable : SqlTempTable
     {
-        public override IDbObject GetCreateStatement(IDbObjectFactory factory, UniqueNameGenerator nameGenerator)
+        public MySqlTempTable()
+        {
+            RowNumberColumnName = TranslationConstants.MySqlRowNumberColumnAlias;
+        }
+
+        public override IDbObject GetCreateStatement(IDbObjectFactory factory)
         {
             Func<string> action = () =>
             {
@@ -14,22 +19,20 @@ namespace EFSqlTranslator.Translation.DbObjects.MySqlObjects
                 sb.AppendLine($"create temporary table if not exists {this} as (");
 
                 // add row
-                var alias = nameGenerator.GenerateAlias(SourceSelect, TranslationConstants.RowNumberColumnAlias, true);
-                var rowNumberScript = new MySqlVariableColumn("@row := @row + 1")
+                var rowNumberScript = new MySqlVariableColumn("@var_row := @var_row + 1")
                 {
-                    Alias = alias
+                    Alias = TranslationConstants.MySqlRowNumberColumnAlias
                 };
 
                 SourceSelect.Selection.Add(rowNumberScript);
 
-                alias = nameGenerator.GenerateAlias(SourceSelect, "row");
-                var dbJoin = new MySqlVariableJoin("select @row := 0", alias);
+                var dbJoin = new MySqlVariableJoin("select @var_row := 0", "_var_row_");
 
                 SourceSelect.Joins.Add(dbJoin);
 
                 sb.AppendLineWithSpace(SourceSelect.ToString());
 
-                sb.AppendLine(");");
+                sb.AppendLine(")");
 
                 SourceSelect.Selection.Remove(rowNumberScript);
                 SourceSelect.Joins.Remove(dbJoin);
@@ -40,12 +43,12 @@ namespace EFSqlTranslator.Translation.DbObjects.MySqlObjects
             return new DbDynamicStatement(action);
         }
 
-        public override IDbObject GetDropStatement(IDbObjectFactory factory, UniqueNameGenerator nameGenerator)
+        public override IDbObject GetDropStatement(IDbObjectFactory factory)
         {
             Func<string> action = () =>
             {
                 var sb = new StringBuilder();
-                sb.AppendLine($"drop temporary table {this};");
+                sb.AppendLine($"drop temporary table {this}");
                 return sb.ToString();
             };
 

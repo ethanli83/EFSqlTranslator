@@ -16,5 +16,14 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
         {
             return new SqliteStatement(script);
         }
+
+        public override IDbTempTable BuildTempTable(string tableName, IDbSelect sourceSelect = null)
+        {
+            return new SqliteTempTable
+            {
+                TableName = tableName,
+                SourceSelect = sourceSelect
+            };
+        }
     }
 }

@@ -26,6 +26,7 @@ namespace EFSqlTranslator.EFModels
             return new EntityFieldInfo 
             {
                 Name = p.Name,
+                ClrProperty = p.PropertyInfo,
                 ValType = p.ClrType,
                 IsPrimaryKey = isPk,
                 Entity = e

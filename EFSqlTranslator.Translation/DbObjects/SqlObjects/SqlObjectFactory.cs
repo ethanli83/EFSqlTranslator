@@ -155,13 +155,11 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             return new SqlCondition(conditions, dbElse);
         }
 
-        public virtual IDbTempTable BuildTempTable(EntityInfo entityInfo, IDbSelect sourceSelect = null)
+        public virtual IDbTempTable BuildTempTable(string tableName, IDbSelect sourceSelect = null)
         {
             return new SqlTempTable
             {
-                Namespace = entityInfo.Namespace,
-                TableName = entityInfo.EntityName,
-                PrimaryKeys = entityInfo.Keys?.Select(k => BuildColumn(null, k.Name, k.ValType)).ToList(),
+                TableName = tableName,
                 SourceSelect = sourceSelect
             };
         }

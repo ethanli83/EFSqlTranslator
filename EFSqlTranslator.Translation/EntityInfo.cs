@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace EFSqlTranslator.Translation
 {
@@ -35,6 +36,10 @@ namespace EFSqlTranslator.Translation
 
         public EntityInfo ToEntity { get; set; }
 
+        public PropertyInfo FromProperty { get; set; }
+
+        public PropertyInfo ToProperty { get; set; }
+
         public IList<EntityFieldInfo> FromKeys { get; set; }
 
         public IList<EntityFieldInfo> ToKeys { get; set; }
@@ -51,5 +56,7 @@ namespace EFSqlTranslator.Translation
         public Type ValType { get; set; }
 
         public bool IsPrimaryKey { get; set; }
+
+        public PropertyInfo ClrProperty { get; set; }
     }
 }

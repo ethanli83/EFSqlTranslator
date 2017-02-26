@@ -14,6 +14,8 @@ namespace EFSqlTranslator.Translation
 
         public string GenerateAlias(IDbSelect dbSelect, string name, bool fullName = false)
         {
+            name = name.StartsWith("#") ? name.Remove(0, 1) : name;
+
             int count;
             if (dbSelect == null)
             {

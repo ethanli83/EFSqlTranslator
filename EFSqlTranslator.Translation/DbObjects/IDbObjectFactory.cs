@@ -25,7 +25,7 @@ namespace EFSqlTranslator.Translation.DbObjects
         IDbFunc BuildFunc(string name, bool isAggregation, params IDbObject[] parameters);
         IDbFunc BuildNullCheckFunc(params IDbObject[] parameters);
         IDbCondition BuildCondition(Tuple<IDbBinary, IDbObject>[] conditions, IDbObject dbElse = null);
-        IDbTempTable BuildTempTable(EntityInfo entityInfo, IDbSelect sourceSelect = null);
+        IDbTempTable BuildTempTable(string tableName, IDbSelect sourceSelect = null);
         IDbStatment BuildStatement(IDbObject script);
         IDbScript BuildScript();
     }

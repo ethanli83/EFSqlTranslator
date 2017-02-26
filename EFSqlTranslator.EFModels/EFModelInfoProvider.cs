@@ -26,7 +26,7 @@ namespace EFSqlTranslator.EFModels
             }
         }
 
-        private void UpdateKeysAndColumns(IEntityType et, EntityInfo ei)
+        private static void UpdateKeysAndColumns(IEntityType et, EntityInfo ei)
         {
             ei.Keys = et.GetKeys().First(k => k.IsPrimaryKey()).ToEntityFieldInfo(ei).ToList();
             ei.Columns = et.GetProperties().Select(p => p.ToEntityFieldInfo(ei)).ToList();
@@ -50,6 +50,8 @@ namespace EFSqlTranslator.EFModels
                 {
                     FromEntity = declaringEntity,
                     ToEntity = principalEntity,
+                    FromProperty = relation.DependentToPrincipal.PropertyInfo,
+                    ToProperty = relation.PrincipalToDependent.PropertyInfo,
                     FromKeys = declaringKeys.ToList(),
                     ToKeys = principalKeys.ToList(), 
                 };
@@ -76,6 +78,8 @@ namespace EFSqlTranslator.EFModels
                 {
                     FromEntity = principalEntity,
                     ToEntity = declaringEntity,
+                    FromProperty = relation.PrincipalToDependent.PropertyInfo,
+                    ToProperty = relation.DependentToPrincipal.PropertyInfo,
                     FromKeys = principalKeys.ToList(),
                     ToKeys = declaringKeys.ToList(), 
                     IsChildRelation = true
@@ -96,10 +100,7 @@ namespace EFSqlTranslator.EFModels
         public EntityInfo FindEntityInfo(Type type)
         {
             type = type.GenericTypeArguments.FirstOrDefault() ?? type;
-            if (_entityInfos.ContainsKey(type))
-                return _entityInfos[type];
-
-            return null;
+            return _entityInfos.ContainsKey(type) ? _entityInfos[type] : null;
         }
     }
 }

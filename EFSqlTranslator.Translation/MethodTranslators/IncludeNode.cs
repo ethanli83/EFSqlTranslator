@@ -15,13 +15,17 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             node.FromNode = this;
         }
 
+        public Expression Expression { get; set; }
         public IncludeNode FromNode { get; set; }
 
+        public IDbSelect Select { get; set; }
+        public IDbTempTable TempTable { get; set; }
+
+        public LambdaExpression FillFunc { get; set; }
+        public IEnumerable<object> Result { get; set; }
+
         public IEnumerable<IncludeNode> ToNodes => _toNodes;
-
-        public IDbObject Select { get; set; }
-
-        public Expression Expression { get; set; }
+        public IncludeGraph Graph { get; set; }
 
         public override string ToString()
         {

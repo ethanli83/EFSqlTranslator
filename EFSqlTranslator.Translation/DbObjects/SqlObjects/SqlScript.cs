@@ -21,9 +21,33 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine(PrintString(PreScripts));
-            sb.AppendLine(PrintString(Scripts));
-            sb.AppendLine(PrintString(PostScripts));
+            if (PreScripts.Any())
+            {
+                sb.Append(PrintString(PreScripts));
+
+                if (Scripts.Any() || PostScripts.Any())
+                {
+                    sb.AppendLine(StatementSeparator);
+                    sb.AppendLine();
+                }
+            }
+
+            if (Scripts.Any())
+            {
+                sb.Append(PrintString(Scripts));
+
+                if (PostScripts.Any())
+                {
+                    sb.AppendLine(StatementSeparator);
+                    sb.AppendLine();
+                }
+            }
+
+            if (PostScripts.Any())
+            {
+                sb.Append(PrintString(PostScripts));
+                sb.AppendLine();
+            }
 
             return sb.ToString();
         }
@@ -32,7 +56,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             return string.Join(
                 StatementSeparator + Environment.NewLine + Environment.NewLine, 
-                Scripts.Select(s => s.ToString().Trim()));
+                Scripts.Select(s => s.ToString().Trim())).Trim();
         }
     }
 }

@@ -299,7 +299,7 @@ namespace EFSqlTranslator.Translation
                 childSelect = _dbFactory.BuildSelect(childRef);
                 childRef.Alias = _nameGenerator.GenerateAlias(childSelect, dbTable.TableName);
 
-                var tableAlias = _nameGenerator.GenerateAlias(dbSelect, SqlTranslationHelper.SubSelectPrefix, true);
+                var tableAlias = _nameGenerator.GenerateAlias(dbSelect, TranslationConstants.SubSelectPrefix, true);
                 joinTo = _dbFactory.BuildRef(childSelect, tableAlias);
             }
 
@@ -320,7 +320,7 @@ namespace EFSqlTranslator.Translation
                 // that are used in join condition selected from the sub select.
                 if (childRef != null && childSelect != null)
                 {
-                    var alias = _nameGenerator.GenerateAlias(childSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
+                    var alias = _nameGenerator.GenerateAlias(childSelect, toKey.Name + TranslationConstants.JoinKeySuffix, true);
                     var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType, alias, true);
 
                     /**
@@ -347,7 +347,7 @@ namespace EFSqlTranslator.Translation
                 var fromSelect = fromRef.Referee as IDbSelect;
                 if (fromSelect != null)
                 {
-                    var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.Name + SqlTranslationHelper.JoinKeySuffix, true);
+                    var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.Name + TranslationConstants.JoinKeySuffix, true);
                     fromColumn.Name = alias;
                     fromColumn.Alias = string.Empty;
 
@@ -356,9 +356,7 @@ namespace EFSqlTranslator.Translation
                 }
 
                 var binary = _dbFactory.BuildBinary(fromColumn, DbOperator.Equal, toColumn);
-                condition = condition != null
-                    ? _dbFactory.BuildBinary(condition, DbOperator.And, binary)
-                    : binary;
+                condition = condition.UpdateBinary(binary, _dbFactory);
             }
 
             dbJoin.Condition = condition;

@@ -40,7 +40,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
 
                 dbExpression = childSelect.Selection.Last(
                     s => string.IsNullOrEmpty(s.Alias) ||
-                         !s.Alias.EndsWith(SqlTranslationHelper.JoinKeySuffix));
+                         !s.Alias.EndsWith(TranslationConstants.JoinKeySuffix));
 
                 childSelect.Selection.Remove(dbExpression);
                 childSelect.GroupBys.Remove(dbExpression);
