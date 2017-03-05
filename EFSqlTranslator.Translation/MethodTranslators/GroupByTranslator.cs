@@ -16,7 +16,6 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             plugIns.RegisterMethodTranslator("groupby", this);
         }
 
-
         public override void Translate(
             MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator)
         {
