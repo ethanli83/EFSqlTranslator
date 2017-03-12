@@ -16,9 +16,8 @@ namespace EFSqlTranslator.ConsoleApp
 
             using (var db = new BloggingContext())
             {
-                if (db.Database.EnsureCreated())
+                if (db.Database.EnsureDeleted() && db.Database.EnsureCreated())
                 {
-                    // Insert hash if created
                     UpdateData(db);
                     db.SaveChanges();
                 }
@@ -30,6 +29,7 @@ namespace EFSqlTranslator.ConsoleApp
                     .Where(p => p.Blog.Url != null)
                     .OrderBy(p => p.Comments.Average(c => c.PostId))
                     .Include(b => b.User)
+                    .ThenInclude(u => u.Comments)
                     .Include(b => b.Blog);
 
                 var sql = "";
@@ -121,6 +121,13 @@ namespace EFSqlTranslator.ConsoleApp
                 Content = "Post 2",
                 BlogId = 1,
                 UserId = 1
+            });
+
+            db.Comments.Add(new Comment
+            {
+                CommentId = 1,
+                UserId = 1,
+                PostId = 1
             });
         }
     }
