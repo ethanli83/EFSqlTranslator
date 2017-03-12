@@ -7,9 +7,17 @@ using NUnit.Framework;
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
+    [CategoryReadMe(
+        Index = 5,
+        Title = "Translating OrderBys",
+        Description = @"This section demostrates how the OrderBy is translated into sql."
+    )]
     public class OrderByTranslationTests
     {
         [Test]
+        [TranslationReadMe(
+            Index = 0,
+            Title = "OrderBy on normal column")]
         public void Test_OrderBy()
         {
             using (var db = new TestingContext())
@@ -80,6 +88,9 @@ order by u0.'UserName' desc";
         }
 
         [Test]
+        [TranslationReadMe(
+            Index = 1,
+            Title = "OrderBy with different direction")]
         public void Test_ThenByDescending()
         {
             using (var db = new TestingContext())

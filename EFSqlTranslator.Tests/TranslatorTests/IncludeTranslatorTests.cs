@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
-using EFSqlTranslator.Translation.DbObjects.MySqlObjects;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
@@ -9,14 +8,23 @@ using NUnit.Framework;
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
+    [CategoryReadMe(
+        Index = 6,
+        Title = "Translating Includes",
+        Description = @"
+Not like Entity Framework, Include and ThenInclude are translated as seperated select statements.
+This will give us better performance when includes a one to many relation. As we do not need to
+return all parent rows repeatly, this will significantly reduce the amount of data that needs to be
+returned from database."
+    )]
     public class IncludeTranslatorTests
     {
         [Test]
         [TranslationReadMe(
             Index = 0,
-            Title = "Count on basic grouping"
+            Title = "Include an entity by parent relation"
         )]
-        public void Test_Basic()
+        public void Test_Include_Parent()
         {
             using (var db = new TestingContext())
             {
@@ -60,9 +68,9 @@ drop table if exists 'Temp_Table_Posts0'";
         [Test]
         [TranslationReadMe(
             Index = 1,
-            Title = "Count on basic grouping"
+            Title = "Include a parent relation, then include a child relation"
         )]
-        public void Test_Basic_2()
+        public void Test_Include_Parent_Relation_Then_Include_Child_Relation()
         {
             using (var db = new TestingContext())
             {
@@ -126,11 +134,7 @@ drop table if exists 'Temp_Table_Posts0'
         }
 
         [Test]
-        [TranslationReadMe(
-            Index = 1,
-            Title = "Count on basic grouping"
-        )]
-        public void Test_Basic_3()
+        public void Test_Multiple_Includes()
         {
             using (var db = new TestingContext())
             {
@@ -181,11 +185,7 @@ drop table if exists 'Temp_Table_Posts0'";
         }
 
         [Test]
-        [TranslationReadMe(
-            Index = 1,
-            Title = "Count on basic grouping"
-        )]
-        public void Test_Basic_4()
+        public void Test_Mix_Includes()
         {
             using (var db = new TestingContext())
             {

@@ -10,7 +10,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
 {
     [TestFixture]
     [CategoryReadMe(
-         Index = 5,
+         Index = 7,
          Title = "Translating Manual Join",
          Description = @"
 This libary supports more complicated join. You can define your own join condition rather than
@@ -27,7 +27,9 @@ have to be limited to column pairs."
         {
             using (var db = new TestingContext())
             {
-                var query = db.Blogs.Where(b => b.Posts.Any(p => p.User.UserName != null));
+                var query = db.Blogs
+                    .Where(b => b.Posts.Any(p => p.User.UserName != null));
+
                 var query1 = db.Posts.
                     Join(
                         query, 

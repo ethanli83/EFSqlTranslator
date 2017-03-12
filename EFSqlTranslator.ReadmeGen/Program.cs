@@ -34,29 +34,7 @@ The translator is a nuget libary. To use the libary, use your nuget managment to
 
 You can now try the translator out on http://linqrunner.daydreamer.io/.";
 
-        private const string Ending = @"## VII. Basic Support of Include Method
-The libary only has basic support for 'Include' method. It only works on query that returns full entity.
-This may not work if the query has custom selection. Also, you need to provide a map function. For
-more information of the mapping function, please checkout the 'Multi Mapping' section in the [Dapper](https://github.com/StackExchange/dapper-dot-net)'s github
-page.
-
-Here is a example on how to include a parent relation:
-
-```csharp
-var query = db.Blogs.
-    Where(b => b.User.UserName.StartsWith(""ethan"")).
-    Include(b => b.User);
-
-string sql;
-var blogs = db.Query(
-    query,
-    (b, u) => // the mapping function
-    {
-        b.User = u;
-        return b;
-    },
-    out sql);
-```";
+        private const string Ending = @"";
 
         public static void Main(string[] args)
         {

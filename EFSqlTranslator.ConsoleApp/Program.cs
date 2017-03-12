@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using AgileObjects.ReadableExpressions;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace EFSqlTranslator.ConsoleApp
 {
@@ -40,9 +37,14 @@ namespace EFSqlTranslator.ConsoleApp
                         new EFModelInfoProvider(db),
                         new SqliteObjectFactory(),
                         out sql);
+
+                    var json = JsonConvert.SerializeObject(blogs, Formatting.Indented);
+                    Console.WriteLine("Result:");
+                    Console.WriteLine(json);
                 }
                 finally
                 {
+                    Console.WriteLine("Sql:");
                     Console.WriteLine(sql);
                 }
             }

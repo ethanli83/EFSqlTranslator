@@ -28,9 +28,9 @@ In this section, we will show you multiple ways to select data. You can basicall
         {
             using (var db = new TestingContext())
             {
-                var query = db.Posts.
-                    Where(p => p.User.UserName != null).
-                    Select(p => new { p.Content, p.Title });
+                var query = db.Posts
+                    .Where(p => p.User.UserName != null)
+                    .Select(p => new { p.Content, p.Title });
                 
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
@@ -54,9 +54,9 @@ where u0.'UserName' is not null";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Posts.
-                    Where(p => p.User.UserName != null).
-                    Select(p => new { p.Content, p.Blog.User.UserName });
+                var query = db.Posts
+                    .Where(p => p.User.UserName != null)
+                    .Select(p => new { p.Content, p.Blog.User.UserName });
 
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
@@ -82,9 +82,9 @@ where u0.'UserName' is not null";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => new
+                var query = db.Posts
+                    .Where(p => p.Content != null)
+                    .Select(p => new
                     {
                         TitleContent = p.Title + "|" + p.Content,
                         Num = p.BlogId / p.User.UserId,
@@ -108,9 +108,9 @@ where p0.'Content' is not null";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => new { p.Blog, p.User.UserName });
+                var query = db.Posts
+                    .Where(p => p.Content != null)
+                    .Select(p => new { p.Blog, p.User.UserName });
                 
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
@@ -136,10 +136,10 @@ where p0.'Content' is not null";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => new { p.Blog, p.User.UserName }).
-                    Select(p => new { p.Blog.Url, p.Blog.Name, p.UserName });
+                var query = db.Posts
+                    .Where(p => p.Content != null)
+                    .Select(p => new { p.Blog, p.User.UserName })
+                    .Select(p => new { p.Blog.Url, p.Blog.Name, p.UserName });
                 
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
@@ -160,10 +160,10 @@ where p0.'Content' is not null";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => p.Blog).
-                    Select(b => b.Url);
+                var query = db.Posts
+                    .Where(p => p.Content != null)
+                    .Select(p => p.Blog)
+                    .Select(b => b.Url);
 
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
@@ -184,11 +184,11 @@ where p0.'Content' is not null";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => p.Blog).
-                    Select(g => new { g.User, g.Url }).
-                    Select(g => new { g.User.UserName, g.Url });
+                var query = db.Posts
+                    .Where(p => p.Content != null)
+                    .Select(p => p.Blog)
+                    .Select(g => new { g.User, g.Url })
+                    .Select(g => new { g.User.UserName, g.Url });
                 
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
@@ -212,12 +212,12 @@ left outer join 'Users' u0 on sq0.'UserId_jk0' = u0.'UserId'";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(p => new { p.Blog }).
-                    GroupBy(g => new { g.Blog, g.Blog.Url }).
-                    Select(p => new { p.Key.Blog, p.Key.Blog.User, p.Key.Url }).
-                    Select(g => new { g.Blog.Name, g.User.UserName, g.Url });
+                var query = db.Posts
+                    .Where(p => p.Content != null)
+                    .Select(p => new { p.Blog })
+                    .GroupBy(g => new { g.Blog, g.Blog.Url })
+                    .Select(p => new { p.Key.Blog, p.Key.Blog.User, p.Key.Url })
+                    .Select(g => new { g.Blog.Name, g.User.UserName, g.Url });
 
                 var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
@@ -242,8 +242,8 @@ group by sq0.'BlogId', sq0.'Url', u0.'UserId', sq0.'Name', u0.'UserName'";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Blogs.
-                    Select(b => new
+                var query = db.Blogs
+                    .Select(b => new
                     {
                         Cnt1 = b.Posts.Count(p => p.LikeCount > 10),
                         Cnt2 = b.Posts.Count(p => p.LikeCount < 50)
