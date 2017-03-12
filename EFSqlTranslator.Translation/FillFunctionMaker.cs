@@ -110,7 +110,11 @@ namespace EFSqlTranslator.Translation
 
             //var posts = dicts[blog.BlogId];
             var varTs = Expression.Variable(toEnumType, "rts");
-            var dictItemExpr = Expression.Property(varDict, "Item", fkExpr);
+
+            var keyType = varDict.Type.GenericTypeArguments.First();
+            var castExpr = Expression.Convert(fkExpr, keyType);
+            var dictItemExpr = Expression.Property(varDict, "Item", castExpr);
+
             var varTsAssignExpr = Expression.Assign(varTs, dictItemExpr);
 
             var fmExpr = Expression.Property(varFromEntity, fromProperty);
@@ -132,7 +136,7 @@ namespace EFSqlTranslator.Translation
             var updateBlockExpr = Expression.Block(new[] {varTs}, varTsAssignExpr, arcExpr, tkLoop);
 
             // ContainsKey(TKey key)
-            var ccExpr = Expression.Call(varDict, "ContainsKey", null, fkExpr);
+            var ccExpr = Expression.Call(varDict, "ContainsKey", null, castExpr);
             var ifExpr = Expression.IfThen(ccExpr, updateBlockExpr);
             return ifExpr;
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
@@ -27,10 +28,8 @@ namespace EFSqlTranslator.ConsoleApp
             {
                 var query = db.Posts
                     .Where(p => p.Blog.Url != null)
-                    .OrderBy(p => p.Comments.Average(c => c.PostId))
                     .Include(b => b.User)
-                    .ThenInclude(u => u.Comments)
-                    .Include(b => b.Blog);
+                    .ThenInclude(u => u.Comments);
 
                 var sql = "";
                 try
