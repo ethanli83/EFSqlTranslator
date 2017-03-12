@@ -2,7 +2,6 @@
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using NUnit.Framework;
 
 namespace EFSqlTranslator.Tests.TranslatorTests

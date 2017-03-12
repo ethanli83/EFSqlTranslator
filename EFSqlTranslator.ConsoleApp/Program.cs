@@ -30,10 +30,7 @@ namespace EFSqlTranslator.ConsoleApp
             {
                 var query = db.Posts
                     .Where(p => p.Blog.Url != null)
-                    .Include(p => p.User)
-                    .ThenInclude(u => u.Comments)
-                    .ThenInclude(c => c.User)
-                    .Include(p => p.Blog);
+                    .OrderBy(p => p.Comments.Average(c => c.PostId));
 
                 var sql = "";
                 try

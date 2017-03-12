@@ -14,6 +14,7 @@ namespace EFSqlTranslator.Translation.DbObjects
         IDbColumn BuildColumn(DbReference dbRef, string colName, Type type, string alias = null, bool isJoinKey = false);
         IDbColumn BuildColumn(DbReference dbRef, string colName, DbType type, string alias = null, bool isJoinKey = false);
         IDbColumn BuildColumn(IDbColumn column);
+        IDbOrderByColumn BuildOrderByColumn(IDbSelectable selectable, DbOrderDirection direction = DbOrderDirection.Asc);
         IDbRefColumn BuildRefColumn(DbReference dbRef, string alias = null, IDbRefColumn fromRefColumn = null);
         IDbList<T> BuildList<T>() where T : IDbObject;
         IDbList<T> BuildList<T>(params T[] objs) where T : IDbObject;

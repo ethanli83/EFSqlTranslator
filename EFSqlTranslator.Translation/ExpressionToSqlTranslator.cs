@@ -43,6 +43,7 @@ namespace EFSqlTranslator.Translation
             new AnyTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new JoinTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new GroupByTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new OrderByTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new SelectTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new CountTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new AggregationTranslator(_infoProvider, _dbFactory).Register(_plugIns);

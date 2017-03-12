@@ -65,6 +65,11 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
         }
 
+        public IDbOrderByColumn BuildOrderByColumn(IDbSelectable selectable, DbOrderDirection direction = DbOrderDirection.Asc)
+        {
+            return new SqlOrderColumn(selectable, direction);
+        }
+
         public IDbRefColumn BuildRefColumn(DbReference dbRef, string alias = null, IDbRefColumn fromRefColumn = null)
         {
             var refCol = new SqlRefColumn
