@@ -26,11 +26,25 @@ namespace EFSqlTranslator.Translation
 
         public static LambdaExpression Make(MemberExpression memberExpr, IModelInfoProvider infoProvider)
         {
-            // b => b.Posts
-            // from prop Posts, to prop Blog
-            // so If I go:
-            // b(fromEntity).Posts(fromProp)
-            // p(toEntity).Blog(toProp)
+            /** for example
+            relation: b => b.posts
+            fill func:
+            Action<IEnumerable<Blog>, IEnumerable<Post>> x = (bs, ps) =>
+            {
+                var dict = ps.GroupBy(p => p.BlogId).ToDictionary(g => g.Key);
+                foreach (var blog in bs)
+                {
+                    if (dict.ContainsKey(blog.BlogId))
+                    {
+                        var posts = dict[blog.BlogId];
+                        blog.Posts.AddRange(posts);
+
+                        foreach (var post in posts)
+                            post.Blog = blog;
+                    }
+                }
+            };
+             */
             var fromEntity = infoProvider.FindEntityInfo(memberExpr.Expression.Type);
             var relation = fromEntity.GetRelation(memberExpr.Member.Name);
             var toEntity = relation.ToEntity;
@@ -44,30 +58,25 @@ namespace EFSqlTranslator.Translation
             var fromEnumType = typeof(IEnumerable<>).MakeGenericType(fromEntity.Type);
             var toEnumType = typeof(IEnumerable<>).MakeGenericType(toEntity.Type);
 
-            if (!toEnumType.IsAssignableFrom(memberExpr.Type))
-            {
-                fromEntity = relation.ToEntity;
-                toEntity = relation.FromEntity;
+            // we need to invert the from and to for parent relation as the expression
+            // was designed for child relation
+            return toEnumType.IsAssignableFrom(memberExpr.Type)
+                ? MakeFillerFunc(memberExpr, fromEnumType, toEnumType, fromEntity, toEntity, fromKey, toKey, fromProp, toProp)
+                : MakeFillerFunc(memberExpr, toEnumType, fromEnumType, toEntity, fromEntity, toKey, fromKey, toProp, fromProp);
+        }
 
-                fromKey = relation.ToKeys.Single();
-                toKey = relation.FromKeys.Single();
-
-                fromProp = relation.ToProperty;
-                toProp = relation.FromProperty;
-
-                var ft = fromEnumType;
-                fromEnumType = toEnumType;
-                toEnumType = ft;
-            }
-
+        private static LambdaExpression MakeFillerFunc(
+            Expression memberExpr, Type fromEnumType, Type toEnumType, EntityInfo fromEntity, EntityInfo toEntity,
+            EntityFieldInfo fromKey, EntityFieldInfo toKey, PropertyInfo fromProp, PropertyInfo toProp)
+        {
             var fromParam = Expression.Parameter(typeof(List<object>), "fs");
             var toParam = Expression.Parameter(typeof(List<object>), "ts");
 
             var varFromArr = Expression.Variable(fromEnumType, "fromArr");
             var varToArr = Expression.Variable(toEnumType, "toArr");
 
-            var fromCastCall = Expression.Call(typeof(Enumerable), "Cast", new[] { fromEntity.Type }, fromParam);
-            var toCastCall = Expression.Call(typeof(Enumerable), "Cast", new[] { toEntity.Type }, toParam);
+            var fromCastCall = Expression.Call(typeof(Enumerable), nameof(Enumerable.Cast), new[] {fromEntity.Type}, fromParam);
+            var toCastCall = Expression.Call(typeof(Enumerable), nameof(Enumerable.Cast), new[] {toEntity.Type}, toParam);
 
             var varFromArrAssign = Expression.Assign(varFromArr, fromCastCall);
             var varToArrAssign = Expression.Assign(varToArr, toCastCall);
@@ -85,7 +94,7 @@ namespace EFSqlTranslator.Translation
             var forEachExpr = MakeForEach(varFromArr, varFromEntity, ifExpr);
 
             var codeBlock = Expression.Block(
-                new [] { varFromArr, varToArr, varDict },
+                new[] {varFromArr, varToArr, varDict},
                 varFromArrAssign, varToArrAssign, varDictAssignExpr, forEachExpr);
 
             return toEnumType.IsAssignableFrom(memberExpr.Type)
@@ -134,13 +143,13 @@ namespace EFSqlTranslator.Translation
             var gParam = Expression.Parameter(toEntity.Type, "t");
             var gBody = Expression.Property(gParam, toKey.ClrProperty);
             var gLambda = Expression.Lambda(gBody, gParam);
-            var gCall = Expression.Call(typeof(Enumerable), "GroupBy", new[] {gParam.Type, gBody.Type}, toParam, gLambda);
+            var gCall = Expression.Call(typeof(Enumerable), nameof(Enumerable.GroupBy), new[] {gParam.Type, gBody.Type}, toParam, gLambda);
 
             // ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
             var tdParam = Expression.Parameter(typeof(IGrouping<,>).MakeGenericType(toKey.ValType, toEntity.Type));
             var tdBody = Expression.Property(tdParam, "Key");
             var tdLambda = Expression.Lambda(tdBody, tdParam);
-            var tdCall = Expression.Call(typeof(Enumerable), "ToDictionary", new[] {tdParam.Type, tdBody.Type}, gCall, tdLambda);
+            var tdCall = Expression.Call(typeof(Enumerable), nameof(Enumerable.ToDictionary), new[] {tdParam.Type, tdBody.Type}, gCall, tdLambda);
 
             return tdCall;
         }
@@ -162,8 +171,6 @@ namespace EFSqlTranslator.Translation
             var breakExpression = Expression.Break(breakLabel);
             var disposeCall = Expression.Call(enumeratorVar, typeof(IDisposable).GetMethod("Dispose"));
             var elseBlock = Expression.Block(disposeCall, breakExpression);
-
-            new List<int>().GetEnumerator().Dispose();
 
             var loop = Expression.Block(new[] { enumeratorVar },
                 enumeratorAssign,

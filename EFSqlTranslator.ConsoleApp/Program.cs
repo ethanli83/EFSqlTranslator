@@ -3,6 +3,7 @@ using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace EFSqlTranslator.ConsoleApp
@@ -27,7 +28,9 @@ namespace EFSqlTranslator.ConsoleApp
             {
                 var query = db.Posts
                     .Where(p => p.Blog.Url != null)
-                    .OrderBy(p => p.Comments.Average(c => c.PostId));
+                    .OrderBy(p => p.Comments.Average(c => c.PostId))
+                    .Include(b => b.User)
+                    .Include(b => b.Blog);
 
                 var sql = "";
                 try
@@ -38,7 +41,12 @@ namespace EFSqlTranslator.ConsoleApp
                         new SqliteObjectFactory(),
                         out sql);
 
-                    var json = JsonConvert.SerializeObject(blogs, Formatting.Indented);
+                    var json = JsonConvert.SerializeObject(blogs, new JsonSerializerSettings
+                    {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                        Formatting = Formatting.Indented
+                    });
+                    
                     Console.WriteLine("Result:");
                     Console.WriteLine(json);
                 }
