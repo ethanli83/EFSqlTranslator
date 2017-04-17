@@ -1,7 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
-using NUnit.Framework;
+using Xunit;
 
 namespace EFSqlTranslator.Tests
 {
@@ -13,7 +12,7 @@ namespace EFSqlTranslator.Tests
 
             expected = Regex.Replace(expected, @"[\n\r\s]+", " ").Trim();
             actual = Regex.Replace(actual, @"[\n\r\s]+", " ").Trim();
-            Assert.AreEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
     }
 

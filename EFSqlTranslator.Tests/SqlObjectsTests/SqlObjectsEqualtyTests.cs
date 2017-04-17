@@ -1,13 +1,12 @@
 ﻿using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
-using NUnit.Framework;
+using Xunit;
 
 namespace EFSqlTranslator.Tests.SqlObjectsTests
 {
-    [TestFixture]
     public class SqlObjectsEqualtyTests
     {
-        [Test]
+        [Fact]
         public void Test_Column_Equals()
         {
             var s1 = new SqlColumn
@@ -43,8 +42,8 @@ namespace EFSqlTranslator.Tests.SqlObjectsTests
                 Alias = "aaaa"
             };
 
-            Assert.AreEqual(s1, s2);
-            Assert.AreNotEqual(s2, s3);
+            Assert.Equal(s1, s2);
+            Assert.NotEqual(s2, s3);
         }
     }
 }

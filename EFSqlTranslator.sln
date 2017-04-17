@@ -1,17 +1,17 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.0.0
-MinimumVisualStudioVersion = 10.0.0.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EFSqlTranslator.Translation", "EFSqlTranslator.Translation\EFSqlTranslator.Translation.xproj", "{895A9227-F5DA-4A5C-9734-F15314E9D2F0}"
+
+Microsoft Visual Studio Solution File, Format Version 15.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26114.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFSqlTranslator.Translation", "EFSqlTranslator.Translation\EFSqlTranslator.Translation.csproj", "{895A9227-F5DA-4A5C-9734-F15314E9D2F0}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EFSqlTranslator.ConsoleApp", "EFSqlTranslator.ConsoleApp\EFSqlTranslator.ConsoleApp.xproj", "{0E8192E8-01F2-4886-A8D1-FC55A9BB23BC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFSqlTranslator.ConsoleApp", "EFSqlTranslator.ConsoleApp\EFSqlTranslator.ConsoleApp.csproj", "{0E8192E8-01F2-4886-A8D1-FC55A9BB23BC}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EFSqlTranslator.EFModels", "EFSqlTranslator.EFModels\EFSqlTranslator.EFModels.xproj", "{FFFCD3F3-E457-4E7D-9F2C-9C926A22F430}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFSqlTranslator.EFModels", "EFSqlTranslator.EFModels\EFSqlTranslator.EFModels.csproj", "{FFFCD3F3-E457-4E7D-9F2C-9C926A22F430}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EFSqlTranslator.Tests", "EFSqlTranslator.Tests\EFSqlTranslator.Tests.xproj", "{2B9F7013-F749-4E66-9922-2C27C479AECD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFSqlTranslator.Tests", "EFSqlTranslator.Tests\EFSqlTranslator.Tests.csproj", "{2B9F7013-F749-4E66-9922-2C27C479AECD}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "EFSqlTranslator.ReadmeGen", "EFSqlTranslator.ReadmeGen\EFSqlTranslator.ReadmeGen.xproj", "{B58E37DF-FBFA-4DE2-B3E2-549FC1042018}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFSqlTranslator.ReadmeGen", "EFSqlTranslator.ReadmeGen\EFSqlTranslator.ReadmeGen.csproj", "{B58E37DF-FBFA-4DE2-B3E2-549FC1042018}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

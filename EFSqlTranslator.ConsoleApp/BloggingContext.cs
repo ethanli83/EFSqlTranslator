@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NLog.Config;
 
 namespace EFSqlTranslator.ConsoleApp
 {
@@ -16,6 +18,8 @@ namespace EFSqlTranslator.ConsoleApp
         public DbSet<Comment> Comments { get; set; }
 
         public DbSet<Statistic> Statistics { get; set; }
+
+        public DbSet<Foo> Foos { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -43,7 +47,7 @@ namespace EFSqlTranslator.ConsoleApp
     public class Post
     {
         public int PostId { get; set; }
-        
+
         public string Title { get; set; }
         
         public string Content { get; set; }
@@ -94,5 +98,13 @@ namespace EFSqlTranslator.ConsoleApp
         public int BlogId { get; set; }
 
         public Blog Blog { get; set; }
+    }
+
+    [Table("Foo Table")]
+    public class Foo
+    {
+        public int FooId { get; set; }
+
+        public string FooCol { get; set; }
     }
 }

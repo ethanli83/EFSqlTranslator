@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Reflection;
 using EFSqlTranslator.Translation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -10,14 +11,15 @@ namespace EFSqlTranslator.EFModels
 {
     public class EFModelInfoProvider : IModelInfoProvider
     {
-        private readonly DbContext _ctx;
         private readonly ConcurrentDictionary<Type, EntityInfo> _entityInfos = 
             new ConcurrentDictionary<Type, EntityInfo>();
 
+        private readonly ConcurrentDictionary<MemberInfo, EntityFieldInfo> _fieldInfos =
+            new ConcurrentDictionary<MemberInfo, EntityFieldInfo>();
+
         public EFModelInfoProvider(DbContext context)
         {
-            _ctx = context;
-            foreach(var entityType in _ctx.Model.GetEntityTypes())
+            foreach(var entityType in context.Model.GetEntityTypes())
             {
                 var entityInfo = GetOrAddEntityInfo(entityType);
                 UpdateKeysAndColumns(entityType, entityInfo);
@@ -26,10 +28,13 @@ namespace EFSqlTranslator.EFModels
             }
         }
 
-        private static void UpdateKeysAndColumns(IEntityType et, EntityInfo ei)
+        private void UpdateKeysAndColumns(IEntityType et, EntityInfo ei)
         {
             ei.Keys = et.GetKeys().First(k => k.IsPrimaryKey()).ToEntityFieldInfo(ei).ToList();
             ei.Columns = et.GetProperties().Select(p => p.ToEntityFieldInfo(ei)).ToList();
+
+            foreach (var fieldInfo in ei.Keys.Concat(ei.Columns))
+                _fieldInfos.TryAdd(fieldInfo.ClrProperty, fieldInfo);
         }
 
         private void UpdateParentRelations(IEntityType et, EntityInfo ei)
@@ -101,6 +106,11 @@ namespace EFSqlTranslator.EFModels
         {
             type = type.GenericTypeArguments.FirstOrDefault() ?? type;
             return _entityInfos.ContainsKey(type) ? _entityInfos[type] : null;
+        }
+
+        public EntityFieldInfo FindFieldInfo(MemberInfo memberInfo)
+        {
+            return _fieldInfos.ContainsKey(memberInfo) ? _fieldInfos[memberInfo] : null;
         }
     }
 }

@@ -2,11 +2,10 @@
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using NUnit.Framework;
+using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
-    [TestFixture]
     [CategoryReadMe(
         Index = 5,
         Title = "Translating OrderBys",
@@ -14,7 +13,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
     )]
     public class OrderByTranslationTests
     {
-        [Test]
+        [Fact]
         [TranslationReadMe(
             Index = 0,
             Title = "OrderBy on normal column")]
@@ -31,16 +30,16 @@ namespace EFSqlTranslator.Tests.TranslatorTests
 
                 const string expected = @"
 select b0.*
-from 'Blogs' b0
-left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
-where b0.'Url' like 'ethan.com%'
-order by u0.'UserName'";
+from Blogs b0
+left outer join Users u0 on b0.UserId = u0.UserId
+where b0.Url like 'ethan.com%'
+order by u0.UserName";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_ThenBy()
         {
             using (var db = new TestingContext())
@@ -55,16 +54,16 @@ order by u0.'UserName'";
 
                 const string expected = @"
 select b0.*
-from 'Blogs' b0
-left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
-where b0.'Url' like 'ethan.com%'
-order by u0.'UserName', b0.'CommentCount'";
+from Blogs b0
+left outer join Users u0 on b0.UserId = u0.UserId
+where b0.Url like 'ethan.com%'
+order by u0.UserName, b0.CommentCount";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_OrderByDescending()
         {
             using (var db = new TestingContext())
@@ -78,16 +77,16 @@ order by u0.'UserName', b0.'CommentCount'";
 
                 const string expected = @"
 select b0.*
-from 'Blogs' b0
-left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
-where b0.'Url' like 'ethan.com%'
-order by u0.'UserName' desc";
+from Blogs b0
+left outer join Users u0 on b0.UserId = u0.UserId
+where b0.Url like 'ethan.com%'
+order by u0.UserName desc";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
             Index = 1,
             Title = "OrderBy with different direction")]
@@ -105,16 +104,16 @@ order by u0.'UserName' desc";
 
                 const string expected = @"
 select b0.*
-from 'Blogs' b0
-left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
-where b0.'Url' like 'ethan.com%'
-order by u0.'UserName', b0.'CommentCount' desc";
+from Blogs b0
+left outer join Users u0 on b0.UserId = u0.UserId
+where b0.Url like 'ethan.com%'
+order by u0.UserName, b0.CommentCount desc";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Mix()
         {
             using (var db = new TestingContext())
@@ -130,16 +129,16 @@ order by u0.'UserName', b0.'CommentCount' desc";
 
                 const string expected = @"
 select b0.*
-from 'Blogs' b0
-left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
-where b0.'Url' like 'ethan.com%'
-order by u0.'UserName', b0.'CommentCount' desc, b0.'Url'";
+from Blogs b0
+left outer join Users u0 on b0.UserId = u0.UserId
+where b0.Url like 'ethan.com%'
+order by u0.UserName, b0.CommentCount desc, b0.Url";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_OnChildRelation()
         {
             using (var db = new TestingContext())
@@ -153,14 +152,14 @@ order by u0.'UserName', b0.'CommentCount' desc, b0.'Url'";
 
                 const string expected = @"
 select b0.*
-from 'Blogs' b0
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', sum(p0.'LikeCount') as 'sum0'
-    from 'Posts' p0
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-where b0.'Url' like 'ethan.com%'
-order by ifnull(sq0.'sum0', 0)";
+    select p0.BlogId as 'BlogId_jk0', sum(p0.LikeCount) as 'sum0'
+    from Posts p0
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+where b0.Url like 'ethan.com%'
+order by ifnull(sq0.sum0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

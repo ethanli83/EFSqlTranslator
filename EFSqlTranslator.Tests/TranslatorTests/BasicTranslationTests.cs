@@ -2,12 +2,10 @@ using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using EFSqlTranslator.Translation.DbObjects.SqlObjects;
-using NUnit.Framework;
+using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
-    [TestFixture]
     [CategoryReadMe(
         Index = 0,
         Title = @"Basic Translation",
@@ -15,7 +13,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
     )]
     public class BasicTranslationTests
     {
-        [Test]
+        [Fact]
         [TranslationReadMe(
             Index = 0,
             Title = "Basic filtering on column values in where clause")]
@@ -33,14 +31,14 @@ namespace EFSqlTranslator.Tests.TranslatorTests
 
                 const string expected = @"
 select b0.*
-from 'Blogs' b0
-where ((b0.'Url' is not null) and (b0.'Name' like 'Ethan%')) and ((b0.'UserId' > 1) or (b0.'UserId' < 100))";
+from Blogs b0
+where ((b0.Url is not null) and (b0.Name like 'Ethan%')) and ((b0.UserId > 1) or (b0.UserId < 100))";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Ues_Left_Join_If_In_Or_Condition()
         {
             using (var db = new TestingContext())
@@ -52,15 +50,15 @@ where ((b0.'Url' is not null) and (b0.'Name' like 'Ethan%')) and ((b0.'UserId' >
 
                 const string expected = @"
 select p0.*
-from 'Posts' p0
-left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where (u0.'UserName' is not null) or (p0.'Content' is not null)";
+from Posts p0
+left outer join Users u0 on p0.UserId = u0.UserId
+where (u0.UserName is not null) or (p0.Content is not null)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Nullable_Value_In_Condition()
         {
             using (var db = new TestingContext())
@@ -71,13 +69,13 @@ where (u0.'UserName' is not null) or (p0.'Content' is not null)";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.* from 'Blogs' b0 where b0.'CommentCount' > 10";
+select b0.* from Blogs b0 where b0.CommentCount > 10";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Query_Unwrapping()
         {
             using (var db = new TestingContext())
@@ -90,13 +88,13 @@ select b0.* from 'Blogs' b0 where b0.'CommentCount' > 10";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.'BlogId' as 'K' from 'Blogs' b0 where b0.'CommentCount' > 10";
+select b0.BlogId as 'K' from Blogs b0 where b0.CommentCount > 10";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Query_Unwrapping2()
         {
             using (var db = new TestingContext())
@@ -107,7 +105,7 @@ select b0.'BlogId' as 'K' from 'Blogs' b0 where b0.'CommentCount' > 10";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.* from 'Blogs' b0";
+select b0.* from Blogs b0";
 
                 TestUtils.AssertStringEqual(expected, sql);
 

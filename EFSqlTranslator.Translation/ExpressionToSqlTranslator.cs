@@ -246,7 +246,8 @@ namespace EFSqlTranslator.Translation
                 var refCol = dbObj as IDbRefColumn;
                 var dbRef = refCol != null ? refCol.Ref : (DbReference)dbObj;
 
-                var col = _dbFactory.BuildColumn(dbRef, m.Member.Name, m.Type);
+                var fieldInfo = _infoProvider.FindFieldInfo(m.Member);
+                var col = _dbFactory.BuildColumn(dbRef, fieldInfo.Name, fieldInfo.ValType);
                 _state.ResultStack.Push(col);
 
                 // if we create a column whose DbRef is using by a RefColumn
@@ -257,7 +258,7 @@ namespace EFSqlTranslator.Translation
                 // if the ref column is not now, and it is referring another ref column
                 // we need to make sure the column we translated is in the sub select which
                 // owns the ref column that referred by the current refColumn
-                refCol?.RefTo?.AddToReferedSelect(_dbFactory, m.Member.Name, m.Type);
+                refCol?.RefTo?.AddToReferedSelect(_dbFactory, fieldInfo.Name, fieldInfo.ValType);
 
                 return m;
             }

@@ -3,12 +3,10 @@ using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using EFSqlTranslator.Translation.DbObjects.SqlObjects;
-using NUnit.Framework;
+using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
-    [TestFixture]
     [CategoryReadMe(
          Index = 1,
          Title = "Translating Relationsheips",
@@ -21,7 +19,7 @@ In this section, we will show you how relationships are translated. The basic ru
      )]
     public class RelationTranslationTests
     {
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 0,
              Title = "Join to a parent relation"
@@ -37,15 +35,15 @@ In this section, we will show you how relationships are translated. The basic ru
 
                 const string expected = @"
 select p0.*
-from 'Posts' p0
-inner join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-where b0.'Url' is not null ";
+from Posts p0
+inner join Blogs b0 on p0.BlogId = b0.BlogId
+where b0.Url is not null ";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 1,
              Title = "Join to a child relation"
@@ -61,20 +59,20 @@ where b0.'Url' is not null ";
 
                 const string expected = @"
 select b0.*
-from 'Blogs' b0
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0'
-    from 'Posts' p0
-    where p0.'Content' is not null
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-where sq0.'BlogId_jk0' is not null";
+    select p0.BlogId as 'BlogId_jk0'
+    from Posts p0
+    where p0.Content is not null
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+where sq0.BlogId_jk0 is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 2,
              Title = "Use relationships in a chain"
@@ -90,16 +88,16 @@ where sq0.'BlogId_jk0' is not null";
 
                 const string expected = @"
 select b0.*
-from 'Blogs' b0
-inner join 'Users' u0 on b0.'UserId' = u0.'UserId'
+from Blogs b0
+inner join Users u0 on b0.UserId = u0.UserId
 left outer join (
-    select c0.'UserId' as 'UserId_jk0'
-    from 'Comments' c0
-    inner join 'Posts' p0 on c0.'PostId' = p0.'PostId'
-    where p0.'Content' is not null
-    group by c0.'UserId'
-) sq0 on u0.'UserId' = sq0.'UserId_jk0'
-where sq0.'UserId_jk0' is not null";
+    select c0.UserId as 'UserId_jk0'
+    from Comments c0
+    inner join Posts p0 on c0.PostId = p0.PostId
+    where p0.Content is not null
+    group by c0.UserId
+) sq0 on u0.UserId = sq0.UserId_jk0
+where sq0.UserId_jk0 is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

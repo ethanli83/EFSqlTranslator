@@ -19,7 +19,7 @@ namespace EFSqlTranslator.Translation.DbObjects.MySqlObjects
             {
                 TableName = tableName,
                 SourceSelect = sourceSelect,
-                OutputOption = {QuotationMark = "`"}
+                OutputOption = { QuotationMark = "`" }
             };
 
             return sqlTable;

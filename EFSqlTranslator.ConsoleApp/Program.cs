@@ -26,10 +26,8 @@ namespace EFSqlTranslator.ConsoleApp
 
             using (var db = new BloggingContext())
             {
-                var query = db.Posts
-                    .Where(p => p.Blog.Url != null)
-                    .Include(b => b.User)
-                    .ThenInclude(u => u.Comments);
+                var query = db.Foos
+                    .Where(f => f.FooCol != null);
 
                 var sql = "";
                 try
@@ -110,6 +108,7 @@ namespace EFSqlTranslator.ConsoleApp
             {
                 PostId = 1,
                 Content = "Post 1",
+                Title = "Title 1",
                 BlogId = 1,
                 UserId = 1
             });
@@ -118,6 +117,7 @@ namespace EFSqlTranslator.ConsoleApp
             {
                 PostId = 2,
                 Content = "Post 2",
+                Title = "Title 2",
                 BlogId = 1,
                 UserId = 1
             });
@@ -127,6 +127,12 @@ namespace EFSqlTranslator.ConsoleApp
                 CommentId = 1,
                 UserId = 1,
                 PostId = 1
+            });
+
+            db.Foos.Add(new Foo
+            {
+                FooId = 1,
+                FooCol = "Column to test custom column name"
             });
         }
     }

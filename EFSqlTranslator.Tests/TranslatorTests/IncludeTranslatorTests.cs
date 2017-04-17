@@ -3,11 +3,10 @@ using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
+using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
-    [TestFixture]
     [CategoryReadMe(
         Index = 6,
         Title = "Translating Includes",
@@ -19,7 +18,7 @@ returned from database."
     )]
     public class IncludeTranslatorTests
     {
-        [Test]
+        [Fact]
         [TranslationReadMe(
             Index = 0,
             Title = "Include an entity by parent relation"
@@ -36,36 +35,36 @@ returned from database."
                 var sql = script.ToString();
 
                 const string expected = @"
-create temporary table if not exists 'Temp_Table_Posts0' as
-    select p0.'PostId', p0.'UserId'
-    from 'Posts' p0
-    inner join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-    where b0.'Url' is not null;
+create temporary table if not exists Temp_Table_Posts0 as
+    select p0.PostId, p0.UserId
+    from Posts p0
+    inner join Blogs b0 on p0.BlogId = b0.BlogId
+    where b0.Url is not null;
 
 select p0.*
-from 'Posts' p0
+from Posts p0
 inner join (
-    select t0.'PostId', t0.'_rowid_'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'PostId', t0.'_rowid_'
-) s0 on p0.'PostId' = s0.'PostId'
-order by s0.'_rowid_';
+    select t0.PostId, t0._rowid_
+    from Temp_Table_Posts0 t0
+    group by t0.PostId, t0._rowid_
+) s0 on p0.PostId = s0.PostId
+order by s0._rowid_;
 
 select u0.*
-from 'Users' u0
+from Users u0
 inner join (
-    select t0.'UserId'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'UserId'
-) s0 on u0.'UserId' = s0.'UserId';
+    select t0.UserId
+    from Temp_Table_Posts0 t0
+    group by t0.UserId
+) s0 on u0.UserId = s0.UserId;
 
-drop table if exists 'Temp_Table_Posts0'";
+drop table if exists Temp_Table_Posts0";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
             Index = 1,
             Title = "Include a parent relation, then include a child relation"
@@ -83,57 +82,57 @@ drop table if exists 'Temp_Table_Posts0'";
                 var sql = script.ToString();
 
                 const string expected = @"
-create temporary table if not exists 'Temp_Table_Posts0' as
-    select p0.'PostId', p0.'UserId'
-    from 'Posts' p0
-    inner join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-    where b0.'Url' is not null;
+create temporary table if not exists Temp_Table_Posts0 as
+    select p0.PostId, p0.UserId
+    from Posts p0
+    inner join Blogs b0 on p0.BlogId = b0.BlogId
+    where b0.Url is not null;
 
 select p0.*
-from 'Posts' p0
+from Posts p0
 inner join (
-    select t0.'PostId', t0.'_rowid_'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'PostId', t0.'_rowid_'
-) s0 on p0.'PostId' = s0.'PostId'
-order by s0.'_rowid_';
+    select t0.PostId, t0._rowid_
+    from Temp_Table_Posts0 t0
+    group by t0.PostId, t0._rowid_
+) s0 on p0.PostId = s0.PostId
+order by s0._rowid_;
 
-create temporary table if not exists 'Temp_Table_Users0' as
-    select u0.'UserId'
-    from 'Users' u0
+create temporary table if not exists Temp_Table_Users0 as
+    select u0.UserId
+    from Users u0
     inner join (
-        select t0.'UserId'
-        from 'Temp_Table_Posts0' t0
-        group by t0.'UserId'
-    ) s0 on u0.'UserId' = s0.'UserId';
+        select t0.UserId
+        from Temp_Table_Posts0 t0
+        group by t0.UserId
+    ) s0 on u0.UserId = s0.UserId;
 
 select u0.*
-from 'Users' u0
+from Users u0
 inner join (
-    select t0.'UserId', t0.'_rowid_'
-    from 'Temp_Table_Users0' t0
-    group by t0.'UserId', t0.'_rowid_'
-) s0 on u0.'UserId' = s0.'UserId'
-order by s0.'_rowid_';
+    select t0.UserId, t0._rowid_
+    from Temp_Table_Users0 t0
+    group by t0.UserId, t0._rowid_
+) s0 on u0.UserId = s0.UserId
+order by s0._rowid_;
 
 select b0.*
-from 'Blogs' b0
+from Blogs b0
 inner join (
-    select t0.'UserId'
-    from 'Temp_Table_Users0' t0
-    group by t0.'UserId'
-) s0 on b0.'UserId' = s0.'UserId';
+    select t0.UserId
+    from Temp_Table_Users0 t0
+    group by t0.UserId
+) s0 on b0.UserId = s0.UserId;
 
-drop table if exists 'Temp_Table_Users0';
+drop table if exists Temp_Table_Users0;
 
-drop table if exists 'Temp_Table_Posts0'
+drop table if exists Temp_Table_Posts0
 ";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Multiple_Includes()
         {
             using (var db = new TestingContext())
@@ -147,44 +146,44 @@ drop table if exists 'Temp_Table_Posts0'
                 var sql = script.ToString();
 
                 const string expected = @"
-create temporary table if not exists 'Temp_Table_Posts0' as
-    select p0.'PostId', p0.'UserId', p0.'BlogId'
-    from 'Posts' p0
-    inner join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-    where b0.'Url' is not null;
+create temporary table if not exists Temp_Table_Posts0 as
+    select p0.PostId, p0.UserId, p0.BlogId
+    from Posts p0
+    inner join Blogs b0 on p0.BlogId = b0.BlogId
+    where b0.Url is not null;
 
 select p0.*
-from 'Posts' p0
+from Posts p0
 inner join (
-    select t0.'PostId', t0.'_rowid_'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'PostId', t0.'_rowid_'
-) s0 on p0.'PostId' = s0.'PostId'
-order by s0.'_rowid_';
+    select t0.PostId, t0._rowid_
+    from Temp_Table_Posts0 t0
+    group by t0.PostId, t0._rowid_
+) s0 on p0.PostId = s0.PostId
+order by s0._rowid_;
 
 select u0.*
-from 'Users' u0
+from Users u0
 inner join (
-    select t0.'UserId'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'UserId'
-) s0 on u0.'UserId' = s0.'UserId';
+    select t0.UserId
+    from Temp_Table_Posts0 t0
+    group by t0.UserId
+) s0 on u0.UserId = s0.UserId;
 
 select b0.*
-from 'Blogs' b0
+from Blogs b0
 inner join (
-    select t0.'BlogId'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'BlogId'
-) s0 on b0.'BlogId' = s0.'BlogId';
+    select t0.BlogId
+    from Temp_Table_Posts0 t0
+    group by t0.BlogId
+) s0 on b0.BlogId = s0.BlogId;
 
-drop table if exists 'Temp_Table_Posts0'";
+drop table if exists Temp_Table_Posts0";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Mix_Includes()
         {
             using (var db = new TestingContext())
@@ -200,76 +199,76 @@ drop table if exists 'Temp_Table_Posts0'";
                 var sql = script.ToString();
 
                 const string expected = @"
-create temporary table if not exists 'Temp_Table_Posts0' as
-    select p0.'PostId', p0.'UserId', p0.'BlogId'
-    from 'Posts' p0
-    inner join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-    where b0.'Url' is not null;
+create temporary table if not exists Temp_Table_Posts0 as
+    select p0.PostId, p0.UserId, p0.BlogId
+    from Posts p0
+    inner join Blogs b0 on p0.BlogId = b0.BlogId
+    where b0.Url is not null;
 
 select p0.*
-from 'Posts' p0
+from Posts p0
 inner join (
-    select t0.'PostId', t0.'_rowid_'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'PostId', t0.'_rowid_'
-) s0 on p0.'PostId' = s0.'PostId'
-order by s0.'_rowid_';
+    select t0.PostId, t0._rowid_
+    from Temp_Table_Posts0 t0
+    group by t0.PostId, t0._rowid_
+) s0 on p0.PostId = s0.PostId
+order by s0._rowid_;
 
-create temporary table if not exists 'Temp_Table_Users0' as
-    select u0.'UserId'
-    from 'Users' u0
+create temporary table if not exists Temp_Table_Users0 as
+    select u0.UserId
+    from Users u0
     inner join (
-        select t0.'UserId'
-        from 'Temp_Table_Posts0' t0
-        group by t0.'UserId'
-    ) s0 on u0.'UserId' = s0.'UserId';
+        select t0.UserId
+        from Temp_Table_Posts0 t0
+        group by t0.UserId
+    ) s0 on u0.UserId = s0.UserId;
 select u0.*
 
-from 'Users' u0
+from Users u0
 inner join (
-    select t0.'UserId', t0.'_rowid_'
-    from 'Temp_Table_Users0' t0
-    group by t0.'UserId', t0.'_rowid_'
-) s0 on u0.'UserId' = s0.'UserId'
-order by s0.'_rowid_';
+    select t0.UserId, t0._rowid_
+    from Temp_Table_Users0 t0
+    group by t0.UserId, t0._rowid_
+) s0 on u0.UserId = s0.UserId
+order by s0._rowid_;
 
-create temporary table if not exists 'Temp_Table_Comments0' as
-    select c0.'CommentId', c0.'UserId'
-    from 'Comments' c0
+create temporary table if not exists Temp_Table_Comments0 as
+    select c0.CommentId, c0.UserId
+    from Comments c0
     inner join (
-        select t0.'UserId'
-        from 'Temp_Table_Users0' t0
-        group by t0.'UserId'
-    ) s0 on c0.'UserId' = s0.'UserId';
+        select t0.UserId
+        from Temp_Table_Users0 t0
+        group by t0.UserId
+    ) s0 on c0.UserId = s0.UserId;
 
 select c0.*
-from 'Comments' c0
+from Comments c0
 inner join (
-    select t0.'CommentId', t0.'_rowid_'
-    from 'Temp_Table_Comments0' t0
-    group by t0.'CommentId', t0.'_rowid_'
-) s0 on c0.'CommentId' = s0.'CommentId'
-order by s0.'_rowid_';
+    select t0.CommentId, t0._rowid_
+    from Temp_Table_Comments0 t0
+    group by t0.CommentId, t0._rowid_
+) s0 on c0.CommentId = s0.CommentId
+order by s0._rowid_;
 
 select u0.*
-from 'Users' u0
+from Users u0
 inner join (
-    select t0.'UserId'
-    from 'Temp_Table_Comments0' t0
-    group by t0.'UserId'
-) s0 on u0.'UserId' = s0.'UserId';
+    select t0.UserId
+    from Temp_Table_Comments0 t0
+    group by t0.UserId
+) s0 on u0.UserId = s0.UserId;
 
-drop table if exists 'Temp_Table_Comments0';
+drop table if exists Temp_Table_Comments0;
 
-drop table if exists 'Temp_Table_Users0';
+drop table if exists Temp_Table_Users0;
 select b0.*
-from 'Blogs' b0
+from Blogs b0
 inner join (
-    select t0.'BlogId'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'BlogId'
-) s0 on b0.'BlogId' = s0.'BlogId';
-drop table if exists 'Temp_Table_Posts0'";
+    select t0.BlogId
+    from Temp_Table_Posts0 t0
+    group by t0.BlogId
+) s0 on b0.BlogId = s0.BlogId;
+drop table if exists Temp_Table_Posts0";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

@@ -16,16 +16,16 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (!string.IsNullOrEmpty(Ref?.Alias))
                 sb.Append($"{Ref.Alias}.");
 
-            sb.Append($"{QuotationMark}{Name}{QuotationMark}");
+            var qm = Name.Contains(" ") ? QuotationMark : string.Empty;
+            sb.Append($"{qm}{Name}{qm}");
 
             return sb.ToString();
         }
 
         public override string ToSelectionString()
         {
-            return !string.IsNullOrEmpty(Alias) &&
-                   !Alias.Equals(Name, StringComparison.CurrentCultureIgnoreCase)
-                ? $"{this} as '{Alias}'"
+            return !string.IsNullOrEmpty(Alias) && !Alias.Equals(Name, StringComparison.CurrentCultureIgnoreCase)
+                ? $"{this} as {QuotationMark}{Alias}{QuotationMark}"
                 : $"{this}";
         }
 

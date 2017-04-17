@@ -18,7 +18,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (!string.IsNullOrEmpty(Namespace))
                 sb.Append($"{Namespace}.");
 
-            sb.Append($"{QuotationMark}{TableName}{QuotationMark}");
+            var qm = TableName.Contains(" ") ? QuotationMark : string.Empty;
+            sb.Append($"{qm}{TableName}{qm}");
             
             return sb.ToString();
         }

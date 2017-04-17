@@ -2,11 +2,10 @@
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using NUnit.Framework;
+using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
-    [TestFixture]
     [CategoryReadMe(
          Index = 3,
          Title = "Translating GroupBy",
@@ -17,7 +16,7 @@ with aggregation methods."
      )]
     public class GroupByTranslationTests
     {
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 0,
              Title = "Basic grouping on table column"
@@ -35,16 +34,16 @@ with aggregation methods."
                 var sql = script.ToString();
 
                 const string expected = @"
-select p0.'BlogId' as 'Key'
-from 'Posts' p0
-where p0.'Content' is not null
-group by p0.'BlogId'";
+select p0.BlogId as 'Key'
+from Posts p0
+where p0.Content is not null
+group by p0.BlogId";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 1,
              Title = "Using relationships in grouping"
@@ -62,18 +61,18 @@ group by p0.'BlogId'";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.'Url', u0.'UserName'
-from 'Posts' p0
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where p0.'Content' is not null
-group by b0.'Url', u0.'UserName'";
+select b0.Url, u0.UserName
+from Posts p0
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u0 on p0.UserId = u0.UserId
+where p0.Content is not null
+group by b0.Url, u0.UserName";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 2,
              Title = "Group on whole entity",
@@ -93,18 +92,18 @@ This feature allows developers to write sophisticated aggregtion in a much simpl
                 var sql = script.ToString();
 
                 const string expected = @"
-select u0.'UserId'
-from 'Posts' p0
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
-where p0.'Content' is not null
-group by b0.'BlogId', u0.'UserId'";
+select u0.UserId
+from Posts p0
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u0 on b0.UserId = u0.UserId
+where p0.Content is not null
+group by b0.BlogId, u0.UserId";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 3,
              Title = "Mix of Select and Group method calls"
@@ -123,22 +122,22 @@ group by b0.'BlogId', u0.'UserId'";
                 var sql = script.ToString();
 
                 const string expected = @"
-select sq0.'Url', u0.'UserName'
+select sq0.Url, u0.UserName
 from (
-    select b0.'BlogId', b0.'Url', b0.'UserId' as 'UserId_jk0'
-    from 'Posts' p0
-    left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-    left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
-    where p0.'Content' is not null
+    select b0.BlogId, b0.Url, b0.UserId as 'UserId_jk0'
+    from Posts p0
+    left outer join Blogs b0 on p0.BlogId = b0.BlogId
+    left outer join Users u0 on p0.UserId = u0.UserId
+    where p0.Content is not null
 ) sq0
-left outer join 'Users' u0 on sq0.'UserId_jk0' = u0.'UserId'
-group by sq0.'BlogId', sq0.'Url', u0.'UserName'";
+left outer join Users u0 on sq0.UserId_jk0 = u0.UserId
+group by sq0.BlogId, sq0.Url, u0.UserName";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_GroupBy_On_Aggregation()
         {
             using (var db = new TestingContext())
@@ -152,21 +151,21 @@ group by sq0.'BlogId', sq0.'Url', u0.'UserName'";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.'count0', 0) as 'Cnt'
-from 'Blogs' b0
+select ifnull(sq0.count0, 0) as 'Cnt'
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0'
-    from 'Posts' p0
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-where b0.'Url' is not null
-group by ifnull(sq0.'count0', 0)";
+    select p0.BlogId as 'BlogId_jk0', count(1) as 'count0'
+    from Posts p0
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+where b0.Url is not null
+group by ifnull(sq0.count0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_GroupBy_On_Aggregation2()
         {
             using (var db = new TestingContext())
@@ -180,21 +179,21 @@ group by ifnull(sq0.'count0', 0)";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.'count0', 0) as 'Key', sum(b0.'CommentCount') as 'Sum'
-from 'Blogs' b0
+select ifnull(sq0.count0, 0) as 'Key', sum(b0.CommentCount) as 'Sum'
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0'
-    from 'Posts' p0
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-where b0.'Url' is not null
-group by ifnull(sq0.'count0', 0)";
+    select p0.BlogId as 'BlogId_jk0', count(1) as 'count0'
+    from Posts p0
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+where b0.Url is not null
+group by ifnull(sq0.count0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_GroupBy_On_Aggregation4()
         {
             using (var db = new TestingContext())
@@ -208,26 +207,26 @@ group by ifnull(sq0.'count0', 0)";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.'count0', 0) as 'Key', sum(ifnull(sq1.'count1', 0)) as 'Sum'
-from 'Blogs' b0
+select ifnull(sq0.count0, 0) as 'Key', sum(ifnull(sq1.count1, 0)) as 'Sum'
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0'
-    from 'Posts' p0
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
+    select p0.BlogId as 'BlogId_jk0', count(1) as 'count0'
+    from Posts p0
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
 left outer join (
-    select c0.'BlogId' as 'BlogId_jk0', count(1) as 'count1'
-    from 'Comments' c0
-    group by c0.'BlogId'
-) sq1 on b0.'BlogId' = sq1.'BlogId_jk0'
-where b0.'Url' is not null
-group by ifnull(sq0.'count0', 0)";
+    select c0.BlogId as 'BlogId_jk0', count(1) as 'count1'
+    from Comments c0
+    group by c0.BlogId
+) sq1 on b0.BlogId = sq1.BlogId_jk0
+where b0.Url is not null
+group by ifnull(sq0.count0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
             Index = 4,
             Title = "Group On Aggregation"
@@ -245,21 +244,21 @@ group by ifnull(sq0.'count0', 0)";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.'count0', 0) as 'Cnt', ifnull(sq0.'avg0', 0) as 'Avg', sum(b0.'CommentCount') as 'CommentCount'
-from 'Blogs' b0
+select ifnull(sq0.count0, 0) as 'Cnt', ifnull(sq0.avg0, 0) as 'Avg', sum(b0.CommentCount) as 'CommentCount'
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0', avg(p0.'LikeCount') as 'avg0'
-    from 'Posts' p0
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-where b0.'Url' is not null
-group by ifnull(sq0.'count0', 0), ifnull(sq0.'avg0', 0)";
+    select p0.BlogId as 'BlogId_jk0', count(1) as 'count0', avg(p0.LikeCount) as 'avg0'
+    from Posts p0
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+where b0.Url is not null
+group by ifnull(sq0.count0, 0), ifnull(sq0.avg0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_GroupBy_On_Aggregation5()
         {
             using (var db = new TestingContext())
@@ -282,24 +281,24 @@ group by ifnull(sq0.'count0', 0), ifnull(sq0.'avg0', 0)";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.'count0', 0) as 'Cnt', ifnull(sq1.'avg0', 0) as 'Avg', sum(b0.'CommentCount') as 'CommentCount'
-from 'Blogs' b0
+select ifnull(sq0.count0, 0) as 'Cnt', ifnull(sq1.avg0, 0) as 'Avg', sum(b0.CommentCount) as 'CommentCount'
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', count(case
-        when p0.'LikeCount' < 1000 then 1
+    select p0.BlogId as 'BlogId_jk0', count(case
+        when p0.LikeCount < 1000 then 1
         else null
     end) as 'count0'
-    from 'Posts' p0
-    where p0.'LikeCount' > 10
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
+    from Posts p0
+    where p0.LikeCount > 10
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', avg(p0.'LikeCount') as 'avg0'
-    from 'Posts' p0
-    group by p0.'BlogId'
-) sq1 on b0.'BlogId' = sq1.'BlogId_jk0'
-where b0.'Url' is not null
-group by ifnull(sq0.'count0', 0), ifnull(sq1.'avg0', 0)";
+    select p0.BlogId as 'BlogId_jk0', avg(p0.LikeCount) as 'avg0'
+    from Posts p0
+    group by p0.BlogId
+) sq1 on b0.BlogId = sq1.BlogId_jk0
+where b0.Url is not null
+group by ifnull(sq0.count0, 0), ifnull(sq1.avg0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

@@ -3,11 +3,10 @@ using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using NUnit.Framework;
+using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
 {
-    [TestFixture]
     [CategoryReadMe(
          Index = 2,
          Title = "Translating Select",
@@ -19,7 +18,7 @@ In this section, we will show you multiple ways to select data. You can basicall
      )]
     public class SelectTranslationTests
     {
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 0,
              Title = "Select out only required columns"
@@ -36,16 +35,16 @@ In this section, we will show you multiple ways to select data. You can basicall
                 var sql = script.ToString();
                 
                 const string expected = @"
-select p0.'Content', p0.'Title'
-from 'Posts' p0
-inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where u0.'UserName' is not null";
+select p0.Content, p0.Title
+from Posts p0
+inner join Users u0 on p0.UserId = u0.UserId
+where u0.UserName is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 1,
              Title = "Select out required columns from related entity"
@@ -62,18 +61,18 @@ where u0.'UserName' is not null";
                 var sql = script.ToString();
 
                 const string expected = @"
-select p0.'Content', u1.'UserName'
-from 'Posts' p0
-inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u1 on b0.'UserId' = u1.'UserId'
-where u0.'UserName' is not null";
+select p0.Content, u1.UserName
+from Posts p0
+inner join Users u0 on p0.UserId = u0.UserId
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u1 on b0.UserId = u1.UserId
+where u0.UserName is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 2,
              Title = "Translate up selection with columns and expression"
@@ -94,16 +93,16 @@ where u0.'UserName' is not null";
                 var sql = script.ToString();
 
                 const string expected = @"
-select (p0.'Title' + '|') + p0.'Content' as 'TitleContent', p0.'BlogId' / u0.'UserId' as 'Num'
-from 'Posts' p0
-inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where p0.'Content' is not null";
+select (p0.Title + '|') + p0.Content as 'TitleContent', p0.BlogId / u0.UserId as 'Num'
+from Posts p0
+inner join Users u0 on p0.UserId = u0.UserId
+where p0.Content is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Select_Ref_And_Columns()
         {
             using (var db = new TestingContext())
@@ -116,17 +115,17 @@ where p0.'Content' is not null";
                 var sql = script.ToString();
                 
                 const string expected = @"
-select b0.*, u0.'UserName'
-from 'Posts' p0
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where p0.'Content' is not null";
+select b0.*, u0.UserName
+from Posts p0
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u0 on p0.UserId = u0.UserId
+where p0.Content is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         [TranslationReadMe(
              Index = 3,
              Title = "Multiple selections with selecting whole entity",
@@ -145,17 +144,17 @@ where p0.'Content' is not null";
                 var sql = script.ToString();
                 
                 const string expected = @"
-select b0.'Url', b0.'Name', u0.'UserName'
-from 'Posts' p0
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where p0.'Content' is not null";
+select b0.Url, b0.Name, u0.UserName
+from Posts p0
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u0 on p0.UserId = u0.UserId
+where p0.Content is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Multiple_Select_Calls1()
         {
             using (var db = new TestingContext())
@@ -169,17 +168,17 @@ where p0.'Content' is not null";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.'Url'
-from 'Posts' p0
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-where p0.'Content' is not null";
+select b0.Url
+from Posts p0
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+where p0.Content is not null";
 
                 Trace.WriteLine(sql);
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Multiple_Select_Calls2()
         {
             using (var db = new TestingContext())
@@ -194,20 +193,20 @@ where p0.'Content' is not null";
                 var sql = script.ToString();
                 
                 const string expected = @"
-select u0.'UserName', sq0.'Url'
+select u0.UserName, sq0.Url
 from (
-    select b0.'UserId' as 'UserId_jk0', b0.'Url'
-    from 'Posts' p0
-    left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-    where p0.'Content' is not null
+    select b0.UserId as 'UserId_jk0', b0.Url
+    from Posts p0
+    left outer join Blogs b0 on p0.BlogId = b0.BlogId
+    where p0.Content is not null
 ) sq0
-left outer join 'Users' u0 on sq0.'UserId_jk0' = u0.'UserId'";
+left outer join Users u0 on sq0.UserId_jk0 = u0.UserId";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Multiple_Select_Calls_After_Grouping()
         {
             using (var db = new TestingContext())
@@ -223,21 +222,21 @@ left outer join 'Users' u0 on sq0.'UserId_jk0' = u0.'UserId'";
                 var sql = script.ToString();
 
                 const string expected = @"
-select sq0.'Name', u0.'UserName', sq0.'Url'
+select sq0.Name, u0.UserName, sq0.Url
 from (
-    select b0.'Url', b0.'BlogId', b0.'UserId' as 'UserId_jk0', b0.'Name'
-    from 'Posts' p0
-    left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-    where p0.'Content' is not null
+    select b0.Url, b0.BlogId, b0.UserId as 'UserId_jk0', b0.Name
+    from Posts p0
+    left outer join Blogs b0 on p0.BlogId = b0.BlogId
+    where p0.Content is not null
 ) sq0
-left outer join 'Users' u0 on sq0.'UserId_jk0' = u0.'UserId'
-group by sq0.'BlogId', sq0.'Url', u0.'UserId', sq0.'Name', u0.'UserName'";
+left outer join Users u0 on sq0.UserId_jk0 = u0.UserId
+group by sq0.BlogId, sq0.Url, u0.UserId, sq0.Name, u0.UserName";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
-        [Test]
+        [Fact]
         public void Test_Multiple_Aggregatons()
         {
             using (var db = new TestingContext())
@@ -253,19 +252,19 @@ group by sq0.'BlogId', sq0.'Url', u0.'UserId', sq0.'Name', u0.'UserName'";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.'count0', 0) as 'Cnt1', ifnull(sq0.'count1', 0) as 'Cnt2'
-from 'Blogs' b0
+select ifnull(sq0.count0, 0) as 'Cnt1', ifnull(sq0.count1, 0) as 'Cnt2'
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', count(case
-        when p0.'LikeCount' > 10 then 1
+    select p0.BlogId as 'BlogId_jk0', count(case
+        when p0.LikeCount > 10 then 1
         else null
     end) as 'count0', count(case
-        when p0.'LikeCount' < 50 then 1
+        when p0.LikeCount < 50 then 1
         else null
     end) as 'count1'
-    from 'Posts' p0
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'";
+    from Posts p0
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
