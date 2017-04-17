@@ -23,7 +23,7 @@ namespace EFSqlTranslator.ReadmeGen
         {
             var queryableType = typeof(EntityQueryable<>);
             var contextNamespace = typeof(TestingContext).Namespace;
-            QueryableNameRegex = new Regex($@"^{Regex.Escape(queryableType.FullName)}\[{Regex.Escape(contextNamespace)}\.(\w+)\]");
+            QueryableNameRegex = new Regex($@"{Regex.Escape(queryableType.FullName)}\[{Regex.Escape(contextNamespace)}\.(\w+)\]");
         }
 
         private const string Beginning = @"# <img src=""https://github.com/ethanli83/LinqRunner/blob/master/LinqRunner.Client/src/img/Butterfly.png"" align=""left"" height=""40"" width=""40""/>EFSqlTranslator [![Build Status](https://travis-ci.org/ethanli83/EFSqlTranslator.svg?branch=master)](https://travis-ci.org/ethanli83/EFSqlTranslator)

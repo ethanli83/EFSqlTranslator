@@ -479,7 +479,7 @@ have to be limited to column pairs.
 ```csharp
 // Linq expression:
 db.Posts.Join(
-    Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1[EFSqlTranslator.Tests.Blog].Where(b => b.Posts.Any(p => p.User.UserName != null)),(p, b) => (p.BlogId == b.BlogId) && (p.User.UserName == "ethan"),(p, b) => new { PId = p.PostId, Name = b.Name },
+    db.Blogs.Where(b => b.Posts.Any(p => p.User.UserName != null)),(p, b) => (p.BlogId == b.BlogId) && (p.User.UserName == "ethan"),(p, b) => new { PId = p.PostId, Name = b.Name },
     DbJoinType.LeftOuter)
 ```
 ```sql
