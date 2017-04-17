@@ -16,8 +16,8 @@ db.Blogs.Where(b => ((b.Url != null) && b.Name.StartsWith("Ethan")) && ((b.UserI
 ```sql
 -- Transalted Sql:
 select b0.*
-from 'Blogs' b0
-where ((b0.'Url' is not null) and (b0.'Name' like 'Ethan%')) and ((b0.'UserId' > 1) or (b0.'UserId' < 100))
+from Blogs b0
+where ((b0.Url is not null) and (b0.Name like 'Ethan%')) and ((b0.UserId > 1) or (b0.UserId < 100))
 ```
 ## II. Translating Relationsheips
 In this section, we will show you how relationships are translated. The basic rules are:
@@ -34,9 +34,9 @@ db.Posts.Where(p => p.Blog.Url != null)
 ```sql
 -- Transalted Sql:
 select p0.*
-from 'Posts' p0
-inner join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-where b0.'Url' is not null
+from Posts p0
+inner join Blogs b0 on p0.BlogId = b0.BlogId
+where b0.Url is not null
 ```
 
 ### 2. Join to a child relation
@@ -47,14 +47,14 @@ db.Blogs.Where(b => b.Posts.Any(p => p.Content != null))
 ```sql
 -- Transalted Sql:
 select b0.*
-from 'Blogs' b0
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0'
-    from 'Posts' p0
-    where p0.'Content' is not null
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-where sq0.'BlogId_jk0' is not null
+    select p0.BlogId as 'BlogId_jk0'
+    from Posts p0
+    where p0.Content is not null
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+where sq0.BlogId_jk0 is not null
 ```
 
 ### 3. Use relationships in a chain
@@ -65,16 +65,16 @@ db.Blogs.Where(b => b.User.Comments.Any(c => c.Post.Content != null))
 ```sql
 -- Transalted Sql:
 select b0.*
-from 'Blogs' b0
-inner join 'Users' u0 on b0.'UserId' = u0.'UserId'
+from Blogs b0
+inner join Users u0 on b0.UserId = u0.UserId
 left outer join (
-    select c0.'UserId' as 'UserId_jk0'
-    from 'Comments' c0
-    inner join 'Posts' p0 on c0.'PostId' = p0.'PostId'
-    where p0.'Content' is not null
-    group by c0.'UserId'
-) sq0 on u0.'UserId' = sq0.'UserId_jk0'
-where sq0.'UserId_jk0' is not null
+    select c0.UserId as 'UserId_jk0'
+    from Comments c0
+    inner join Posts p0 on c0.PostId = p0.PostId
+    where p0.Content is not null
+    group by c0.UserId
+) sq0 on u0.UserId = sq0.UserId_jk0
+where sq0.UserId_jk0 is not null
 ```
 ## III. Translating Select
 In this section, we will show you multiple ways to select data. You can basically:
@@ -89,10 +89,10 @@ db.Posts.Where(p => p.User.UserName != null).Select(p => new { Content = p.Conte
 ```
 ```sql
 -- Transalted Sql:
-select p0.'Content', p0.'Title'
-from 'Posts' p0
-inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where u0.'UserName' is not null
+select p0.Content, p0.Title
+from Posts p0
+inner join Users u0 on p0.UserId = u0.UserId
+where u0.UserName is not null
 ```
 
 ### 2. Select out required columns from related entity
@@ -102,12 +102,12 @@ db.Posts.Where(p => p.User.UserName != null).Select(p => new { Content = p.Conte
 ```
 ```sql
 -- Transalted Sql:
-select p0.'Content', u1.'UserName'
-from 'Posts' p0
-inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u1 on b0.'UserId' = u1.'UserId'
-where u0.'UserName' is not null
+select p0.Content, u1.UserName
+from Posts p0
+inner join Users u0 on p0.UserId = u0.UserId
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u1 on b0.UserId = u1.UserId
+where u0.UserName is not null
 ```
 
 ### 3. Translate up selection with columns and expression
@@ -117,10 +117,10 @@ db.Posts.Where(p => p.Content != null).Select(p => new { TitleContent = p.Title 
 ```
 ```sql
 -- Transalted Sql:
-select (p0.'Title' + '|') + p0.'Content' as 'TitleContent', p0.'BlogId' / u0.'UserId' as 'Num'
-from 'Posts' p0
-inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where p0.'Content' is not null
+select (p0.Title + '|') + p0.Content as 'TitleContent', p0.BlogId / u0.UserId as 'Num'
+from Posts p0
+inner join Users u0 on p0.UserId = u0.UserId
+where p0.Content is not null
 ```
 
 ### 4. Multiple selections with selecting whole entity
@@ -134,11 +134,11 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-select b0.'Url', b0.'Name', u0.'UserName'
-from 'Posts' p0
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where p0.'Content' is not null
+select b0.Url, b0.Name, u0.UserName
+from Posts p0
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u0 on p0.UserId = u0.UserId
+where p0.Content is not null
 ```
 ## IV. Translating GroupBy
 Grouping is always used along with aggregations. In this section, we will demostrate number of
@@ -155,10 +155,10 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-select p0.'BlogId' as 'Key'
-from 'Posts' p0
-where p0.'Content' is not null
-group by p0.'BlogId'
+select p0.BlogId as 'Key'
+from Posts p0
+where p0.Content is not null
+group by p0.BlogId
 ```
 
 ### 2. Using relationships in grouping
@@ -171,12 +171,12 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-select b0.'Url', u0.'UserName'
-from 'Posts' p0
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where p0.'Content' is not null
-group by b0.'Url', u0.'UserName'
+select b0.Url, u0.UserName
+from Posts p0
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u0 on p0.UserId = u0.UserId
+where p0.Content is not null
+group by b0.Url, u0.UserName
 ```
 
 ### 3. Group on whole entity
@@ -190,12 +190,12 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-select u0.'UserId'
-from 'Posts' p0
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
-where p0.'Content' is not null
-group by b0.'BlogId', u0.'UserId'
+select u0.UserId
+from Posts p0
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u0 on b0.UserId = u0.UserId
+where p0.Content is not null
+group by b0.BlogId, u0.UserId
 ```
 
 ### 4. Mix of Select and Group method calls
@@ -209,16 +209,16 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-select sq0.'Url', u0.'UserName'
+select sq0.Url, u0.UserName
 from (
-    select b0.'BlogId', b0.'Url', b0.'UserId' as 'UserId_jk0'
-    from 'Posts' p0
-    left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-    left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
-    where p0.'Content' is not null
+    select b0.BlogId, b0.Url, b0.UserId as 'UserId_jk0'
+    from Posts p0
+    left outer join Blogs b0 on p0.BlogId = b0.BlogId
+    left outer join Users u0 on p0.UserId = u0.UserId
+    where p0.Content is not null
 ) sq0
-left outer join 'Users' u0 on sq0.'UserId_jk0' = u0.'UserId'
-group by sq0.'BlogId', sq0.'Url', u0.'UserName'
+left outer join Users u0 on sq0.UserId_jk0 = u0.UserId
+group by sq0.BlogId, sq0.Url, u0.UserName
 ```
 
 ### 5. Group On Aggregation
@@ -231,15 +231,15 @@ db.Blogs
 ```
 ```sql
 -- Transalted Sql:
-select ifnull(sq0.'count0', 0) as 'Cnt', ifnull(sq0.'avg0', 0) as 'Avg', sum(b0.'CommentCount') as 'CommentCount'
-from 'Blogs' b0
+select ifnull(sq0.count0, 0) as 'Cnt', ifnull(sq0.avg0, 0) as 'Avg', sum(b0.CommentCount) as 'CommentCount'
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', count(1) as 'count0', avg(p0.'LikeCount') as 'avg0'
-    from 'Posts' p0
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-where b0.'Url' is not null
-group by ifnull(sq0.'count0', 0), ifnull(sq0.'avg0', 0)
+    select p0.BlogId as 'BlogId_jk0', count(1) as 'count0', avg(p0.LikeCount) as 'avg0'
+    from Posts p0
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+where b0.Url is not null
+group by ifnull(sq0.count0, 0), ifnull(sq0.avg0, 0)
 ```
 ## V. Translating Aggregtaions
 In this section, we will give you several examples to show how the aggregation is translated.
@@ -256,9 +256,9 @@ db.Posts
 ```sql
 -- Transalted Sql:
 select count(1) as 'cnt'
-from 'Posts' p0
-where p0.'Content' is not null
-group by p0.'BlogId'
+from Posts p0
+where p0.Content is not null
+group by p0.BlogId
 ```
 
 ### 2. Combine aggregations in selection
@@ -271,14 +271,14 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-select p0.'BlogId' as 'BId', count(1) as 'cnt', sum(u0.'UserId') * count(case
-    when p0.'Content' like 'Ethan%' then 1
+select p0.BlogId as 'BId', count(1) as 'cnt', sum(u0.UserId) * count(case
+    when p0.Content like 'Ethan%' then 1
     else null
 end) as 'Exp'
-from 'Posts' p0
-inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where p0.'Content' is not null
-group by p0.'BlogId'
+from Posts p0
+inner join Users u0 on p0.UserId = u0.UserId
+where p0.Content is not null
+group by p0.BlogId
 ```
 
 ### 3. Count on basic grouping with condition
@@ -291,15 +291,15 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-select p0.'BlogId' as 'BID', count(case
-    when (b0.'Url' is not null) or (u0.'UserId' > 0) then 1
+select p0.BlogId as 'BID', count(case
+    when (b0.Url is not null) or (u0.UserId > 0) then 1
     else null
 end) as 'cnt'
-from 'Posts' p0
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u0 on p0.'UserId' = u0.'UserId'
-where p0.'Content' is not null
-group by p0.'BlogId'
+from Posts p0
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u0 on p0.UserId = u0.UserId
+where p0.Content is not null
+group by p0.BlogId
 ```
 
 ### 4. Sum on child relationship
@@ -309,14 +309,14 @@ db.Blogs.Where(b => b.Url != null).Select(b => new { Name = b.Name, cnt = b.Post
 ```
 ```sql
 -- Transalted Sql:
-select b0.'Name', ifnull(sq0.'sum0', 0) as 'cnt'
-from 'Blogs' b0
+select b0.Name, ifnull(sq0.sum0, 0) as 'cnt'
+from Blogs b0
 left outer join (
-    select p0.'BlogId' as 'BlogId_jk0', sum(p0.'PostId') as 'sum0'
-    from 'Posts' p0
-    group by p0.'BlogId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-where b0.'Url' is not null
+    select p0.BlogId as 'BlogId_jk0', sum(p0.PostId) as 'sum0'
+    from Posts p0
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+where b0.Url is not null
 ```
 
 ### 5. Aggregate after grouping on an entity.
@@ -329,21 +329,21 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-select b0.'Url', u0.'UserId', count(case
-    when u1.'UserName' like 'Ethan%' then 1
+select b0.Url, u0.UserId, count(case
+    when u1.UserName like 'Ethan%' then 1
     else null
 end) as 'Cnt'
-from 'Posts' p0
-left outer join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
+from Posts p0
+left outer join Blogs b0 on p0.BlogId = b0.BlogId
+left outer join Users u0 on b0.UserId = u0.UserId
 left outer join (
-    select c0.'BlogId' as 'BlogId_jk0', c0.'UserId' as 'UserId_jk0'
-    from 'Comments' c0
-    group by c0.'BlogId', c0.'UserId'
-) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-left outer join 'Users' u1 on sq0.'UserId_jk0' = u1.'UserId'
-where p0.'Content' is not null
-group by b0.'BlogId', b0.'Url', u0.'UserId'
+    select c0.BlogId as 'BlogId_jk0', c0.UserId as 'UserId_jk0'
+    from Comments c0
+    group by c0.BlogId, c0.UserId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+left outer join Users u1 on sq0.UserId_jk0 = u1.UserId
+where p0.Content is not null
+group by b0.BlogId, b0.Url, u0.UserId
 ```
 ## VI. Translating OrderBys
 This section demostrates how the OrderBy is translated into sql.
@@ -355,10 +355,10 @@ db.Blogs.Where(b => b.Url.StartsWith("ethan.com")).OrderBy(b => b.User.UserName)
 ```sql
 -- Transalted Sql:
 select b0.*
-from 'Blogs' b0
-left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
-where b0.'Url' like 'ethan.com%'
-order by u0.'UserName'
+from Blogs b0
+left outer join Users u0 on b0.UserId = u0.UserId
+where b0.Url like 'ethan.com%'
+order by u0.UserName
 ```
 
 ### 2. OrderBy with different direction
@@ -372,10 +372,10 @@ db.Blogs
 ```sql
 -- Transalted Sql:
 select b0.*
-from 'Blogs' b0
-left outer join 'Users' u0 on b0.'UserId' = u0.'UserId'
-where b0.'Url' like 'ethan.com%'
-order by u0.'UserName', b0.'CommentCount' desc
+from Blogs b0
+left outer join Users u0 on b0.UserId = u0.UserId
+where b0.Url like 'ethan.com%'
+order by u0.UserName, b0.CommentCount desc
 ```
 ## VII. Translating Includes
 Not like Entity Framework, Include and ThenInclude are translated as seperated select statements.
@@ -390,30 +390,30 @@ db.Posts.Where(p => p.Blog.Url != null).Include(p => p.User)
 ```
 ```sql
 -- Transalted Sql:
-create temporary table if not exists 'Temp_Table_Posts0' as 
-    select p0.'PostId', p0.'UserId'
-    from 'Posts' p0
-    inner join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-    where b0.'Url' is not null;
+create temporary table if not exists Temp_Table_Posts0 as 
+    select p0.PostId, p0.UserId
+    from Posts p0
+    inner join Blogs b0 on p0.BlogId = b0.BlogId
+    where b0.Url is not null;
 
 select p0.*
-from 'Posts' p0
+from Posts p0
 inner join (
-    select t0.'PostId', t0.'_rowid_'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'PostId', t0.'_rowid_'
-) s0 on p0.'PostId' = s0.'PostId'
-order by s0.'_rowid_';
+    select t0.PostId, t0._rowid_
+    from Temp_Table_Posts0 t0
+    group by t0.PostId, t0._rowid_
+) s0 on p0.PostId = s0.PostId
+order by s0._rowid_;
 
 select u0.*
-from 'Users' u0
+from Users u0
 inner join (
-    select t0.'UserId'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'UserId'
-) s0 on u0.'UserId' = s0.'UserId';
+    select t0.UserId
+    from Temp_Table_Posts0 t0
+    group by t0.UserId
+) s0 on u0.UserId = s0.UserId;
 
-drop table if exists 'Temp_Table_Posts0'
+drop table if exists Temp_Table_Posts0
 ```
 
 ### 2. Include a parent relation, then include a child relation
@@ -426,50 +426,50 @@ db.Posts
 ```
 ```sql
 -- Transalted Sql:
-create temporary table if not exists 'Temp_Table_Posts0' as 
-    select p0.'PostId', p0.'UserId'
-    from 'Posts' p0
-    inner join 'Blogs' b0 on p0.'BlogId' = b0.'BlogId'
-    where b0.'Url' is not null;
+create temporary table if not exists Temp_Table_Posts0 as 
+    select p0.PostId, p0.UserId
+    from Posts p0
+    inner join Blogs b0 on p0.BlogId = b0.BlogId
+    where b0.Url is not null;
 
 select p0.*
-from 'Posts' p0
+from Posts p0
 inner join (
-    select t0.'PostId', t0.'_rowid_'
-    from 'Temp_Table_Posts0' t0
-    group by t0.'PostId', t0.'_rowid_'
-) s0 on p0.'PostId' = s0.'PostId'
-order by s0.'_rowid_';
+    select t0.PostId, t0._rowid_
+    from Temp_Table_Posts0 t0
+    group by t0.PostId, t0._rowid_
+) s0 on p0.PostId = s0.PostId
+order by s0._rowid_;
 
-create temporary table if not exists 'Temp_Table_Users0' as 
-    select u0.'UserId'
-    from 'Users' u0
+create temporary table if not exists Temp_Table_Users0 as 
+    select u0.UserId
+    from Users u0
     inner join (
-        select t0.'UserId'
-        from 'Temp_Table_Posts0' t0
-        group by t0.'UserId'
-    ) s0 on u0.'UserId' = s0.'UserId';
+        select t0.UserId
+        from Temp_Table_Posts0 t0
+        group by t0.UserId
+    ) s0 on u0.UserId = s0.UserId;
 
 select u0.*
-from 'Users' u0
+from Users u0
 inner join (
-    select t0.'UserId', t0.'_rowid_'
-    from 'Temp_Table_Users0' t0
-    group by t0.'UserId', t0.'_rowid_'
-) s0 on u0.'UserId' = s0.'UserId'
-order by s0.'_rowid_';
+    select t0.UserId, t0._rowid_
+    from Temp_Table_Users0 t0
+    group by t0.UserId, t0._rowid_
+) s0 on u0.UserId = s0.UserId
+order by s0._rowid_;
 
 select b0.*
-from 'Blogs' b0
+from Blogs b0
 inner join (
-    select t0.'UserId'
-    from 'Temp_Table_Users0' t0
-    group by t0.'UserId'
-) s0 on b0.'UserId' = s0.'UserId';
+    select t0.UserId
+    from Temp_Table_Users0 t0
+    group by t0.UserId
+) s0 on b0.UserId = s0.UserId;
 
-drop table if exists 'Temp_Table_Users0';
+drop table if exists Temp_Table_Users0;
 
-drop table if exists 'Temp_Table_Posts0'
+drop table if exists Temp_Table_Posts0
 ```
 ## VIII. Translating Manual Join
 This libary supports more complicated join. You can define your own join condition rather than
@@ -484,21 +484,21 @@ db.Posts.Join(
 ```
 ```sql
 -- Transalted Sql:
-select p0.'PostId' as 'PId', sq0.'Name'
-from 'Posts' p0
-inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
+select p0.PostId as 'PId', sq0.Name
+from Posts p0
+inner join Users u0 on p0.UserId = u0.UserId
 left outer join (
-    select b0.'Name', b0.'BlogId' as 'BlogId_jk0'
-    from 'Blogs' b0
+    select b0.Name, b0.BlogId as 'BlogId_jk0'
+    from Blogs b0
     left outer join (
-        select p0.'BlogId' as 'BlogId_jk0'
-        from 'Posts' p0
-        inner join 'Users' u0 on p0.'UserId' = u0.'UserId'
-        where u0.'UserName' is not null
-        group by p0.'BlogId'
-    ) sq0 on b0.'BlogId' = sq0.'BlogId_jk0'
-    where sq0.'BlogId_jk0' is not null
-) sq0 on (p0.'BlogId' = sq0.'BlogId_jk0') and (u0.'UserName' = 'ethan')
+        select p0.BlogId as 'BlogId_jk0'
+        from Posts p0
+        inner join Users u0 on p0.UserId = u0.UserId
+        where u0.UserName is not null
+        group by p0.BlogId
+    ) sq0 on b0.BlogId = sq0.BlogId_jk0
+    where sq0.BlogId_jk0 is not null
+) sq0 on (p0.BlogId = sq0.BlogId_jk0) and (u0.UserName = 'ethan')
 ```
 
 
