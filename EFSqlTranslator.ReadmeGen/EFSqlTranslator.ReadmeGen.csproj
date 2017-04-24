@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFrameworks>netcoreapp1.1</TargetFrameworks>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+  <ItemGroup>
     <ProjectReference Include="../EFSqlTranslator.Translation/EFSqlTranslator.Translation.csproj" />
     <ProjectReference Include="../EFSqlTranslator.EFModels/EFSqlTranslator.EFModels.csproj" />
     <ProjectReference Include="../EFSqlTranslator.Tests/EFSqlTranslator.Tests.csproj" />
