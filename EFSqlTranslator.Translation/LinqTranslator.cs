@@ -9,7 +9,7 @@ namespace EFSqlTranslator.Translation
 {
     public static class LinqTranslator
     {
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger(nameof(LinqTranslator));
 
         public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
         {
