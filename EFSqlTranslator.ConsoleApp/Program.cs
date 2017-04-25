@@ -26,8 +26,7 @@ namespace EFSqlTranslator.ConsoleApp
 
             using (var db = new BloggingContext())
             {
-                var query = db.Foos
-                    .Where(f => f.FooCol != null);
+                var query = db.Blogs;
 
                 var sql = "";
                 try
@@ -127,12 +126,6 @@ namespace EFSqlTranslator.ConsoleApp
                 CommentId = 1,
                 UserId = 1,
                 PostId = 1
-            });
-
-            db.Foos.Add(new Foo
-            {
-                FooId = 1,
-                FooCol = "Column to test custom column name"
             });
         }
     }
