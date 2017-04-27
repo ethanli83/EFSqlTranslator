@@ -28,7 +28,7 @@ namespace EFSqlTranslator.ConsoleApp
                 try
                 {
                     var query = db.Statistics
-                        .GroupBy(s => s.BlogId)
+                        .GroupBy(s => s.GuidId)
                         .Select(g => new
                         {
                             BId = g.Key,
@@ -40,7 +40,7 @@ namespace EFSqlTranslator.ConsoleApp
                     var a = new Stopwatch();
                     a.Start();
 
-                    for (int i = 0; i < 10000; i++)
+                    for (int i = 0; i < 100; i++)
                     {
                         var result = db.Query(
                             query,
@@ -55,7 +55,7 @@ namespace EFSqlTranslator.ConsoleApp
 
                     a.Restart();
 
-                    for (int i = 0; i < 10000; i++)
+                    for (int i = 0; i < 100; i++)
                     {
                         var result = db.QueryDynamic(
                             query,
@@ -159,14 +159,18 @@ namespace EFSqlTranslator.ConsoleApp
                 PostId = 1
             });
 
-            db.Statistics.Add(new Statistic
+            for (int i = 1; i < 2; i++)
             {
-                BlogId = 1,
-                ViewCount = 100,
-                FloatVal = 1.1f,
-                DecimalVal = 2.2m,
-                DoubleVal = 3.3d
-            });
+                db.Statistics.Add(new Statistic
+                {
+                    BlogId = i % 3,
+                    GuidId = Guid.NewGuid(),
+                    ViewCount = 100,
+                    FloatVal = 1.1f,
+                    DecimalVal = 2.2m,
+                    DoubleVal = 3.3d
+                });
+            }
 
             db.SaveChanges();
         }

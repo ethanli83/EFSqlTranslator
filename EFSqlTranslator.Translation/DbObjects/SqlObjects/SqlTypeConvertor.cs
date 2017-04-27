@@ -23,6 +23,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (type == typeof(double) || type == typeof(decimal) || type == typeof(float))
                 return "decimal";
 
+            if (type == typeof(Guid))
+                return "uniqueidentifier";
+
             if (type == typeof(DbJoinType))
                 return "<<DbJoinType>>";
 

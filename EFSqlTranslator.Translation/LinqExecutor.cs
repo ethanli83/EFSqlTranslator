@@ -66,7 +66,8 @@ namespace EFSqlTranslator.Translation
             var constructor = type.GetConstructors().Single();
 
             var fdList = new List<object>();
-            var castRequiredAt = new HashSet<int>();
+            var valTypes = new Dictionary<int, Type>();
+            var infoTypes = new Dictionary<int, Type>();
             foreach (var row in data)
             {
                 var objIdx = 0;
@@ -78,18 +79,18 @@ namespace EFSqlTranslator.Translation
                     var info = properties[i];
                     var val = valDict[info.Name];
 
-                    if (castRequiredAt.Contains(i) || val.GetType() != info.GetType())
+                    var valType = valTypes.ContainsKey(i) ? valTypes[i] : valTypes[i] = val.GetType();
+                    var infoType = infoTypes.ContainsKey(i) ? infoTypes[i] : infoTypes[i] = info.PropertyType.StripNullable();
+                    if (valType != infoType)
                     {
-                        objArray[objIdx++] = Convert.ChangeType(val, info.PropertyType);
-                        if (!castRequiredAt.Contains(i))
-                            castRequiredAt.Add(i);
+                        objArray[objIdx++] = infoType == typeof(Guid)
+                            ? new Guid((byte[])val)
+                            : Convert.ChangeType(val, infoType);
                     }
                     else
                     {
                         objArray[objIdx++] = val;
                     }
-
-                    var a = val.GetType();
                 }
 
                 var obj = constructor.Invoke(objArray);

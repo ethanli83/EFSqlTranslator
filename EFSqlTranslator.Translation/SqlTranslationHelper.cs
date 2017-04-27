@@ -29,6 +29,19 @@ namespace EFSqlTranslator.Translation
             return type.Name.StartsWith("<>") || type.Name.StartsWith("VB$");
         }
 
+        public static bool IsNullable(this Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            return Nullable.GetUnderlyingType(type) != null;
+        }
+
+        public static Type StripNullable(this Type type)
+        {
+            return Nullable.GetUnderlyingType(type) ?? type;
+        }
+
         public static bool IsGrouping(this Type type)
         {
             if (type == null)

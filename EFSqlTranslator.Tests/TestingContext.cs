@@ -101,7 +101,7 @@ namespace EFSqlTranslator.Tests
 
         public int ViewCount { get; set; }
 
-        public float FloatVal { get; set; }
+        public float? FloatVal { get; set; }
 
         public decimal DecimalVal { get; set; }
 
