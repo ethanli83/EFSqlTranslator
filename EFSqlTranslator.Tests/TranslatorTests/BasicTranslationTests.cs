@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
@@ -80,7 +81,8 @@ select b0.* from Blogs b0 where b0.CommentCount > 10";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Blogs.Where(b => b.CommentCount > 10)
+                var query = db.Blogs
+                    .Where(b => b.CommentCount > 10)
                     .Select(b => new {KKK = b.BlogId})
                     .Select(b => new {K = b.KKK});
 
@@ -106,6 +108,36 @@ select b0.BlogId as 'K' from Blogs b0 where b0.CommentCount > 10";
 
                 const string expected = @"
 select b0.* from Blogs b0";
+
+                TestUtils.AssertStringEqual(expected, sql);
+
+            }
+        }
+
+        [Fact]
+        public void Test_Query_SupportValueTypes()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Statistics
+                    .GroupBy(s => s.BlogId)
+                    .Select(g => new
+                    {
+                        BId = g.Key,
+                        FloatVal = g.Sum(s => s.FloatVal),
+                        DecimalVal = g.Sum(s => s.DecimalVal),
+                        DoubleVal = g.Sum(s => s.DoubleVal)
+                    });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"
+select s0.BlogId as 'BId', sum(s0.FloatVal) as 'FloatVal', sum(s0.DecimalVal) as 'DecimalVal', sum(s0.DoubleVal) as 'DoubleVal'
+from Statistics s0
+group by s0.BlogId";
 
                 TestUtils.AssertStringEqual(expected, sql);
 

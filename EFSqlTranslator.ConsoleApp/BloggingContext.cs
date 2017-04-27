@@ -91,6 +91,12 @@ namespace EFSqlTranslator.ConsoleApp
 
         public int ViewCount { get; set; }
 
+        public float FloatVal { get; set; }
+
+        public decimal DecimalVal { get; set; }
+
+        public double DoubleVal { get; set; }
+
         public int BlogId { get; set; }
 
         public Blog Blog { get; set; }

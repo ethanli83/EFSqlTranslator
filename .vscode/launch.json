@@ -9,7 +9,7 @@
             "program": "${workspaceRoot}/EFSqlTranslator.ConsoleApp/bin/Debug/netcoreapp1.1/EFSqlTranslator.ConsoleApp.dll",
             "args": [],
             "cwd": "${workspaceRoot}",
-            "externalConsole": false,
+            "console": "internalConsole",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart"
         },

@@ -4,9 +4,6 @@
     <TargetFrameworks>netstandard1.3</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <NetStandardImplicitPackageVersion Include="NetStandardLibrary" Version="1.6.0" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="../EFSqlTranslator.Translation/EFSqlTranslator.Translation.csproj" />
   </ItemGroup>
   <ItemGroup>

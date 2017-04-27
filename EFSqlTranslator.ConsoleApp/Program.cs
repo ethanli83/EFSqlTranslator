@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace EFSqlTranslator.ConsoleApp
@@ -20,31 +19,63 @@ namespace EFSqlTranslator.ConsoleApp
                 if (db.Database.EnsureDeleted() && db.Database.EnsureCreated())
                 {
                     UpdateData(db);
-                    db.SaveChanges();
                 }
             }
 
             using (var db = new BloggingContext())
             {
-                var query = db.Blogs;
-
                 var sql = "";
                 try
                 {
-                    var blogs = db.Query(
-                        query,
-                        new EFModelInfoProvider(db),
-                        new SqliteObjectFactory(),
-                        out sql);
+                    var query = db.Statistics
+                        .GroupBy(s => s.BlogId)
+                        .Select(g => new
+                        {
+                            BId = g.Key,
+                            FloatVal = g.Sum(s => s.FloatVal),
+                            DecimalVal = g.Sum(s => s.DecimalVal),
+                            DoubleVal = g.Sum(s => s.DoubleVal)
+                        });
 
-                    var json = JsonConvert.SerializeObject(blogs, new JsonSerializerSettings
+                    var a = new Stopwatch();
+                    a.Start();
+
+                    for (int i = 0; i < 10000; i++)
                     {
-                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                        Formatting = Formatting.Indented
-                    });
-                    
-                    Console.WriteLine("Result:");
-                    Console.WriteLine(json);
+                        var result = db.Query(
+                            query,
+                            new EFModelInfoProvider(db),
+                            new SqliteObjectFactory(),
+                            out sql);
+                    }
+
+                    a.Stop();
+
+                    Console.WriteLine($"Casted {a.ElapsedMilliseconds}");
+
+                    a.Restart();
+
+                    for (int i = 0; i < 10000; i++)
+                    {
+                        var result = db.QueryDynamic(
+                            query,
+                            new EFModelInfoProvider(db),
+                            new SqliteObjectFactory(),
+                            out sql);
+                    }
+
+                    a.Stop();
+
+                    Console.WriteLine($"Not Casted {a.ElapsedMilliseconds}");
+
+//                    var json = JsonConvert.SerializeObject(result, new JsonSerializerSettings
+//                    {
+//                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+//                        Formatting = Formatting.Indented
+//                    });
+//
+//                    Console.WriteLine("Result:");
+//                    Console.WriteLine(json);
                 }
                 finally
                 {
@@ -127,6 +158,17 @@ namespace EFSqlTranslator.ConsoleApp
                 UserId = 1,
                 PostId = 1
             });
+
+            db.Statistics.Add(new Statistic
+            {
+                BlogId = 1,
+                ViewCount = 100,
+                FloatVal = 1.1f,
+                DecimalVal = 2.2m,
+                DoubleVal = 3.3d
+            });
+
+            db.SaveChanges();
         }
     }
 }

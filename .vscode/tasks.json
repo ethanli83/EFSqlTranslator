@@ -7,7 +7,7 @@
         {
             "taskName": "build",
             "args": [
-                "./EFSqlTranslator.Translation", "./EFSqlTranslator.EFModels", "./EFSqlTranslator.Tests", "./EFSqlTranslator.ConsoleApp"
+                "./EFSqlTranslator.sln"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"

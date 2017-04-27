@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Reflection;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
@@ -224,32 +223,6 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 Ref = dbRef,
                 Alias = alias
             };
-        }
-    }
-
-    public class SqlTypeConvertor
-    {
-        public string Convert(Type type)
-        {
-            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                var gType = type.GenericTypeArguments.Single();
-                return Convert(gType);
-            }
-
-            if (type == typeof(int))
-                return "int";
-
-            if (type == typeof(string))
-                return "nvarchar";
-
-            if (type == typeof(double))
-                return "decimal";
-
-            if (type == typeof(DbJoinType))
-                return "<<DbJoinType>>";
-
-            throw new NotImplementedException($"{type.Name} not supported.");
         }
     }
 }

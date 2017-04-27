@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using Dapper;
 using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.MethodTranslators;
@@ -34,7 +36,16 @@ namespace EFSqlTranslator.Translation
                     {
                         var node = _graph.ScriptToNodes[statement];
                         var entityType = node.Expression.GetReturnBaseType();
-                        node.Result = connection.Query(entityType, sql);
+
+                        if (entityType.IsAnonymouse())
+                        {
+                            var result = connection.Query<dynamic>(sql);
+                            node.Result = ConvertDynamicToRealType(entityType, result);
+                        }
+                        else
+                        {
+                            node.Result = connection.Query(entityType, sql);
+                        }
 
                         if (node.FromNode != null)
                             node.FillFunc.Compile().DynamicInvoke(node.FromNode.Result, node.Result);
@@ -47,6 +58,45 @@ namespace EFSqlTranslator.Translation
 
                 return _graph.Root.Result.Cast<T>();
             }
+        }
+
+        public IEnumerable<object> ConvertDynamicToRealType(Type type, IEnumerable<dynamic> data)
+        {
+            var properties = typeof(T).GetProperties();
+            var constructor = type.GetConstructors().Single();
+
+            var fdList = new List<object>();
+            var castRequiredAt = new HashSet<int>();
+            foreach (var row in data)
+            {
+                var objIdx = 0;
+                var objArray = new object[properties.Length];
+
+                var valDict = (IDictionary<string, object>)row;
+                for (var i = 0; i < properties.Length; i ++)
+                {
+                    var info = properties[i];
+                    var val = valDict[info.Name];
+
+                    if (castRequiredAt.Contains(i) || val.GetType() != info.GetType())
+                    {
+                        objArray[objIdx++] = Convert.ChangeType(val, info.PropertyType);
+                        if (!castRequiredAt.Contains(i))
+                            castRequiredAt.Add(i);
+                    }
+                    else
+                    {
+                        objArray[objIdx++] = val;
+                    }
+
+                    var a = val.GetType();
+                }
+
+                var obj = constructor.Invoke(objArray);
+                fdList.Add(obj);
+            }
+
+            return fdList;
         }
 
         public IDbScript Script { get; }

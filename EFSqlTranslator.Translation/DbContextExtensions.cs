@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Dapper;
 using EFSqlTranslator.Translation.DbObjects;
@@ -15,11 +14,10 @@ namespace EFSqlTranslator.Translation
             var executor = LinqExecutorMaker.Make(query, infoProvider, factory, db);
             var result = executor.Execute();
 
-            var sql = executor.Script.ToString();
             return result;
         }
 
-        public static IEnumerable<dynamic> Query(this DbContext db,
+        public static IEnumerable<dynamic> QueryDynamic(this DbContext db,
             IQueryable query, IModelInfoProvider infoProvider, IDbObjectFactory factory)
         {
             using (var connection = db.Database.GetDbConnection())
@@ -42,7 +40,7 @@ namespace EFSqlTranslator.Translation
             return result;
         }
 
-        public static IEnumerable<dynamic> Query(this DbContext db,
+        public static IEnumerable<dynamic> QueryDynamic(this DbContext db,
             IQueryable query, IModelInfoProvider infoProvider, IDbObjectFactory factory, out string sql)
         {
             using (var connection = db.Database.GetDbConnection())
