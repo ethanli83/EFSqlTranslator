@@ -27,8 +27,8 @@ namespace EFSqlTranslator.ConsoleApp
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseSqlite(SqliteConnectionString);
-            optionsBuilder.UseMySql(SqlConnectionStr);
+            optionsBuilder.UseSqlite(SqliteConnectionString);
+            //optionsBuilder.UseMySql(SqlConnectionStr);
         }
     }
 
@@ -113,7 +113,7 @@ namespace EFSqlTranslator.ConsoleApp
         public virtual Blog Blog { get; set; }
     }
 
-    [Table(nameof(Item), Schema="fin")]
+    //[Table(nameof(Item), Schema="fin")]
     public class Item
     {
         public int ItemId { get; set; }

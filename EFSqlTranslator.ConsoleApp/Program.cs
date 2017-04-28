@@ -17,9 +17,9 @@ namespace EFSqlTranslator.ConsoleApp
 
             using (var db = new BloggingContext())
             {
-                //if (db.Database.EnsureDeleted() && db.Database.EnsureCreated())
+                if (db.Database.EnsureDeleted() && db.Database.EnsureCreated())
                 {
-                    //UpdateData(db);
+                    UpdateData(db);
                 }
             }
 
@@ -28,7 +28,7 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Items.Where(i => i.Company.Name.Contains("2")).Select(i => new { i.ItemId, i.CompanyId });
+                    var query = db.Items.Where(i => i.Company.Name.Contains("2"));
 
                     var result = db.Query(
                         query,

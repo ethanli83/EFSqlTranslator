@@ -4,6 +4,7 @@
 4, Column will be created if they are directly used in expression or it is required by relationship. Doing group-by or select on entities will also require primary key to be created and added.
 
 commands:
+dotnet pack ../EFSqlTranslator.Translation/ -o ../nuget-packages/ --version-suffix rc2
 dotnet pack ../EFSqlTranslator.Translation/ -o .
 nuget push EFSqlTranslator.Translation.1.2.0.nupkg
 git tag -a v1.2.0 -m "Include and OrderBy"
