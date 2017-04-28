@@ -28,7 +28,7 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Items.Where(i => i.Company.Name.Contains("2"));
+                    var query = db.Items.Where(i => i.Company.Name.Contains("2")).Select(i => i.ItemId);
 
                     var result = db.Query(
                         query,
