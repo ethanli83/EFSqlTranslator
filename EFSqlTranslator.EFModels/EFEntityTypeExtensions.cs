@@ -8,21 +8,26 @@ namespace EFSqlTranslator.EFModels
 {
     public static class EFEntityTypeExtensions
     {
+        private const string TableSchemaAnnoName = "Relational:Schema";
+
         private const string TableNameAnnoName = "Relational:TableName";
+        
         private const string ColumnNameAnnoName = "Relational:ColumnName";
 
         public static EntityInfo ToEntityInfo(this IEntityType et)
         {
-            var annotation = et.FindAnnotation(TableNameAnnoName);
-            if (annotation == null)
+            var annoName = et.FindAnnotation(TableNameAnnoName);
+            if (annoName == null)
             {
                 throw new NotSupportedException("Entity must have a table name");
             }
 
+            var annoSchema = et.FindAnnotation(TableSchemaAnnoName);
+
             var info = new EntityInfo
             {
-                Namespace = "",
-                EntityName = annotation.Value.ToString(),
+                Namespace = annoSchema != null ? annoSchema.Value.ToString() : string.Empty,
+                EntityName = annoName.Value.ToString(),
                 Type = et.ClrType
             };
 

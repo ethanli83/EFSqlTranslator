@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace EFSqlTranslator.Tests
@@ -16,6 +18,10 @@ namespace EFSqlTranslator.Tests
         public DbSet<Comment> Comments { get; set; }
 
         public DbSet<Statistic> Statistics { get; set; }
+
+        public DbSet<Item> Items { get; set; }
+
+        public DbSet<Company> Companies { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -110,5 +116,28 @@ namespace EFSqlTranslator.Tests
         public int BlogId { get; set; }
 
         public Blog Blog { get; set; }
+    }
+
+    [Table(nameof(Item), Schema="fin")]
+    public class Item
+    {
+        public int ItemId { get; set; }
+
+        public int CategoryId { get; set; }
+
+        public decimal? Value { get; set; }
+
+        public DateTime? Timer { get; set; }
+
+        public Guid CompanyId { get; set; }
+
+        public Company Company { get; set; }
+    }
+
+    public class Company
+    {
+        public Guid CompanyId { get; set; }
+
+        public string Name { get; set; }
     }
 }

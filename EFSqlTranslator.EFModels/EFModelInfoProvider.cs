@@ -41,6 +41,11 @@ namespace EFSqlTranslator.EFModels
         {
             foreach(var relation in et.GetForeignKeys())
             {
+                if (relation.DependentToPrincipal == null)
+                {
+                    continue;
+                }
+
                 var relationKey = relation.DependentToPrincipal.Name;
 
                 // child entity in parent relation is the current entity
@@ -56,7 +61,10 @@ namespace EFSqlTranslator.EFModels
                     FromEntity = declaringEntity,
                     ToEntity = principalEntity,
                     FromProperty = relation.DependentToPrincipal.PropertyInfo,
-                    ToProperty = relation.PrincipalToDependent.PropertyInfo,
+                    // for example, team property is defined in teamMember, but teamMembers is 
+                    // not defined in team, the one side of the relation will be missing
+                    // we will assume the conlumn name is the same in both side
+                    ToProperty = (relation.PrincipalToDependent ?? relation.DependentToPrincipal).PropertyInfo,
                     FromKeys = declaringKeys.ToList(),
                     ToKeys = principalKeys.ToList(), 
                 };
@@ -69,6 +77,11 @@ namespace EFSqlTranslator.EFModels
         {
             foreach(var relation in et.GetReferencingForeignKeys())
             {
+                if (relation.PrincipalToDependent == null)
+                {
+                    continue;
+                }
+
                 var relationKey = relation.PrincipalToDependent.Name;
 
                 // child entity in child relation is the referring entity
@@ -84,7 +97,7 @@ namespace EFSqlTranslator.EFModels
                     FromEntity = principalEntity,
                     ToEntity = declaringEntity,
                     FromProperty = relation.PrincipalToDependent.PropertyInfo,
-                    ToProperty = relation.DependentToPrincipal.PropertyInfo,
+                    ToProperty = (relation.DependentToPrincipal ?? relation.PrincipalToDependent).PropertyInfo,
                     FromKeys = principalKeys.ToList(),
                     ToKeys = declaringKeys.ToList(), 
                     IsChildRelation = true

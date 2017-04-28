@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
+using EFSqlTranslator.Translation.DbObjects.MySqlObjects;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using Newtonsoft.Json;
 
@@ -16,9 +17,9 @@ namespace EFSqlTranslator.ConsoleApp
 
             using (var db = new BloggingContext())
             {
-                if (db.Database.EnsureDeleted() && db.Database.EnsureCreated())
+                //if (db.Database.EnsureDeleted() && db.Database.EnsureCreated())
                 {
-                    UpdateData(db);
+                    //UpdateData(db);
                 }
             }
 
@@ -27,55 +28,22 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Statistics
-                        .GroupBy(s => s.GuidId)
-                        .Select(g => new
-                        {
-                            BId = g.Key,
-                            FloatVal = g.Sum(s => s.FloatVal),
-                            DecimalVal = g.Sum(s => s.DecimalVal),
-                            DoubleVal = g.Sum(s => s.DoubleVal)
-                        });
+                    var query = db.Items.Where(i => i.Company.Name.Contains("2")).Select(i => new { i.ItemId, i.CompanyId });
 
-                    var a = new Stopwatch();
-                    a.Start();
+                    var result = db.Query(
+                        query,
+                        new EFModelInfoProvider(db),
+                        new SqliteObjectFactory(),
+                        out sql);
 
-                    for (int i = 0; i < 100; i++)
+                    var json = JsonConvert.SerializeObject(result, new JsonSerializerSettings
                     {
-                        var result = db.Query(
-                            query,
-                            new EFModelInfoProvider(db),
-                            new SqliteObjectFactory(),
-                            out sql);
-                    }
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                        Formatting = Formatting.Indented
+                    });
 
-                    a.Stop();
-
-                    Console.WriteLine($"Casted {a.ElapsedMilliseconds}");
-
-                    a.Restart();
-
-                    for (int i = 0; i < 100; i++)
-                    {
-                        var result = db.QueryDynamic(
-                            query,
-                            new EFModelInfoProvider(db),
-                            new SqliteObjectFactory(),
-                            out sql);
-                    }
-
-                    a.Stop();
-
-                    Console.WriteLine($"Not Casted {a.ElapsedMilliseconds}");
-
-//                    var json = JsonConvert.SerializeObject(result, new JsonSerializerSettings
-//                    {
-//                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-//                        Formatting = Formatting.Indented
-//                    });
-//
-//                    Console.WriteLine("Result:");
-//                    Console.WriteLine(json);
+                    Console.WriteLine("Result:");
+                    Console.WriteLine(json);
                 }
                 finally
                 {
@@ -159,7 +127,8 @@ namespace EFSqlTranslator.ConsoleApp
                 PostId = 1
             });
 
-            for (int i = 1; i < 2; i++)
+            var iid = 1;
+            for (var i = 1; i < 2; i++)
             {
                 db.Statistics.Add(new Statistic
                 {
@@ -170,6 +139,25 @@ namespace EFSqlTranslator.ConsoleApp
                     DecimalVal = 2.2m,
                     DoubleVal = 3.3d
                 });
+            }
+
+            for (var i = 0; i < 10; i++)
+            {
+                var cid = Guid.NewGuid();
+                db.Companies.Add(new Company
+                {
+                    CompanyId = cid,
+                    Name = "C_" + i
+                });
+
+                for(var c = 0; c < 5; c++)
+                {
+                    db.Items.Add(new Item
+                    {
+                        ItemId = iid++,
+                        CompanyId = cid
+                    }); 
+                }
             }
 
             db.SaveChanges();

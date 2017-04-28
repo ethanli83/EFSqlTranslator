@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace EFSqlTranslator.ConsoleApp
 {
     public class BloggingContext : DbContext
     {
-        public const string ConnectionString = "Filename=./blog.db";
+        public const string SqliteConnectionString = "Filename=./blog.db";
+
+        public const string SqlConnectionStr = "server=localhost;userid=root;pwd=chenli1234;database=Blogging;port=3306;sslmode=none;";
 
         public DbSet<Blog> Blogs { get; set; }
         
@@ -18,9 +21,14 @@ namespace EFSqlTranslator.ConsoleApp
 
         public DbSet<Statistic> Statistics { get; set; }
 
+        public DbSet<Item> Items { get; set; }
+
+        public DbSet<Company> Companies { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(ConnectionString);
+            //optionsBuilder.UseSqlite(SqliteConnectionString);
+            optionsBuilder.UseMySql(SqlConnectionStr);
         }
     }
 
@@ -103,5 +111,22 @@ namespace EFSqlTranslator.ConsoleApp
         public Guid? GuidId { get; set; }
 
         public virtual Blog Blog { get; set; }
+    }
+
+    [Table(nameof(Item), Schema="fin")]
+    public class Item
+    {
+        public int ItemId { get; set; }
+
+        public Guid CompanyId { get; set; }
+
+        public Company Company { get; set; }
+    }
+
+    public class Company
+    {
+        public Guid CompanyId { get; set; }
+
+        public string Name { get; set; }
     }
 }

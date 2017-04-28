@@ -47,8 +47,7 @@ namespace EFSqlTranslator.Translation
             new SelectTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new CountTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new AggregationTranslator(_infoProvider, _dbFactory).Register(_plugIns);
-            new StartsWithTranslator(_infoProvider, _dbFactory).Register(_plugIns);
-            new EndsWithTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new StringStartsEndsContainsTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         internal IDbScript GetResult()

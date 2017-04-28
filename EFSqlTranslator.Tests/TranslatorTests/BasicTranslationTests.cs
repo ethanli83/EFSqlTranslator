@@ -40,6 +40,28 @@ where ((b0.Url is not null) and (b0.Name like 'Ethan%')) and ((b0.UserId > 1) or
         }
 
         [Fact]
+        public void Test_Translate_Filter_On_Contains()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs
+                    .Where(b => b.Url != null &&
+                                b.Name.Contains("Ethan") &&
+                                (b.UserId > 1 || b.UserId < 100));
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select b0.*
+from Blogs b0
+where ((b0.Url is not null) and (b0.Name like '%Ethan%')) and ((b0.UserId > 1) or (b0.UserId < 100))";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
         public void Test_Ues_Left_Join_If_In_Or_Condition()
         {
             using (var db = new TestingContext())
@@ -138,6 +160,32 @@ select b0.* from Blogs b0";
 select s0.BlogId as 'BId', sum(s0.FloatVal) as 'FloatVal', sum(s0.DecimalVal) as 'DecimalVal', sum(s0.DoubleVal) as 'DoubleVal'
 from Statistics s0
 group by s0.BlogId";
+
+                TestUtils.AssertStringEqual(expected, sql);
+
+            }
+        }
+
+        [Fact]
+        public void Test_Query_DifferentSchema()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Items
+                    .GroupBy(i => i.CategoryId)
+                    .Select(g => new
+                    {
+                        CategoryId = g.Key,
+                        Sum = g.Sum(i => i.Value)
+                    });
+
+                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select i0.CategoryId, sum(i0.Value) as 'Sum'
+from fin.Item i0
+group by i0.CategoryId";
 
                 TestUtils.AssertStringEqual(expected, sql);
 

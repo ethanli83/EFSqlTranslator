@@ -34,9 +34,9 @@ namespace EFSqlTranslator.Translation
             IQueryable<T> query, IModelInfoProvider infoProvider, IDbObjectFactory factory, out string sql)
         {
             var executor = LinqExecutorMaker.Make(query, infoProvider, factory, db);
-            var result = executor.Execute();
-
             sql = executor.Script.ToString();
+            
+            var result = executor.Execute();
             return result;
         }
 
