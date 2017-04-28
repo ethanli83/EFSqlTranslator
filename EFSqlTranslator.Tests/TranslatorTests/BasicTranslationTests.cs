@@ -27,7 +27,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
                                 b.Name.StartsWith("Ethan") &&
                                 (b.UserId > 1 || b.UserId < 100));
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -49,7 +49,7 @@ where ((b0.Url is not null) and (b0.Name like 'Ethan%')) and ((b0.UserId > 1) or
                                 b.Name.Contains("Ethan") &&
                                 (b.UserId > 1 || b.UserId < 100));
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -68,7 +68,7 @@ where ((b0.Url is not null) and (b0.Name like '%Ethan%')) and ((b0.UserId > 1) o
             {
                 var query = db.Posts.Where(p => p.User.UserName != null || p.Content != null);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -88,7 +88,7 @@ where (u0.UserName is not null) or (p0.Content is not null)";
             {
                 var query = db.Blogs.Where(b => b.CommentCount > 10);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -108,7 +108,7 @@ select b0.* from Blogs b0 where b0.CommentCount > 10";
                     .Select(b => new {KKK = b.BlogId})
                     .Select(b => new {K = b.KKK});
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -125,7 +125,7 @@ select b0.BlogId as 'K' from Blogs b0 where b0.CommentCount > 10";
             {
                 var query = db.Blogs.Select(b => b);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -151,7 +151,7 @@ select b0.* from Blogs b0";
                         DoubleVal = g.Sum(s => s.DoubleVal)
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 Console.WriteLine(sql);
@@ -179,7 +179,7 @@ group by s0.BlogId";
                         Sum = g.Sum(i => i.Value)
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

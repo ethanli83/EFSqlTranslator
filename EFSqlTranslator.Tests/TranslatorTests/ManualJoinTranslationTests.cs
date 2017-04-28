@@ -35,7 +35,7 @@ have to be limited to column pairs."
                         (p, b) => new { PId = p.PostId, b.Name },
                         DbJoinType.LeftOuter);
 
-                var script = LinqTranslator.Translate(query1.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query1.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

@@ -108,7 +108,7 @@ namespace EFSqlTranslator.Translation
         public static LinqExecutor<T> Make<T>(IQueryable<T> queryable, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, DbContext dtx)
         {
             IncludeGraph includeGraph;
-            var script = LinqTranslator.Translate(queryable.Expression, infoProvider, dbFactory, out includeGraph);
+            var script = QueryTranslator.Translate(queryable.Expression, infoProvider, dbFactory, out includeGraph);
             return new LinqExecutor<T>(includeGraph, script, dtx);
         }
     }

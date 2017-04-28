@@ -15,7 +15,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
             {
                 var query = db.Blogs.Where(b => b.Posts.Any(p => p.Content != null));
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -40,7 +40,7 @@ where sq0.BlogId_jk0 is not null";
             {
                 var query = db.Blogs.Where(b => b.Posts.Any());
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

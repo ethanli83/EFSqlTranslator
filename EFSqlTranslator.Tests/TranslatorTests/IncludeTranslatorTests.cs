@@ -31,7 +31,7 @@ returned from database."
                     .Where(p => p.Blog.Url != null)
                     .Include(p => p.User);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -78,7 +78,7 @@ drop table if exists Temp_Table_Posts0";
                     .Include(p => p.User)
                     .ThenInclude(u => u.Blogs);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -142,7 +142,7 @@ drop table if exists Temp_Table_Posts0
                     .Include(p => p.User)
                     .Include(p => p.Blog);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -195,7 +195,7 @@ drop table if exists Temp_Table_Posts0";
                     .ThenInclude(c => c.User)
                     .Include(p => p.Blog);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

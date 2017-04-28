@@ -30,7 +30,7 @@ with aggregation methods."
                     GroupBy(p => p.BlogId).
                     Select(g => new { g.Key });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -57,7 +57,7 @@ group by p0.BlogId";
                     GroupBy(p => new { p.Blog.Url, p.User.UserName }).
                     Select(g => new { g.Key.Url, g.Key.UserName });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -88,7 +88,7 @@ This feature allows developers to write sophisticated aggregtion in a much simpl
                     GroupBy(p => new { p.Blog }).
                     Select(g => new { g.Key.Blog.User.UserId });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -118,7 +118,7 @@ group by b0.BlogId, u0.UserId";
                     GroupBy(x => new { x.Blog }).
                     Select(x => new { x.Key.Blog.Url, x.Key.Blog.User.UserName });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -147,7 +147,7 @@ group by sq0.BlogId, sq0.Url, u0.UserName";
                     GroupBy(b => new { Cnt = b.Posts.Count() }).
                     Select(x => new { x.Key.Cnt });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -175,7 +175,7 @@ group by ifnull(sq0.count0, 0)";
                     GroupBy(b => b.Posts.Count()).
                     Select(x => new { x.Key, Sum = x.Sum(b => b.CommentCount) });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -203,7 +203,7 @@ group by ifnull(sq0.count0, 0)";
                     GroupBy(b => b.Posts.Count()).
                     Select(x => new { x.Key, Sum = x.Sum(b => b.Comments.Count()) });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -240,7 +240,7 @@ group by ifnull(sq0.count0, 0)";
                     GroupBy(b => new { Cnt = b.Posts.Count(), Avg = b.Posts.Average(p => p.LikeCount) }).
                     Select(x => new { x.Key.Cnt, x.Key.Avg, CommentCount = x.Sum(b => b.CommentCount) });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -277,7 +277,7 @@ group by ifnull(sq0.count0, 0), ifnull(sq0.avg0, 0)";
                         CommentCount = x.Sum(b => b.CommentCount)
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

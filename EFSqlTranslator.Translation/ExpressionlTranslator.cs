@@ -8,7 +8,7 @@ using EFSqlTranslator.Translation.MethodTranslators;
 
 namespace EFSqlTranslator.Translation
 {
-    public class ExpressionToSqlTranslator : ExpressionVisitor
+    public class ExpressionlTranslator : ExpressionVisitor
     {
         private readonly IModelInfoProvider _infoProvider;
 
@@ -20,7 +20,7 @@ namespace EFSqlTranslator.Translation
 
         private readonly TranslationPlugIns _plugIns = new TranslationPlugIns();
 
-        public ExpressionToSqlTranslator(
+        public ExpressionlTranslator(
             IModelInfoProvider infoProvider, IDbObjectFactory dbFactory,
             TranslationState state = null, IEnumerable<AbstractMethodTranslator> methodTranslators = null)
         {

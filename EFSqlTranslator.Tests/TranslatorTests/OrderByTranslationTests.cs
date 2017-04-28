@@ -25,7 +25,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
                     .Where(b => b.Url.StartsWith("ethan.com"))
                     .OrderBy(b => b.User.UserName);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -49,7 +49,7 @@ order by u0.UserName";
                     .OrderBy(b => b.User.UserName)
                     .ThenBy(b => b.CommentCount);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -72,7 +72,7 @@ order by u0.UserName, b0.CommentCount";
                     .Where(b => b.Url.StartsWith("ethan.com"))
                     .OrderByDescending(b => b.User.UserName);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -99,7 +99,7 @@ order by u0.UserName desc";
                     .OrderBy(b => b.User.UserName)
                     .ThenByDescending(b => b.CommentCount);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -124,7 +124,7 @@ order by u0.UserName, b0.CommentCount desc";
                     .ThenByDescending(b => b.CommentCount)
                     .ThenBy(b => b.Url);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -147,7 +147,7 @@ order by u0.UserName, b0.CommentCount desc, b0.Url";
                     .Where(b => b.Url.StartsWith("ethan.com"))
                     .OrderBy(b => b.Posts.Sum(p => p.LikeCount));
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

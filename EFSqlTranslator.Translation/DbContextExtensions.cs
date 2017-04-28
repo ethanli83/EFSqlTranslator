@@ -22,7 +22,7 @@ namespace EFSqlTranslator.Translation
         {
             using (var connection = db.Database.GetDbConnection())
             {
-                var script = LinqTranslator.Translate(query.Expression, infoProvider, factory);
+                var script = QueryTranslator.Translate(query.Expression, infoProvider, factory);
                 var sql = script.ToString();
 
                 var results = connection.Query(sql);
@@ -45,7 +45,7 @@ namespace EFSqlTranslator.Translation
         {
             using (var connection = db.Database.GetDbConnection())
             {
-                var script = LinqTranslator.Translate(query.Expression, infoProvider, factory);
+                var script = QueryTranslator.Translate(query.Expression, infoProvider, factory);
                 sql = script.ToString();
 
                 var results = connection.Query(sql);

@@ -7,9 +7,9 @@ using NLog;
 
 namespace EFSqlTranslator.Translation
 {
-    public static class LinqTranslator
+    public static class QueryTranslator
     {
-        private static readonly ILogger Logger = LogManager.GetLogger(nameof(LinqTranslator));
+        private static readonly ILogger Logger = LogManager.GetLogger(nameof(QueryTranslator));
 
         public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
         {
@@ -50,7 +50,7 @@ namespace EFSqlTranslator.Translation
             if (fromSelect != null)
                 state.ResultStack.Push(graphNode.FromNode.Select);
 
-            var translator = new ExpressionToSqlTranslator(infoProvider, dbFactory, state);
+            var translator = new ExpressionlTranslator(infoProvider, dbFactory, state);
 
             // translated current included node
             translator.Visit(graphNode.Expression);

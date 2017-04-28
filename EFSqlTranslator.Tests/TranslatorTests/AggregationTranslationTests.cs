@@ -29,7 +29,7 @@ We will also demostrate few powerful aggregations that you can do with this liba
                     GroupBy(p => p.BlogId).
                     Select(g => new { cnt = g.Count() });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -61,7 +61,7 @@ group by p0.BlogId";
                         Exp = g.Sum(p => p.User.UserId) * g.Count(p => p.Content.StartsWith("Ethan"))
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -96,7 +96,7 @@ group by p0.BlogId";
                         cnt = g.Count(p => p.Blog.Url != null || p.User.UserId > 0)
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -131,7 +131,7 @@ group by p0.BlogId";
                         cnt = b.Posts.Sum(p => p.PostId)
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -162,7 +162,7 @@ where b0.Url is not null";
                         cnt = b.Posts.Count(p => p.User.UserName != null)
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -203,7 +203,7 @@ where b0.Url is not null";
                         Cnt = g.Key.Blog.Comments.Count(c => c.User.UserName.StartsWith("Ethan"))
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -243,7 +243,7 @@ group by b0.BlogId, b0.Url, u0.UserId";
                         Cnt = g.Count(x => x.User.UserName != "ethan")
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

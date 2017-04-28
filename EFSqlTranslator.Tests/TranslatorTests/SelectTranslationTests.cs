@@ -31,7 +31,7 @@ In this section, we will show you multiple ways to select data. You can basicall
                     .Where(p => p.User.UserName != null)
                     .Select(p => new { p.Content, p.Title });
                 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
                 
                 const string expected = @"
@@ -57,7 +57,7 @@ where u0.UserName is not null";
                     .Where(p => p.User.UserName != null)
                     .Select(p => new { p.Content, p.Blog.User.UserName });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -89,7 +89,7 @@ where u0.UserName is not null";
                         Num = p.BlogId / p.User.UserId,
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -111,7 +111,7 @@ where p0.Content is not null";
                     .Where(p => p.Content != null)
                     .Select(p => new { p.Blog, p.User.UserName });
                 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
                 
                 const string expected = @"
@@ -140,7 +140,7 @@ where p0.Content is not null";
                     .Select(p => new { p.Blog, p.User.UserName })
                     .Select(p => new { p.Blog.Url, p.Blog.Name, p.UserName });
                 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
                 
                 const string expected = @"
@@ -164,7 +164,7 @@ where p0.Content is not null";
                     .Select(p => p.Blog)
                     .Select(b => b.Url);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -189,7 +189,7 @@ where p0.Content is not null";
                     .Select(g => new { g.User, g.Url })
                     .Select(g => new { g.User.UserName, g.Url });
                 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
                 
                 const string expected = @"
@@ -218,7 +218,7 @@ left outer join Users u0 on sq0.UserId_jk0 = u0.UserId";
                     .Select(p => new { p.Key.Blog, p.Key.Blog.User, p.Key.Url })
                     .Select(g => new { g.Blog.Name, g.User.UserName, g.Url });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -248,7 +248,7 @@ group by sq0.BlogId, sq0.Url, u0.UserId, sq0.Name, u0.UserName";
                         Cnt2 = b.Posts.Count(p => p.LikeCount < 50)
                     });
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

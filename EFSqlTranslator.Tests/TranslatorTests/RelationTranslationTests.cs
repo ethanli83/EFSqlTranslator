@@ -30,7 +30,7 @@ In this section, we will show you how relationships are translated. The basic ru
             {
                 var query = db.Posts.Where(p => p.Blog.Url != null);
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -54,7 +54,7 @@ where b0.Url is not null ";
             {
                 var query = db.Blogs.Where(b => b.Posts.Any(p => p.Content != null));
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -83,7 +83,7 @@ where sq0.BlogId_jk0 is not null";
             {
                 var query = db.Blogs.Where(b => b.User.Comments.Any(c => c.Post.Content != null));
 
-                var script = LinqTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

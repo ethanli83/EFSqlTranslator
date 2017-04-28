@@ -42,7 +42,7 @@ You can now try the translator out on http://linqrunner.daydreamer.io/.";
 
             // Step 2. Create targets and add them to the configuration
             var consoleTarget = new MyFirstTarget();
-            config.AddTarget(nameof(LinqTranslator), consoleTarget);
+            config.AddTarget(nameof(QueryTranslator), consoleTarget);
 
             // Step 3. Set target properties
             consoleTarget.Layout = @"${date:format=HH\:mm\:ss} ${logger} ${message}";
