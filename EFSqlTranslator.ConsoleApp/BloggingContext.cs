@@ -119,8 +119,6 @@ namespace EFSqlTranslator.ConsoleApp
         public int ItemId { get; set; }
 
         public Guid CompanyId { get; set; }
-
-        public Company Company { get; set; }
     }
 
     public class Company
@@ -128,5 +126,7 @@ namespace EFSqlTranslator.ConsoleApp
         public Guid CompanyId { get; set; }
 
         public string Name { get; set; }
+
+        public List<Item> Items { get; set; }
     }
 }

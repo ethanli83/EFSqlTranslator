@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using Dapper;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.MySqlObjects;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace EFSqlTranslator.ConsoleApp
@@ -14,6 +16,8 @@ namespace EFSqlTranslator.ConsoleApp
         public static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+
+            Dapper.SqlMapper.AddTypeHandler<Guid>(new GuidTypeHandler());
 
             using (var db = new BloggingContext())
             {
@@ -28,7 +32,9 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Items.Where(i => i.Company.Name.Contains("2")).Select(i => i.ItemId);
+                    var query = db.Companies
+                        .Where(i => i.Name.Contains("2"))
+                        .Include(i => i.Items);
 
                     var result = db.Query(
                         query,
@@ -161,6 +167,23 @@ namespace EFSqlTranslator.ConsoleApp
             }
 
             db.SaveChanges();
+        }
+    }
+
+    public class GuidTypeHandler : SqlMapper.TypeHandler<Guid>
+    {
+        public override Guid Parse(object value)
+        {
+            var inVal = (byte[])value;
+            byte[] outVal = new byte[] { inVal[3], inVal[2], inVal[1], inVal[0], inVal[5], inVal[4], inVal[7], inVal[6], inVal[8], inVal[9], inVal[10], inVal[11], inVal[12], inVal[13], inVal[14], inVal[15] };
+            return new Guid(outVal);
+        }
+
+        public override void SetValue(System.Data.IDbDataParameter parameter, Guid value)
+        {
+            var inVal = value.ToByteArray();
+            byte[] outVal = new byte[] { inVal[3], inVal[2], inVal[1], inVal[0], inVal[5], inVal[4], inVal[7], inVal[6], inVal[8], inVal[9], inVal[10], inVal[11], inVal[12], inVal[13], inVal[14], inVal[15] };
+            parameter.Value = outVal;
         }
     }
 }

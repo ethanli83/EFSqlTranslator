@@ -105,10 +105,15 @@ namespace EFSqlTranslator.Translation
         private static Expression BuildRelationUpdateBlock(
             EntityFieldInfo fromKey, PropertyInfo fromProperty, EntityInfo toEntity,  PropertyInfo toProperty, Expression varFromEntity, Expression varDict)
         {
+            var actions = new List<Expression>();
+            /**
+             * var posts = dict[blog.BlogId];
+             * blog.Posts.AddRange(posts);
+             */
             var toEnumType = typeof(IEnumerable<>).MakeGenericType(toEntity.Type);
             var fkExpr = Expression.Property(varFromEntity, fromKey.ClrProperty);
 
-            //var posts = dicts[blog.BlogId];
+            // var posts = dicts[blog.BlogId];
             var varTs = Expression.Variable(toEnumType, "rts");
 
             var keyType = varDict.Type.GenericTypeArguments.First();
@@ -117,23 +122,33 @@ namespace EFSqlTranslator.Translation
 
             var varTsAssignExpr = Expression.Assign(varTs, dictItemExpr);
 
-            var fmExpr = Expression.Property(varFromEntity, fromProperty);
+            actions.Add(varTsAssignExpr);
 
-            // blog.Posts.AddRange(posts);
-            var arcExpr = Expression.Call(fmExpr, "AddRange", null, varTs);
+            if (fromProperty != null)
+            {
+                // blog.Posts.AddRange(posts);
+                var fmExpr = Expression.Property(varFromEntity, fromProperty);
+                var toListCall = Expression.Call(typeof(Enumerable), nameof(Enumerable.ToList), new[] { toEntity.Type }, varTs);
+                var arcExpr = Expression.Assign(fmExpr, toListCall);
+
+                actions.Add(arcExpr);
+            }
 
             /**
-            foreach (var post in posts)
-            {
-                post.Blog = blog;
-            }
+             * foreach (var post in posts)
+             *     post.Blog = blog;
              */
-            var varToEntity = Expression.Parameter(toEntity.Type, "t");
-            var tfmExpr = Expression.Property(varToEntity, toProperty);
-            var tfmAssignExpr = Expression.Assign(tfmExpr, varFromEntity);
-            var tkLoop = MakeForEach(varTs, varToEntity, tfmAssignExpr);
+            if (toProperty != null)
+            {
+                var varToEntity = Expression.Parameter(toEntity.Type, "t");
+                var tfmExpr = Expression.Property(varToEntity, toProperty);
+                var tfmAssignExpr = Expression.Assign(tfmExpr, varFromEntity);
+                var tkLoop = MakeForEach(varTs, varToEntity, tfmAssignExpr);
 
-            var updateBlockExpr = Expression.Block(new[] {varTs}, varTsAssignExpr, arcExpr, tkLoop);
+                actions.Add(tkLoop);
+            }
+
+            var updateBlockExpr = Expression.Block(new[] {varTs}, actions.ToArray());
 
             // ContainsKey(TKey key)
             var ccExpr = Expression.Call(varDict, "ContainsKey", null, castExpr);

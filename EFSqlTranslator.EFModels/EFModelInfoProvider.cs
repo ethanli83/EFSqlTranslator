@@ -61,10 +61,7 @@ namespace EFSqlTranslator.EFModels
                     FromEntity = declaringEntity,
                     ToEntity = principalEntity,
                     FromProperty = relation.DependentToPrincipal.PropertyInfo,
-                    // for example, team property is defined in teamMember, but teamMembers is 
-                    // not defined in team, the one side of the relation will be missing
-                    // we will assume the conlumn name is the same in both side
-                    ToProperty = (relation.PrincipalToDependent ?? relation.DependentToPrincipal).PropertyInfo,
+                    ToProperty = relation.PrincipalToDependent?.PropertyInfo,
                     FromKeys = declaringKeys.ToList(),
                     ToKeys = principalKeys.ToList(), 
                 };
@@ -97,7 +94,7 @@ namespace EFSqlTranslator.EFModels
                     FromEntity = principalEntity,
                     ToEntity = declaringEntity,
                     FromProperty = relation.PrincipalToDependent.PropertyInfo,
-                    ToProperty = (relation.DependentToPrincipal ?? relation.PrincipalToDependent).PropertyInfo,
+                    ToProperty = relation.DependentToPrincipal?.PropertyInfo,
                     FromKeys = principalKeys.ToList(),
                     ToKeys = declaringKeys.ToList(), 
                     IsChildRelation = true
