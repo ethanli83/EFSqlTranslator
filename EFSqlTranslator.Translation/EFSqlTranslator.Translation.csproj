@@ -8,7 +8,6 @@
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="Dapper" Version="1.50.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.1" />
     <PackageReference Include="NLog" Version="5.0.0-beta06" />
   </ItemGroup>
   <ItemGroup>
