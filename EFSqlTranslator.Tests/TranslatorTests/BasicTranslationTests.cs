@@ -3,6 +3,7 @@ using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
@@ -151,7 +152,7 @@ select b0.* from Blogs b0";
                         DoubleVal = g.Sum(s => s.DoubleVal)
                     });
 
-                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
 
                 Console.WriteLine(sql);
@@ -179,7 +180,7 @@ group by s0.BlogId";
                         Sum = g.Sum(i => i.Value)
                     });
 
-                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -205,7 +206,7 @@ group by i0.CategoryId";
                         Val = g.Sum(i => i.Value)
                     });
 
-                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

@@ -25,5 +25,13 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
                 SourceSelect = sourceSelect
             };
         }
+
+        public override IDbFunc BuildFunc(string name, bool isAggregation, params IDbObject[] parameters)
+        {
+            return new SqliteFunc(name, parameters)
+            {
+                IsAggregation = isAggregation
+            };
+        }
     }
 }

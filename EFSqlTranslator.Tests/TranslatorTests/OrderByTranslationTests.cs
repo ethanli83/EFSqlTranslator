@@ -2,6 +2,7 @@
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
@@ -147,7 +148,7 @@ order by u0.UserName, b0.CommentCount desc, b0.Url";
                     .Where(b => b.Url.StartsWith("ethan.com"))
                     .OrderBy(b => b.Posts.Sum(p => p.LikeCount));
 
-                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

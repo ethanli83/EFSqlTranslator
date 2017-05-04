@@ -166,7 +166,7 @@ namespace EFSqlTranslator.ConsoleApp
                         ItemId = iid++,
                         CompanyId = cid,
                         CategoryId = i % 7,
-                        Val = i * c / 3.7m
+                        Val = i * c / 2m
                     }); 
                 }
             }

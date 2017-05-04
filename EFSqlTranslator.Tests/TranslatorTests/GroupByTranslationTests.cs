@@ -2,6 +2,7 @@
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
@@ -175,7 +176,7 @@ group by ifnull(sq0.count0, 0)";
                     GroupBy(b => b.Posts.Count()).
                     Select(x => new { x.Key, Sum = x.Sum(b => b.CommentCount) });
 
-                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -203,7 +204,7 @@ group by ifnull(sq0.count0, 0)";
                     GroupBy(b => b.Posts.Count()).
                     Select(x => new { x.Key, Sum = x.Sum(b => b.Comments.Count()) });
 
-                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -240,7 +241,7 @@ group by ifnull(sq0.count0, 0)";
                     GroupBy(b => new { Cnt = b.Posts.Count(), Avg = b.Posts.Average(p => p.LikeCount) }).
                     Select(x => new { x.Key.Cnt, x.Key.Avg, CommentCount = x.Sum(b => b.CommentCount) });
 
-                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -277,7 +278,7 @@ group by ifnull(sq0.count0, 0), ifnull(sq0.avg0, 0)";
                         CommentCount = x.Sum(b => b.CommentCount)
                     });
 
-                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

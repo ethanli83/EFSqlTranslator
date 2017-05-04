@@ -2,6 +2,7 @@
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
@@ -61,7 +62,7 @@ group by p0.BlogId";
                         Exp = g.Sum(p => p.User.UserId) * g.Count(p => p.Content.StartsWith("Ethan"))
                     });
 
-                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
@@ -131,7 +132,7 @@ group by p0.BlogId";
                         cnt = b.Posts.Sum(p => p.PostId)
                     });
 
-                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"

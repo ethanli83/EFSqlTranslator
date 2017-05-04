@@ -141,7 +141,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
         }
 
-        public IDbFunc BuildFunc(string name, bool isAggregation, params IDbObject[] parameters)
+        public virtual IDbFunc BuildFunc(string name, bool isAggregation, params IDbObject[] parameters)
         {
             return new SqlFunc(name, parameters)
             {
