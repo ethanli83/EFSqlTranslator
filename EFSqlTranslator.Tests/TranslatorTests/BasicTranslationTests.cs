@@ -191,5 +191,38 @@ group by i0.CategoryId";
 
             }
         }
+
+        [Fact]
+        public void Test_Query_Fill_Class()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Items
+                    .GroupBy(i => i.CategoryId)
+                    .Select(g => new MyClass
+                    {
+                        Id = g.Key,
+                        Val = g.Sum(i => i.Value)
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select i0.CategoryId as 'Id', sum(i0.Value) as 'Val'
+from fin.Item i0
+group by i0.CategoryId";
+
+                TestUtils.AssertStringEqual(expected, sql);
+
+            }
+        }
+    }
+
+    public class MyClass
+    {
+        public int Id { get; set; }
+
+        public decimal? Val { get; set; }
     }
 }

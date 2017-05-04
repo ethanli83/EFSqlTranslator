@@ -119,6 +119,10 @@ namespace EFSqlTranslator.ConsoleApp
         public int ItemId { get; set; }
 
         public Guid CompanyId { get; set; }
+
+        public int CategoryId { get; set; }
+
+        public decimal? Val { get; set; }
     }
 
     public class Company

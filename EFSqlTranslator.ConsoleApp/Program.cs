@@ -32,9 +32,12 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Companies
-                        .Where(i => i.Name.Contains("2"))
-                        .Include(i => i.Items);
+                    var query = db.Items
+                        .GroupBy(i => i.CategoryId)
+                        .Select(g => new MyClass {
+                            Id = g.Key,
+                            Val = g.Sum(i => i.Val)
+                        });
 
                     var result = db.Query(
                         query,
@@ -161,7 +164,9 @@ namespace EFSqlTranslator.ConsoleApp
                     db.Items.Add(new Item
                     {
                         ItemId = iid++,
-                        CompanyId = cid
+                        CompanyId = cid,
+                        CategoryId = i % 7,
+                        Val = i * c / 3.7m
                     }); 
                 }
             }
@@ -185,5 +190,12 @@ namespace EFSqlTranslator.ConsoleApp
             byte[] outVal = new byte[] { inVal[3], inVal[2], inVal[1], inVal[0], inVal[5], inVal[4], inVal[7], inVal[6], inVal[8], inVal[9], inVal[10], inVal[11], inVal[12], inVal[13], inVal[14], inVal[15] };
             parameter.Value = outVal;
         }
+    }
+
+    public class MyClass
+    {
+        public int Id { get; set; }
+
+        public decimal? Val { get; set; }
     }
 }

@@ -96,22 +96,46 @@ namespace EFSqlTranslator.Translation
         protected override Expression VisitNew(NewExpression n)
         {
             var list = _dbFactory.BuildList<DbKeyValue>();
-            for (var i = 0; i < n.Members.Count; i++)
+            
+            if (n.Members != null)
             {
-                var member = n.Members[i];
-                var assignment = n.Arguments[i];
+                for (var i = 0; i < n.Members.Count; i++)
+                {
+                    var member = n.Members[i];
+                    var assignment = n.Arguments[i];
 
-                Visit(assignment);
+                    Visit(assignment);
 
-                var dbObj = _state.ResultStack.Pop();
-                var dbKeyValue = _dbFactory.BuildKeyValue(member.Name, dbObj);
-                list.Add(dbKeyValue);
+                    var dbObj = _state.ResultStack.Pop();
+                    var dbKeyValue = _dbFactory.BuildKeyValue(member.Name, dbObj);
+                    list.Add(dbKeyValue);
+                }
+
+                _state.ResultStack.Push(list);
+                return n;
             }
 
             _state.ResultStack.Push(list);
-            return n;
+            return base.VisitNew(n);
         }
 
+        protected override MemberAssignment VisitMemberAssignment(MemberAssignment ma)
+        {
+            var list = (IDbList<DbKeyValue>)_state.ResultStack.Pop();
+
+            var member = ma.Member;
+            var assignment = ma.Expression;
+
+            Visit(assignment);
+
+            var dbObj = _state.ResultStack.Pop();
+            var dbKeyValue = _dbFactory.BuildKeyValue(member.Name, dbObj);
+            list.Add(dbKeyValue);
+
+            _state.ResultStack.Push(list);
+            return ma;
+        }
+        
         protected override Expression VisitParameter(ParameterExpression p)
         {
             return VisitParameterInteral(p, false);
