@@ -36,22 +36,17 @@ namespace EFSqlTranslator.EFModels
 
         public static EntityFieldInfo ToEntityFieldInfo(this IProperty p, EntityInfo e, bool isPk = false)
         {
+            var annotation = p.FindAnnotation(ColumnNameAnnoName);
+
             var info = new EntityFieldInfo
             {
                 ClrProperty = p.PropertyInfo,
-                Name = p.Name,
+                PropertyName = p.Name,
+                DbName = annotation != null ? annotation.Value.ToString() : p.Name,
                 ValType = p.ClrType,
                 IsPrimaryKey = isPk,
                 Entity = e
             };
-
-            var annotation = p.FindAnnotation(ColumnNameAnnoName);
-            if (annotation != null && annotation.Value.ToString() != info.Name)
-            {
-                throw new NotSupportedException(
-                    "Annotation specifying column name is not support, " +
-                    "we need to use it to match property name at the moment");
-            }
 
             return info;
         }

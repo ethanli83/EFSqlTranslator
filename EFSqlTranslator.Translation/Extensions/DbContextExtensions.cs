@@ -4,7 +4,7 @@ using Dapper;
 using EFSqlTranslator.Translation.DbObjects;
 using Microsoft.EntityFrameworkCore;
 
-namespace EFSqlTranslator.Translation
+namespace EFSqlTranslator.Translation.Extensions
 {
     public static class DbContextExtensions
     {

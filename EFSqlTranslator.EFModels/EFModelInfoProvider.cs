@@ -63,7 +63,7 @@ namespace EFSqlTranslator.EFModels
                     FromProperty = relation.DependentToPrincipal.PropertyInfo,
                     ToProperty = relation.PrincipalToDependent?.PropertyInfo,
                     FromKeys = declaringKeys.ToList(),
-                    ToKeys = principalKeys.ToList(), 
+                    ToKeys = principalKeys.ToList() 
                 };
 
                 ei.AddRelation(relationKey, entityRelation);

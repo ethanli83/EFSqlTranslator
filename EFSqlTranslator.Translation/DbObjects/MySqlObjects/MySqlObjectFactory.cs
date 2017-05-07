@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using EFSqlTranslator.Translation.DbObjects.SqlObjects;
+﻿using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 
 namespace EFSqlTranslator.Translation.DbObjects.MySqlObjects
 {

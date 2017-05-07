@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using EFSqlTranslator.Translation.Extensions;
 using EFSqlTranslator.Translation.MethodTranslators;
 
 namespace EFSqlTranslator.Translation
@@ -20,7 +21,7 @@ namespace EFSqlTranslator.Translation
 
         public static LambdaExpression Make(LambdaExpression lambdaExpr, IModelInfoProvider infoProvider)
         {
-            var memberExpr = (MemberExpression)lambdaExpr.Body;
+            var memberExpr = lambdaExpr.Body.GetExpressionInPath<MemberExpression>();
             return Make(memberExpr, infoProvider);
         }
 

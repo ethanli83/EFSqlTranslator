@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace EFSqlTranslator.Translation
+namespace EFSqlTranslator.Translation.Extensions
 {
     public static class StringBuilderExtensions
     {

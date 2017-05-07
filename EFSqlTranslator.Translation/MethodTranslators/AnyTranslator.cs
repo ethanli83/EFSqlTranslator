@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects;
+using EFSqlTranslator.Translation.Extensions;
 
 namespace EFSqlTranslator.Translation.MethodTranslators
 {
@@ -39,7 +40,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 var pkColumn = _dbFactory.BuildColumn(dbJoin.To, joinKey.Name, joinKey.ValType.DotNetType, joinKey.Alias);
                 var binary = _dbFactory.BuildBinary(pkColumn, DbOperator.IsNot, _dbFactory.BuildConstant(null));
 
-                whereClause = SqlTranslationHelper.UpdateBinary(whereClause, binary, _dbFactory);
+                whereClause = whereClause.UpdateBinary(binary, _dbFactory);
             }
 
             state.ResultStack.Push(whereClause);

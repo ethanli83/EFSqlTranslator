@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace EFSqlTranslator.Translation
+namespace EFSqlTranslator.Translation.Extensions
 {
     public static class ExpressionExtensions
     {
@@ -36,6 +36,20 @@ namespace EFSqlTranslator.Translation
         {
             var type = expression.GetReturnType();
             return type.GetTypeInfo().IsGenericType ? type.GetGenericArguments().Single() : type;
+        }
+
+        public static T GetExpressionInPath<T>(this Expression expression) where T : Expression
+        {
+            var wantedExpr = expression as T;
+            if (wantedExpr != null)
+                return wantedExpr;
+
+            var methodExpr = expression as MethodCallExpression;
+            if (methodExpr != null)
+                return methodExpr.GetCaller().GetExpressionInPath<T>();
+
+            var memberExpr = expression as MemberExpression;
+            return memberExpr?.Expression.GetExpressionInPath<T>();
         }
     }
 }

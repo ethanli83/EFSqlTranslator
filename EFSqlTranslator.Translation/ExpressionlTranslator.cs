@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using EFSqlTranslator.Translation.DbObjects;
+using EFSqlTranslator.Translation.Extensions;
 using EFSqlTranslator.Translation.MethodTranslators;
 
 namespace EFSqlTranslator.Translation
@@ -48,12 +49,6 @@ namespace EFSqlTranslator.Translation
             new CountTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new AggregationTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new StringStartsEndsContainsTranslator(_infoProvider, _dbFactory).Register(_plugIns);
-        }
-
-        internal IDbScript GetResult()
-        {
-            var script = _state.GetScript(_dbFactory);
-            return script;
         }
 
         internal IDbSelect GetSelect()
@@ -270,7 +265,7 @@ namespace EFSqlTranslator.Translation
                 var dbRef = refCol != null ? refCol.Ref : (DbReference)dbObj;
 
                 var fieldInfo = _infoProvider.FindFieldInfo(m.Member);
-                var col = _dbFactory.BuildColumn(dbRef, fieldInfo.Name, fieldInfo.ValType);
+                var col = _dbFactory.BuildColumn(dbRef, fieldInfo.DbName, fieldInfo.ValType);
                 _state.ResultStack.Push(col);
 
                 // if we create a column whose DbRef is using by a RefColumn
@@ -281,7 +276,7 @@ namespace EFSqlTranslator.Translation
                 // if the ref column is not now, and it is referring another ref column
                 // we need to make sure the column we translated is in the sub select which
                 // owns the ref column that referred by the current refColumn
-                refCol?.RefTo?.AddToReferedSelect(_dbFactory, fieldInfo.Name, fieldInfo.ValType);
+                refCol?.RefTo?.AddToReferedSelect(_dbFactory, fieldInfo.DbName, fieldInfo.ValType);
 
                 return m;
             }
@@ -338,15 +333,15 @@ namespace EFSqlTranslator.Translation
                 var fromKey = relation.FromKeys[i];
                 var toKey = relation.ToKeys[i];
 
-                var fromColumn = _dbFactory.BuildColumn(fromRef, fromKey.Name, fromKey.ValType);
-                var toColumn = _dbFactory.BuildColumn(joinTo, toKey.Name, toKey.ValType);
+                var fromColumn = _dbFactory.BuildColumn(fromRef, fromKey.DbName, fromKey.ValType);
+                var toColumn = _dbFactory.BuildColumn(joinTo, toKey.DbName, toKey.ValType);
 
                 // If we have created a sub for child relation, we need to the columns
                 // that are used in join condition selected from the sub select.
                 if (childRef != null && childSelect != null)
                 {
-                    var alias = _nameGenerator.GenerateAlias(childSelect, toKey.Name + TranslationConstants.JoinKeySuffix, true);
-                    var childColumn = _dbFactory.BuildColumn(childRef, toKey.Name, toKey.ValType, alias, true);
+                    var alias = _nameGenerator.GenerateAlias(childSelect, toKey.DbName + TranslationConstants.JoinKeySuffix, true);
+                    var childColumn = _dbFactory.BuildColumn(childRef, toKey.DbName, toKey.ValType, alias, true);
 
                     /**
                      * We need to also put the join key in the group of the sub select.
@@ -372,12 +367,12 @@ namespace EFSqlTranslator.Translation
                 var fromSelect = fromRef.Referee as IDbSelect;
                 if (fromSelect != null)
                 {
-                    var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.Name + TranslationConstants.JoinKeySuffix, true);
+                    var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.DbName + TranslationConstants.JoinKeySuffix, true);
                     fromColumn.Name = alias;
                     fromColumn.Alias = string.Empty;
 
                     // try to recursively add the join key to all connected sub select.
-                    refCol.RefTo?.AddToReferedSelect(_dbFactory, fromKey.Name, fromKey.ValType, alias);
+                    refCol.RefTo?.AddToReferedSelect(_dbFactory, fromKey.DbName, fromKey.ValType, alias);
                 }
 
                 var binary = _dbFactory.BuildBinary(fromColumn, DbOperator.Equal, toColumn);

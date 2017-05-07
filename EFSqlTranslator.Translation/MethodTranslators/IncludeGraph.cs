@@ -64,5 +64,28 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             sb.AppendLine(Root.ToString());
             return sb.ToString();
         }
+
+        public IDbScript GetScript(IDbObjectFactory dbFactory)
+        {
+            var script = dbFactory.BuildScript();
+
+            UpdateScript(Root, script, dbFactory);
+
+            return script;
+        }
+
+        private static void UpdateScript(IncludeNode node, IDbScript script, IDbObjectFactory dbFactory)
+        {
+            if (node.TempTable != null)
+                script.Scripts.Add(node.TempTable.GetCreateStatement(dbFactory));
+
+            script.Scripts.Add(node.Select);
+
+            foreach (var toNode in node.ToNodes)
+                UpdateScript(toNode, script, dbFactory);
+
+            if (node.TempTable != null)
+                script.Scripts.Add(node.TempTable.GetDropStatement(dbFactory));
+        }
     }
 }

@@ -91,7 +91,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 Namespace = entityInfo.Namespace,
                 TableName = entityInfo.EntityName,
                 PrimaryKeys = entityInfo.Keys.
-                    Select(k => BuildColumn(null, k.Name, k.ValType)).ToList()
+                    Select(k => BuildColumn(null, k.DbName, k.ValType)).ToList()
             };
         }
 

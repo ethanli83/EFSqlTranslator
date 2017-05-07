@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using EFSqlTranslator.Translation.Extensions;
 
 namespace EFSqlTranslator.Translation.DbObjects
 {

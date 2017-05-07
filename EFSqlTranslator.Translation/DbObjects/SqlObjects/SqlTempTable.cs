@@ -1,4 +1,6 @@
-﻿namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
+﻿using System;
+
+namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
     public class SqlTempTable : SqlTable, IDbTempTable
     {
@@ -8,12 +10,12 @@
 
         public virtual IDbObject GetCreateStatement(IDbObjectFactory factory)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public virtual IDbObject GetDropStatement(IDbObjectFactory factory)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

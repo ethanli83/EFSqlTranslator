@@ -86,7 +86,7 @@ where u0.UserName is not null";
                     .Select(p => new
                     {
                         TitleContent = p.Title + "|" + p.Content,
-                        Num = p.BlogId / p.User.UserId,
+                        Num = p.BlogId / p.User.UserId
                     });
 
                 var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());

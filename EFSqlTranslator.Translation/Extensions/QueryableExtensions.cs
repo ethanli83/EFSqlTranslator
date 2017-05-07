@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using EFSqlTranslator.Translation.DbObjects;
 
-namespace EFSqlTranslator.Translation
+namespace EFSqlTranslator.Translation.Extensions
 {
     public static class QueryableExtensions
     {
@@ -18,20 +18,7 @@ namespace EFSqlTranslator.Translation
             var method = typeof(QueryableExtensions).GetMethod("Join");
             var callExpression = Expression.Call(
                 null,
-                method.MakeGenericMethod(new []
-                {
-                    typeof(TOuter),
-                    typeof(TInner),
-                    typeof(TResult)
-                }),
-                new Expression[]
-                {
-                    outer.Expression,
-                    inner.Expression,
-                    Expression.Quote(joinCondition),
-                    Expression.Quote(resultSelector),
-                    Expression.Constant(dbJoinType)
-                });
+                method.MakeGenericMethod(typeof(TOuter), typeof(TInner), typeof(TResult)), outer.Expression, inner.Expression, Expression.Quote(joinCondition), Expression.Quote(resultSelector), Expression.Constant(dbJoinType));
 
             return outer.Provider.CreateQuery<TResult>(callExpression);
         }
@@ -46,20 +33,7 @@ namespace EFSqlTranslator.Translation
             var method = typeof(QueryableExtensions).GetMethod("Join");
             var callExpression = Expression.Call(
                 null,
-                method.MakeGenericMethod(new []
-                    { 
-                        typeof(TOuter),
-                        typeof(TInner),
-                        typeof(TResult) 
-                    }),
-                new Expression[] 
-                    { 
-                        outer.Expression, 
-                        inner.Expression,
-                        Expression.Quote(joinCondition),
-                        Expression.Quote(resultSelector),
-                        Expression.Constant(dbJoinType)
-                    });
+                method.MakeGenericMethod(typeof(TOuter), typeof(TInner), typeof(TResult)), outer.Expression, inner.Expression, Expression.Quote(joinCondition), Expression.Quote(resultSelector), Expression.Constant(dbJoinType));
                     
             return outer.Provider.CreateQuery<TResult>(callExpression);
         }

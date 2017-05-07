@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;

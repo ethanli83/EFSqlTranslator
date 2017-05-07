@@ -3,6 +3,7 @@ using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using EFSqlTranslator.Translation.Extensions;
 using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests

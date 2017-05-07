@@ -57,7 +57,7 @@ namespace EFSqlTranslator.Translation
             script.PreScripts.AddRange(_preScripts);
 
             var dbSelect = GetLastSelect();
-            dbSelect = dbSelect.Optimize();
+
             script.Scripts.Add(dbSelect);
 
             script.PostScripts.AddRange(_postScripts);

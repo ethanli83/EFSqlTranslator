@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using EFSqlTranslator.Translation.DbObjects;
 
-namespace EFSqlTranslator.Translation
+namespace EFSqlTranslator.Translation.Extensions
 {
     public static class DbColumnExtensions
     {

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects;
+using EFSqlTranslator.Translation.Extensions;
 using EFSqlTranslator.Translation.MethodTranslators;
 using NLog;
 
@@ -32,15 +33,13 @@ namespace EFSqlTranslator.Translation
         private static IDbScript TranslateGraph(
             IncludeGraph includeGraph, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)
         {
-            var script = dbFactory.BuildScript();
+            TranslateGraphNode(includeGraph.Root, infoProvider, dbFactory, nameGenerator);
 
-            TranslateGraphNode(includeGraph.Root, script, infoProvider, dbFactory, nameGenerator);
-
-            return script;
+            return includeGraph.GetScript(dbFactory);
         }
 
         private static void TranslateGraphNode(
-            IncludeNode graphNode, IDbScript script, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)
+            IncludeNode graphNode, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)
         {
             //TODO: check if there is a chain in the relation and throw exceptions
 
@@ -59,7 +58,7 @@ namespace EFSqlTranslator.Translation
             var dbRef = dbObject as DbReference;
 
             var includedSelect = dbRef != null ? dbFactory.BuildSelect(dbRef) : (IDbSelect)dbObject;
-            includedSelect = includedSelect.Optimize();
+            includedSelect = SqlSelectOptimizer.Optimize(includedSelect);
 
             // if from node is not null, then we need to add the forgien key into the selection
             // of the temp table, and make the new select join to the translated select
@@ -72,13 +71,15 @@ namespace EFSqlTranslator.Translation
             // so that the child nodes can join to the temp table containing forgien keys
             if (graphNode.ToNodes.Any())
             {
-                UpdateIncludeSelectAndProcessToNodes(graphNode, includedSelect, script, infoProvider, dbFactory, nameGenerator);
+                UpdateIncludeSelectAndProcessToNodes(graphNode, includedSelect, infoProvider, dbFactory, nameGenerator);
             }
             else
             {
                 graphNode.Select = includedSelect;
-                script.Scripts.Add(graphNode.Select);
             }
+
+            var returnType = graphNode.Expression.GetReturnBaseType();
+            graphNode.Select = DbColumnToEntityPropertyMapper.Map(graphNode.Select, returnType, infoProvider, dbFactory, nameGenerator);
 
             // update fill function
             if (graphNode.FromNode != null)
@@ -143,15 +144,15 @@ namespace EFSqlTranslator.Translation
                     includedSelect.GroupBys.Remove(toKey);
                 }
 
-                fromPkCol = dbFactory.BuildColumn(returnRef, fromKey.Name, fromKey.ValType);
-                var toPkCol = dbFactory.BuildColumn(joinToTemp.To, toKey.Name, toKey.ValType);
-                var binary = dbFactory.BuildBinary(fromPkCol, DbOperator.Equal, toPkCol);
+                fromPkCol = dbFactory.BuildColumn(joinToTemp.To, fromKey.Name, fromKey.ValType);
+                var toPkCol = dbFactory.BuildColumn(returnRef, toKey.Name, toKey.ValType);
+                var binary = dbFactory.BuildBinary(toPkCol, DbOperator.Equal, fromPkCol);
                 joinToTemp.Condition = joinToTemp.Condition.UpdateBinary(binary, dbFactory);
             }
         }
 
         private static void UpdateIncludeSelectAndProcessToNodes(
-            IncludeNode graphNode, IDbSelect includedSelect, IDbScript script,
+            IncludeNode graphNode, IDbSelect includedSelect,
             IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)
         {
             // create temp table
@@ -195,14 +196,8 @@ namespace EFSqlTranslator.Translation
             graphNode.Select = newIncludedSelect;
             graphNode.TempTable = tempTable;
 
-            script.Scripts.Add(tempTable.GetCreateStatement(dbFactory));
-
-            script.Scripts.Add(graphNode.Select);
-
             foreach (var toNode in graphNode.ToNodes)
-                TranslateGraphNode(toNode, script, infoProvider, dbFactory, nameGenerator);
-
-            script.Scripts.Add(tempTable.GetDropStatement(dbFactory));
+                TranslateGraphNode(toNode, infoProvider, dbFactory, nameGenerator);
         }
 
         private static IDbJoin MakeJoin(IDbSelect ownerSelect, IDbObject tempSelect, IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)

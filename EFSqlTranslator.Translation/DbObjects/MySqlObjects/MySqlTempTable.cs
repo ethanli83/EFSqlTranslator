@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
+using EFSqlTranslator.Translation.Extensions;
 
 namespace EFSqlTranslator.Translation.DbObjects.MySqlObjects
 {

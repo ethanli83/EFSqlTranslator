@@ -77,13 +77,5 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
             return sb.ToString();
         }
-
-        public IDbSelect Optimize()
-        {
-            var dbSelect = SqlSelectOptimizer.UnwrapUnneededSelect(this);
-            SqlSelectOptimizer.RemoveUnneededSelectAllColumn(dbSelect);
-            SqlSelectOptimizer.MergeChildJoins(dbSelect);
-            return dbSelect;
-        }
     }
 }

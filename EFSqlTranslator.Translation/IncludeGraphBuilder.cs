@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Linq.Expressions;
+using EFSqlTranslator.Translation.Extensions;
 using EFSqlTranslator.Translation.MethodTranslators;
 
 namespace EFSqlTranslator.Translation

@@ -8,8 +8,6 @@
     <ProjectReference Include="../EFSqlTranslator.EFModels/EFSqlTranslator.EFModels.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AgileObjects.ReadableExpressions" Version="1.8.3">
-    </PackageReference>
     <PackageReference Include="Dapper" Version="1.50.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.1" />

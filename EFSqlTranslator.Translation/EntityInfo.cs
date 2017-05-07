@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace EFSqlTranslator.Translation
@@ -28,6 +29,11 @@ namespace EFSqlTranslator.Translation
         {
             return _retlations.ContainsKey(relationName) ? _retlations[relationName] : null;
         }
+
+        public bool RequirePropertyNameMapping()
+        {
+            return Columns.Any(c => c.RequirePropertyNameMapping());
+        }
     }
 
     public class EntityRelation
@@ -49,7 +55,9 @@ namespace EFSqlTranslator.Translation
 
     public class EntityFieldInfo
     {
-        public string Name { get; set; }
+        public string DbName { get; set; }
+
+        public string PropertyName { get; set; }
         
         public EntityInfo Entity { get; set; }
 
@@ -58,5 +66,10 @@ namespace EFSqlTranslator.Translation
         public bool IsPrimaryKey { get; set; }
 
         public PropertyInfo ClrProperty { get; set; }
+
+        public bool RequirePropertyNameMapping()
+        {
+            return !string.Equals(DbName, PropertyName, StringComparison.CurrentCultureIgnoreCase);
+        }
     }
 }

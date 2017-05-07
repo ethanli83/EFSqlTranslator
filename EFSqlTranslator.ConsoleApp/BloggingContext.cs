@@ -25,10 +25,14 @@ namespace EFSqlTranslator.ConsoleApp
 
         public DbSet<Company> Companies { get; set; }
 
+        public DbSet<Domain> Domains { get; set; }
+
+        public DbSet<Route> Routes { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(SqliteConnectionString);
-            //optionsBuilder.UseMySql(SqlConnectionStr);
+            //optionsBuilder.UseSqlite(SqliteConnectionString);
+            optionsBuilder.UseMySql(SqlConnectionStr);
         }
     }
 
@@ -132,5 +136,32 @@ namespace EFSqlTranslator.ConsoleApp
         public string Name { get; set; }
 
         public List<Item> Items { get; set; }
+    }
+
+    [Table("db_domain")]
+    public class Domain
+    {
+        [Column("pk_domain_id")]
+        public int DomainId { get; set; }
+
+        [Column("domain_name")]
+        public string Name { get; set; }
+
+        public List<Route> Routes { get; set; }
+    }
+
+    [Table("db_route")]
+    public class Route
+    {
+        [Column("pk_route_id")]
+        public int RouteId { get; set; }
+
+        [Column("route_name")]
+        public string Name { get; set; }
+
+        [Column("fk_domain_id")]
+        public int DomainId { get; set; }
+
+        public Domain Domain { get; set; }
     }
 }

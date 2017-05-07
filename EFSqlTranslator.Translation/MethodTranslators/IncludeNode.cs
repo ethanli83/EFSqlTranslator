@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using System.Text;
 using EFSqlTranslator.Translation.DbObjects;
+using EFSqlTranslator.Translation.Extensions;
 
 namespace EFSqlTranslator.Translation.MethodTranslators
 {

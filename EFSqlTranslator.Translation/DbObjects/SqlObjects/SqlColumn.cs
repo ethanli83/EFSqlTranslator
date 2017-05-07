@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using EFSqlTranslator.Translation.Extensions;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {

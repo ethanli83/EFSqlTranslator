@@ -1,10 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using EFSqlTranslator.Translation.DbObjects;
+using EFSqlTranslator.Translation.Extensions;
 
-namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
+namespace EFSqlTranslator.Translation
 {
     public static class SqlSelectOptimizer
     {
+        public static IDbSelect Optimize(IDbSelect dbSelect)
+        {
+            dbSelect = UnwrapUnneededSelect(dbSelect);
+            RemoveUnneededSelectAllColumn(dbSelect);
+            MergeChildJoins(dbSelect);
+            return dbSelect;
+        }
+
         public static IDbSelect UnwrapUnneededSelect(IDbSelect dbSelect)
         {
             while (true)

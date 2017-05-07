@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Data;
 using System.Linq;
 using Dapper;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.MySqlObjects;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using EFSqlTranslator.Translation.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -17,7 +18,7 @@ namespace EFSqlTranslator.ConsoleApp
         {
             Console.WriteLine("Hello World!");
 
-            Dapper.SqlMapper.AddTypeHandler<Guid>(new GuidTypeHandler());
+            SqlMapper.AddTypeHandler(new GuidTypeHandler());
 
             using (var db = new BloggingContext())
             {
@@ -32,12 +33,9 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Items
-                        .GroupBy(i => i.CategoryId)
-                        .Select(g => new MyClass {
-                            Id = g.Key,
-                            Val = g.Sum(i => i.Val)
-                        });
+                    var query = db.Domains
+                        .Where(d => d.Name.StartsWith("day"))
+                        .Include(d => d.Routes.Where(r => r.Name.StartsWith("ethan")));
 
                     var result = db.Query(
                         query,
@@ -171,6 +169,26 @@ namespace EFSqlTranslator.ConsoleApp
                 }
             }
 
+            db.Domains.Add(new Domain
+            {
+                DomainId = 1,
+                Name = "daydreamer"
+            });
+
+            db.Routes.Add(new Route
+            {
+                RouteId = 1,
+                Name = "ethan",
+                DomainId = 1
+            });
+
+            db.Routes.Add(new Route
+            {
+                RouteId = 2,
+                Name = "xufeng",
+                DomainId = 1
+            });
+
             db.SaveChanges();
         }
     }
@@ -180,14 +198,14 @@ namespace EFSqlTranslator.ConsoleApp
         public override Guid Parse(object value)
         {
             var inVal = (byte[])value;
-            byte[] outVal = new byte[] { inVal[3], inVal[2], inVal[1], inVal[0], inVal[5], inVal[4], inVal[7], inVal[6], inVal[8], inVal[9], inVal[10], inVal[11], inVal[12], inVal[13], inVal[14], inVal[15] };
+            byte[] outVal = { inVal[3], inVal[2], inVal[1], inVal[0], inVal[5], inVal[4], inVal[7], inVal[6], inVal[8], inVal[9], inVal[10], inVal[11], inVal[12], inVal[13], inVal[14], inVal[15] };
             return new Guid(outVal);
         }
 
-        public override void SetValue(System.Data.IDbDataParameter parameter, Guid value)
+        public override void SetValue(IDbDataParameter parameter, Guid value)
         {
             var inVal = value.ToByteArray();
-            byte[] outVal = new byte[] { inVal[3], inVal[2], inVal[1], inVal[0], inVal[5], inVal[4], inVal[7], inVal[6], inVal[8], inVal[9], inVal[10], inVal[11], inVal[12], inVal[13], inVal[14], inVal[15] };
+            byte[] outVal = { inVal[3], inVal[2], inVal[1], inVal[0], inVal[5], inVal[4], inVal[7], inVal[6], inVal[8], inVal[9], inVal[10], inVal[11], inVal[12], inVal[13], inVal[14], inVal[15] };
             parameter.Value = outVal;
         }
     }
