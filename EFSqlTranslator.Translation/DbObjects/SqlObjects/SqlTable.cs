@@ -6,7 +6,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
     public class SqlTable : SqlObject, IDbTable
     {
         public string Namespace { get; set; }
-
+        
         public IList<IDbColumn> PrimaryKeys { get; set; } = new List<IDbColumn>();
 
         public string TableName { get; set; }
@@ -18,7 +18,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (!string.IsNullOrEmpty(Namespace))
                 sb.Append($"{Namespace}.");
 
-            var qm = TableName.Contains(" ") ? QuotationMark : string.Empty;
+            var qm = OutputOption.ForceQuotationMark || TableName.Contains(" ") ? QuotationMark : string.Empty;
             sb.Append($"{qm}{TableName}{qm}");
             
             return sb.ToString();

@@ -464,7 +464,7 @@ namespace EFSqlTranslator.Translation
             Visit(b.Right);
             var right = _state.ResultStack.Pop();
 
-            var dbOptr = SqlTranslationHelper.GetDbOperator(b.NodeType);
+            var dbOptr = _dbFactory.GetDbOperator(b.NodeType, b.Left.Type, b.Right.Type);
             if (left.IsNullVal() || right.IsNullVal())
             {
                 dbOptr = dbOptr == DbOperator.Equal

@@ -14,7 +14,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
 
         public override IDbObject GetCreateStatement(IDbObjectFactory factory)
         {
-            Func<string> action = () =>
+            string Action()
             {
                 var sb = new StringBuilder();
 
@@ -23,21 +23,21 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
                 sb.AppendLine();
 
                 return sb.ToString();
-            };
+            }
 
-            return new DbDynamicStatement(action);
+            return new DbDynamicStatement(Action);
         }
 
         public override IDbObject GetDropStatement(IDbObjectFactory factory)
         {
-            Func<string> action = () =>
+            string Action()
             {
                 var sb = new StringBuilder();
                 sb.AppendLine($"drop table if exists {this}");
                 return sb.ToString();
-            };
+            }
 
-            return new DbDynamicStatement(action);
+            return new DbDynamicStatement(Action);
         }
     }
 }

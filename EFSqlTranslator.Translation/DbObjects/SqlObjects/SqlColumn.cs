@@ -17,7 +17,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (!string.IsNullOrEmpty(Ref?.Alias))
                 sb.Append($"{Ref.Alias}.");
 
-            var qm = Name.Contains(" ") ? QuotationMark : string.Empty;
+            var qm = OutputOption.ForceQuotationMark || Name.Contains(" ") ? QuotationMark : string.Empty;
             sb.Append($"{qm}{Name}{qm}");
 
             return sb.ToString();

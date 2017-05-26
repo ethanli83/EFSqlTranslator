@@ -3,9 +3,7 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using EFSqlTranslator.EFModels;
-using EFSqlTranslator.Translation;
-using EFSqlTranslator.Translation.DbObjects.MySqlObjects;
-using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using EFSqlTranslator.Translation.DbObjects.PostgresQlObjects;
 using EFSqlTranslator.Translation.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -35,12 +33,15 @@ namespace EFSqlTranslator.ConsoleApp
                 {
                     var query = db.Domains
                         .Where(d => d.Name.StartsWith("day"))
-                        .Include(d => d.Routes.Where(r => r.Name.StartsWith("ethan")));
+                        .Select(d => new
+                        {
+                            B = d.Name + d.Name
+                        });
 
                     var result = db.Query(
                         query,
                         new EFModelInfoProvider(db),
-                        new SqliteObjectFactory(),
+                        new PostgresQlObjectFactory(),
                         out sql);
 
                     var json = JsonConvert.SerializeObject(result, new JsonSerializerSettings

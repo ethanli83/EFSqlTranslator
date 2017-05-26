@@ -9,3 +9,5 @@ dotnet pack ../EFSqlTranslator.Translation/ -o .
 nuget push EFSqlTranslator.Translation.1.2.0.nupkg
 git tag -a v1.2.0 -m "Include and OrderBy"
 git push --tags
+dotnet ef migrations add testPG
+dotnet ef database update

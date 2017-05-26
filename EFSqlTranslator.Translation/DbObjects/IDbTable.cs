@@ -6,7 +6,6 @@ namespace EFSqlTranslator.Translation.DbObjects
     {
         string Namespace { get; set; }
         string TableName { get; set; }
-
         IList<IDbColumn> PrimaryKeys { get; set; }
     }
 }

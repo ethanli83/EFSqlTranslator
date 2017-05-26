@@ -1,11 +1,14 @@
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
     public class SqlObjectFactory : IDbObjectFactory
     {
         private readonly SqlTypeConvertor _typeConvertor = new SqlTypeConvertor();
+        
+        protected DbOutputOption OutputOption = new DbOutputOption();
 
         public DbKeyValue BuildKeyValue(string key, IDbObject val)
         {
@@ -48,7 +51,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 Ref = dbRef,
                 ValType = type,
                 Alias = alias,
-                IsJoinKey = isJoinKey
+                IsJoinKey = isJoinKey,
+                OutputOption = OutputOption
             };
         }
 
@@ -90,8 +94,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             {
                 Namespace = entityInfo.Namespace,
                 TableName = entityInfo.EntityName,
-                PrimaryKeys = entityInfo.Keys.
-                    Select(k => BuildColumn(null, k.DbName, k.ValType)).ToList()
+                PrimaryKeys = entityInfo.Keys.Select(k => BuildColumn(null, k.DbName, k.ValType)).ToList(),
+                OutputOption = OutputOption
             };
         }
 
@@ -128,7 +132,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 Left = left,
                 Operator = optr,
                 Right = right,
-                IsAggregation = (ls.HasValue && ls.Value) || (rs.HasValue && rs.Value)
+                IsAggregation = (ls.HasValue && ls.Value) || (rs.HasValue && rs.Value),
+                OutputOption = OutputOption
             };
         }
 
@@ -164,13 +169,19 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             return new SqlTempTable
             {
                 TableName = tableName,
-                SourceSelect = sourceSelect
+                SourceSelect = sourceSelect,
+                OutputOption = OutputOption
             };
         }
 
         public virtual IDbStatment BuildStatement(IDbObject script)
         {
             return new SqlStatement(script);
+        }
+
+        public virtual DbOperator GetDbOperator(ExpressionType eType, Type tl, Type tr)
+        {
+            return SqlTranslationHelper.GetDbOperator(eType);
         }
 
         public virtual IDbScript BuildScript()
@@ -216,12 +227,13 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
         }
 
-        public IDbSelectable BuildSelectable(DbReference dbRef, string alias = null)
+        public virtual IDbSelectable BuildSelectable(DbReference dbRef, string alias = null)
         {
             return new SqlSelectable
             {
                 Ref = dbRef,
-                Alias = alias
+                Alias = alias,
+                OutputOption = OutputOption
             };
         }
     }

@@ -4,12 +4,12 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
 {
     public class SqliteObjectFactory : SqlObjectFactory
     {
-        public override IDbColumn BuildColumn(
-            DbReference dbRef, string colName, DbType type, string alias = null, bool isJoinKey = false)
+        public SqliteObjectFactory()
         {
-            var column = base.BuildColumn(dbRef, colName, type, alias, isJoinKey);
-            column.OutputOption.QuotationMark = "'";
-            return column;
+            OutputOption = new DbOutputOption
+            {
+                QuotationMark = "'"
+            };
         }
 
         public override IDbStatment BuildStatement(IDbObject script)
@@ -22,7 +22,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
             return new SqliteTempTable
             {
                 TableName = tableName,
-                SourceSelect = sourceSelect
+                SourceSelect = sourceSelect,
+                OutputOption = OutputOption
             };
         }
 

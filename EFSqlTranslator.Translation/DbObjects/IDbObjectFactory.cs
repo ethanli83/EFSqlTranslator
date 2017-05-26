@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 
 namespace EFSqlTranslator.Translation.DbObjects
 {
@@ -28,6 +29,7 @@ namespace EFSqlTranslator.Translation.DbObjects
         IDbCondition BuildCondition(Tuple<IDbBinary, IDbObject>[] conditions, IDbObject dbElse = null);
         IDbTempTable BuildTempTable(string tableName, IDbSelect sourceSelect = null);
         IDbStatment BuildStatement(IDbObject script);
+        DbOperator GetDbOperator(ExpressionType eType, Type tl, Type tr);
         IDbScript BuildScript();
     }
 }

@@ -10,6 +10,8 @@ namespace EFSqlTranslator.ConsoleApp
         public const string SqliteConnectionString = "Filename=./blog.db";
 
         public const string SqlConnectionStr = "server=localhost;userid=root;pwd=chenli1234;database=Blogging;port=3306;sslmode=none;";
+        
+        public const string PostgresQlConnectionStr = "Host=localhost;Database=db;Username=postgres;Password=mysecretpassword";
 
         public DbSet<Blog> Blogs { get; set; }
         
@@ -32,7 +34,8 @@ namespace EFSqlTranslator.ConsoleApp
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //optionsBuilder.UseSqlite(SqliteConnectionString);
-            optionsBuilder.UseMySql(SqlConnectionStr);
+            //optionsBuilder.UseMySql(SqlConnectionStr);
+            optionsBuilder.UseNpgsql(PostgresQlConnectionStr);
         }
     }
 

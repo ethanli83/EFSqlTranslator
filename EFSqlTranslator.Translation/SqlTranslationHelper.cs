@@ -188,6 +188,11 @@ namespace EFSqlTranslator.Translation
                     return "<=";
                 case DbOperator.Like:
                     return "like";
+                case DbOperator.StringAdd:
+                    return "||";
+                case DbOperator.In:
+                    return "in";
+                    break;
                 default:
                     throw new NotSupportedException(optr.ToString());
             }
