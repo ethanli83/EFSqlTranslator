@@ -31,12 +31,10 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Domains
-                        .Where(d => d.Name.StartsWith("day"))
-                        .Select(d => new
-                        {
-                            B = d.Name + d.Name
-                        });
+                    var query = db.Blogs
+                        .Where(b => b.Url != null)
+                        .Include(b => b.User)
+                        .ThenInclude(u => u.Posts);
 
                     var result = db.Query(
                         query,
