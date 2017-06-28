@@ -14,6 +14,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 return Convert(gType);
             }
 
+            if (type == typeof(bool))
+                return "bit";
+
             if (type == typeof(int))
                 return "int";
 

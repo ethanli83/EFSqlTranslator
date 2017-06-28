@@ -98,6 +98,8 @@ namespace EFSqlTranslator.Tests
 
         public int PostId { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public User User { get; set; }
 
         public Blog Blog { get; set; }
