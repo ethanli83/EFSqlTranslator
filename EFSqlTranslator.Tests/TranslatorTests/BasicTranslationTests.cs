@@ -168,6 +168,53 @@ group by s0.BlogId";
         }
 
         [Fact]
+        public void Test_Query_ForBoolean()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Comments
+                    .Select(c => new
+                    {
+                        c.IsDeleted
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select c0.IsDeleted from Comments c0";
+
+                TestUtils.AssertStringEqual(expected, sql);
+
+            }
+        }
+
+        [Fact]
+        public void Test_Query_FilterOnBoolean()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Comments
+                    .Where(x => x.IsDeleted == false)
+                    .Select(c => new
+                    {
+                        c.IsDeleted
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select c0.IsDeleted from Comments c0 where c0.IsDeleted = '0'";
+
+                TestUtils.AssertStringEqual(expected, sql);
+
+            }
+        }
+
+        [Fact]
         public void Test_Query_DifferentSchema()
         {
             using (var db = new TestingContext())

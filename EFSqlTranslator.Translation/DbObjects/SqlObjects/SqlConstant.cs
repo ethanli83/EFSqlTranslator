@@ -14,6 +14,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (Val is string)
                 return $"'{Val}'";
 
+            if (Val is bool)
+                return (bool)Val ? "'1'" : "'0'";
+
             return Val.ToString();
         }
     }

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace EFSqlTranslator.ConsoleApp
 {
@@ -9,7 +11,9 @@ namespace EFSqlTranslator.ConsoleApp
     {
         public const string SqliteConnectionString = "Filename=./blog.db";
 
-        public const string SqlConnectionStr = "server=localhost;userid=root;pwd=chenli1234;database=Blogging;port=3306;sslmode=none;";
+        public const string SqlConnectionStr = @"server=localhost;userid=root;pwd=chenli1234;database=Blogging;port=3306;sslmode=none;";
+
+        public const string SqlServerConnectionStr = @"Data Source=localhost\sqlexpress;Initial Catalog=BloggingContext;Integrated Security=True;";
         
         public const string PostgresQlConnectionStr = "Host=localhost;Database=db;Username=postgres;Password=mysecretpassword";
 
@@ -33,14 +37,25 @@ namespace EFSqlTranslator.ConsoleApp
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            //optionsBuilder.UseSqlServer(SqlServerConnectionStr);
             //optionsBuilder.UseSqlite(SqliteConnectionString);
             //optionsBuilder.UseMySql(SqlConnectionStr);
             optionsBuilder.UseNpgsql(PostgresQlConnectionStr);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            {
+                relationship.DeleteBehavior = DeleteBehavior.Restrict;
+            }
         }
     }
 
     public class Blog
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int BlogId { get; set; }
         
         public string Url { get; set; }
@@ -58,6 +73,7 @@ namespace EFSqlTranslator.ConsoleApp
 
     public class Post
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int PostId { get; set; }
 
         public string Title { get; set; }
@@ -77,6 +93,7 @@ namespace EFSqlTranslator.ConsoleApp
 
     public class User
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int UserId { get; set; }
 
         public string UserName { get; set; }
@@ -90,6 +107,7 @@ namespace EFSqlTranslator.ConsoleApp
 
     public class Comment
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int CommentId { get; set; }
 
         public int? UserId { get; set; }
@@ -103,6 +121,7 @@ namespace EFSqlTranslator.ConsoleApp
 
     public class Statistic
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int StatisticId { get; set; }
 
         public int ViewCount { get; set; }
@@ -123,6 +142,7 @@ namespace EFSqlTranslator.ConsoleApp
     //[Table(nameof(Item), Schema="fin")]
     public class Item
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int ItemId { get; set; }
 
         public Guid CompanyId { get; set; }
@@ -145,6 +165,7 @@ namespace EFSqlTranslator.ConsoleApp
     public class Domain
     {
         [Column("pk_domain_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int DomainId { get; set; }
 
         [Column("domain_name")]
@@ -157,6 +178,7 @@ namespace EFSqlTranslator.ConsoleApp
     public class Route
     {
         [Column("pk_route_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int RouteId { get; set; }
 
         [Column("route_name")]
