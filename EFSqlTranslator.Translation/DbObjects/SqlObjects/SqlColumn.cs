@@ -27,7 +27,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             return !string.IsNullOrEmpty(Alias) && !Alias.Equals(Name, StringComparison.CurrentCultureIgnoreCase)
                 ? $"{this} as {QuotationMark}{Alias}{QuotationMark}"
-                : $"{this}";
+                : $"{Alias}"; //we later retrieve the value from dictionary using the Alias. If Alias has different casing than the Name retrieving from Dictionary fails
         }
 
         protected bool Equals(SqlColumn other)
