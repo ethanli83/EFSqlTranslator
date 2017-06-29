@@ -269,5 +269,27 @@ left outer join (
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
+        
+        [Fact]
+        public void Test_Select_NotBoolean()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Comments
+                    .Select(c => new
+                    {
+                        Val = !c.IsDeleted
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select case when c0.IsDeleted != 1 then 1 else 0 end as 'Val'
+from Comments c0";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
     }
 }

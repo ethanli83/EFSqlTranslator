@@ -10,7 +10,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AgileObjects.ReadableExpressions">
-      <Version>1.8.5</Version>
+      <Version>1.8.6</Version>
     </PackageReference>
     <PackageReference Include="NLog" Version="5.0.0-beta06" />
   </ItemGroup>

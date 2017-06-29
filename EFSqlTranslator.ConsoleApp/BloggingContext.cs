@@ -38,9 +38,9 @@ namespace EFSqlTranslator.ConsoleApp
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //optionsBuilder.UseSqlServer(SqlServerConnectionStr);
-            //optionsBuilder.UseSqlite(SqliteConnectionString);
+            optionsBuilder.UseSqlite(SqliteConnectionString);
             //optionsBuilder.UseMySql(SqlConnectionStr);
-            optionsBuilder.UseNpgsql(PostgresQlConnectionStr);
+            //optionsBuilder.UseNpgsql(PostgresQlConnectionStr);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -111,6 +111,8 @@ namespace EFSqlTranslator.ConsoleApp
         public int CommentId { get; set; }
 
         public int? UserId { get; set; }
+
+        public bool IsPrivate { get; set; }
 
         public int PostId { get; set; }
 
