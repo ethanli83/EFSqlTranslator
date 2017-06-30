@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using Dapper;
@@ -24,8 +25,8 @@ namespace EFSqlTranslator.Translation
 
         public IEnumerable<T> Execute()
         {
-            using (var connection = _dtx.Database.GetDbConnection())
-            {
+            var connection = _dtx.Database.GetDbConnection();
+            if (connection.State != ConnectionState.Open)
                 connection.Open();
 
                 foreach (var statement in Script.Scripts)
@@ -58,7 +59,6 @@ namespace EFSqlTranslator.Translation
 
                 return _graph.Root.Result.Cast<T>();
             }
-        }
 
         public IEnumerable<object> ConvertDynamicToRealType(Type type, IEnumerable<dynamic> data)
         {
