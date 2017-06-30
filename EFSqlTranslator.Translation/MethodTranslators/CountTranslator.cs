@@ -38,9 +38,21 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             if (!m.GetArguments().Any())
                 return countOne;
 
-            var dbBinary = (IDbBinary)state.ResultStack.Pop();
+            var dbElement = state.ResultStack.Pop();
+            var dbBinary = dbElement as IDbBinary;
 
-            var tuple = Tuple.Create<IDbBinary, IDbObject>(dbBinary, countOne);
+            IDbBinary whereClause;
+            if (dbBinary != null)
+            {
+                whereClause = dbBinary;
+            }
+            else
+            {
+                var one = _dbFactory.BuildConstant(true);
+                whereClause = _dbFactory.BuildBinary(dbElement, DbOperator.Equal, one);
+            }
+
+            var tuple = Tuple.Create<IDbBinary, IDbObject>(whereClause, countOne);
             return _dbFactory.BuildCondition(new [] { tuple }, _dbFactory.BuildConstant(null));
         }
     }

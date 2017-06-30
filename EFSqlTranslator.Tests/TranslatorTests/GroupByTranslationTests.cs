@@ -167,6 +167,54 @@ group by coalesce(sq0.count0, 0)";
         }
 
         [Fact]
+        public void Test_GroupBy_On_Aggregation_WithBooleanCondition()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Comments.
+                    GroupBy(b => b.PostId).
+                    Select(x => new { count = x.Count(c => c.IsDeleted) });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select count(case
+    when c0.IsDeleted = 1 then 1
+    else null
+end) as 'count'
+from Comments c0
+group by c0.PostId";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
+        public void Test_GroupBy_On_Aggregation_WithInversedBooleanCondition()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Comments.
+                    GroupBy(b => b.PostId).
+                    Select(x => new { count = x.Count(c => !c.IsDeleted) });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select count(case
+    when c0.IsDeleted != 1 then 1
+    else null
+end) as 'count'
+from Comments c0
+group by c0.PostId";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
         public void Test_GroupBy_On_Aggregation2()
         {
             using (var db = new TestingContext())
