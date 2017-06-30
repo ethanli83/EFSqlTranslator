@@ -22,7 +22,7 @@ have to be limited to column pairs."
              Index = 0,
              Title = "Join on custom condition"
          )]
-        public void Test_Translate_Join_Select_Columns() 
+        public void Test_Translate_Join_Select_Columns()
         {
             using (var db = new TestingContext())
             {
@@ -31,8 +31,8 @@ have to be limited to column pairs."
 
                 var query1 = db.Posts.
                     Join(
-                        query, 
-                        (p, b) => p.BlogId == b.BlogId && p.User.UserName == "ethan", 
+                        query,
+                        (p, b) => p.BlogId == b.BlogId && p.User.UserName == "ethan",
                         (p, b) => new { PId = p.PostId, b.Name },
                         DbJoinType.LeftOuter);
 
@@ -56,7 +56,97 @@ left outer join (
     where sq0.BlogId_jk0 is not null
 ) sq0 on (p0.BlogId = sq0.BlogId_jk0) and (u0.UserName = 'ethan')";
 
-                TestUtils.AssertStringEqual(expected, sql);                
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
+        [TranslationReadMe(
+            Index = 0,
+            Title = "Join on custom condition"
+        )]
+        public void Test_Translate_Join_Aggregate_Columns()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Posts.GroupBy(x => x.BlogId).Select(x => new
+                {
+                    BlogId = x.Key,
+                    MaxLikes = x.Max(z => z.LikeCount)
+                });
+
+                var query1 = db.Posts.
+                    Join(
+                        query,
+                        (p, b) => p.BlogId == b.BlogId && p.LikeCount == b.MaxLikes,
+                        (p, b) => new { PId = p.PostId, b.BlogId },
+                        DbJoinType.RightOuter);
+
+                var script = QueryTranslator.Translate(query1.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select p0.PostId as 'PId', sq0.BlogId
+from Posts p0
+right outer join (
+    select sq0.BlogId, MaxLikes, sq0.BlogId as 'BlogId_jk0'
+    from (
+        select p0.BlogId, max(p0.LikeCount) as 'MaxLikes'
+        from Posts p0
+        group by p0.BlogId
+
+    ) sq0
+
+) sq0 on (p0.BlogId = sq0.BlogId) and (p0.LikeCount = MaxLikes)";
+
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+
+        [Fact]
+        [TranslationReadMe(
+            Index = 0,
+            Title = "Join on custom condition"
+        )]
+        public void Test_Translate_Join_Aggregate_Columns3()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Posts.GroupBy(x => x.BlogId).Select(x => new
+                {
+                    BlogId = x.Key,
+                    MaxLikes = x.Max(z => z.LikeCount)
+                });
+
+                var query1 = db.Posts.
+                    Join(
+                        query,
+                        (p, b) => p.BlogId == b.BlogId && p.LikeCount == b.MaxLikes,
+                        (p, b) => new { BlogTitle = p.Blog.Name, Blog = p.Blog, PostWithMaxLikes = p.Title },
+                        DbJoinType.RightOuter);
+
+                var script = QueryTranslator.Translate(query1.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select b0.Name as 'BlogTitle', b0.*, p0.Title as 'PostWithMaxLikes'
+from Posts p0
+inner join Blogs b0 on p0.BlogId = b0.BlogId
+right outer join (
+    select sq0.BlogId, MaxLikes, sq0.BlogId as 'BlogId_jk0'
+    from (
+        select p0.BlogId, max(p0.LikeCount) as 'MaxLikes'
+        from Posts p0
+        group by p0.BlogId
+
+    ) sq0
+
+) sq0 on (p0.BlogId = sq0.BlogId) and (p0.LikeCount = MaxLikes)";
+
+
+                TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
