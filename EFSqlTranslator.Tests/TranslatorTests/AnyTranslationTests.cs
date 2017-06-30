@@ -56,5 +56,55 @@ where sq0.BlogId_jk0 is not null";
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
+        
+        [Fact]
+        public void Test_Any_With_Boolean()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Posts.Where(b => b.Comments.Any(x => x.IsDeleted));
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select p0.*
+from Posts p0
+left outer join (
+    select c0.PostId as 'PostId_jk0'
+    from Comments c0
+    where c0.IsDeleted = 1
+    group by c0.PostId
+) sq0 on p0.PostId = sq0.PostId_jk0
+where sq0.PostId_jk0 is not null";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
+        public void Test_Any_With_InversedBoolean()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Posts.Where(b => b.Comments.Any(x => !x.IsDeleted));
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select p0.*
+from Posts p0
+left outer join (
+    select c0.PostId as 'PostId_jk0'
+    from Comments c0
+    where c0.IsDeleted != 1
+    group by c0.PostId
+) sq0 on p0.PostId = sq0.PostId_jk0
+where sq0.PostId_jk0 is not null";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
     }
 }

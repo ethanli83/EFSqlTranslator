@@ -92,9 +92,11 @@ namespace EFSqlTranslator.Translation
 
         public static IDbBinary ToBinary(this IDbObject dbElement, IDbObjectFactory dbFactory)
         {
+            if (dbElement == null)
+                return null;
+
             var dbBinary = dbElement as IDbBinary;
 
-            
             if (dbBinary != null)
                 return dbBinary;
             

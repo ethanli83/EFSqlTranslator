@@ -33,9 +33,7 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Comments.
-                        GroupBy(b => b.PostId).
-                        Select(x => new { count = x.Count(c => c.IsDeleted) });
+                    var query = db.Blogs.Where(b => b.Posts.Any());
 
                     var result = db.Query(
                         query,

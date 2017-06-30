@@ -28,7 +28,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var childSelect = (IDbSelect)state.ResultStack.Pop();
             var dbSelect = (IDbSelect)state.ResultStack.Peek();
 
-            childSelect.Where = (IDbBinary)condition;
+            childSelect.Where = condition.ToBinary(_dbFactory);
 
             var dbJoin = dbSelect.Joins.Single(j => ReferenceEquals(j.To.Referee, childSelect));
 
