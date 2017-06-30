@@ -42,9 +42,9 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 innerCol.Alias = alias;
                 toSelect.Selection.Add(innerCol);
 
-                joinKey.Ref = toSelectRef;
-                joinKey.Name = alias;
-                joinKey.Alias = string.Empty;
+                //joinKey.Ref = toSelectRef;
+                //joinKey.Name = alias;
+                //joinKey.Alias = string.Empty;
             }
 
             var dbJoin = _dbFactory.BuildJoin(toSelectRef, fromSelect, joinCondition, (DbJoinType)joinType.Val);

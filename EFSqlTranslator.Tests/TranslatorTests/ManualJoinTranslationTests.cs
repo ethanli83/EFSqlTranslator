@@ -97,7 +97,7 @@ right outer join (
 
     ) sq0
 
-) sq0 on (p0.BlogId = sq0.BlogId_jk0) and (p0.LikeCount = MaxLikes)";
+) sq0 on (p0.BlogId = sq0.BlogId) and (p0.LikeCount = MaxLikes)";
 
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -143,7 +143,7 @@ right outer join (
 
     ) sq0
 
-) sq0 on (p0.BlogId = sq0.BlogId_jk0) and (p0.LikeCount = MaxLikes)";
+) sq0 on (p0.BlogId = sq0.BlogId) and (p0.LikeCount = MaxLikes)";
 
 
                 TestUtils.AssertStringEqual(expected, sql);
