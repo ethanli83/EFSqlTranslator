@@ -136,7 +136,7 @@ group by p0.BlogId";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.Name, ifnull(sq0.sum0, 0) as 'cnt'
+select b0.Name, coalesce(sq0.sum0, 0) as 'cnt'
 from Blogs b0
 left outer join (
     select p0.BlogId as 'BlogId_jk0', sum(p0.PostId) as 'sum0'
@@ -167,7 +167,7 @@ where b0.Url is not null";
                 var sql = script.ToString();
 
                 const string expected = @"
-select b0.Url, u0.UserId, ifnull(sq0.count0, 0) as 'cnt'
+select b0.Url, u0.UserId, coalesce(sq0.count0, 0) as 'cnt'
 from Blogs b0
 left outer join Users u0 on b0.UserId = u0.UserId
 left outer join (

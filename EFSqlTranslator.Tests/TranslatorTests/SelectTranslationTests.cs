@@ -252,7 +252,7 @@ group by sq0.BlogId, sq0.Url, u0.UserId, sq0.Name, u0.UserName";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.count0, 0) as 'Cnt1', ifnull(sq0.count1, 0) as 'Cnt2'
+select coalesce(sq0.count0, 0) as 'Cnt1', coalesce(sq0.count1, 0) as 'Cnt2'
 from Blogs b0
 left outer join (
     select p0.BlogId as 'BlogId_jk0', count(case
