@@ -207,6 +207,25 @@ group by s0.BlogId";
         }
 
         [Fact]
+        public void Test_Query_EqualsVariable_Null()
+        {
+            using (var db = new TestingContext())
+            {
+                DateTime? q = null;
+                var query = db.Items.Where(x => x.Timer == q);
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select i0.* from fin.Item i0 where i0.Timer is null";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
         public void Test_Query_ForDateTime()
         {
             using (var db = new TestingContext())

@@ -190,18 +190,22 @@ namespace EFSqlTranslator.Translation
             var expression = Visit(m.Expression);
             if (expression is ConstantExpression)
             {
-                object container = ((ConstantExpression)expression).Value;
+                var container = ((ConstantExpression)expression).Value;
                 var member = m.Member;
                 object value = null;
+                var valueRetrieved = false;
                 if (member is FieldInfo)
                 {
-                     value = ((FieldInfo)member).GetValue(container);
+                    value = ((FieldInfo)member).GetValue(container);
+                    valueRetrieved = true;
                 }
                 if (member is PropertyInfo)
                 {
                     value = ((PropertyInfo)member).GetValue(container, null);
+                    valueRetrieved = true;
                 }
-                if (value != null)
+
+                if (valueRetrieved)
                 {
                     var dbObject = _dbFactory.BuildConstant(value);
                     _state.ResultStack.Push(dbObject);
