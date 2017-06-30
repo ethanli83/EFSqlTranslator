@@ -29,6 +29,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (type == typeof(Guid))
                 return "uniqueidentifier";
 
+            if (type == typeof(DateTime))
+                return "datetime";
+
             if (type == typeof(DbJoinType))
                 return "<<DbJoinType>>";
 

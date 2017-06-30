@@ -125,8 +125,8 @@ select b0.* from Blogs b0 where b0.CommentCount > 10";
             {
                 var query = db.Blogs
                     .Where(b => b.CommentCount > 10)
-                    .Select(b => new {KKK = b.BlogId})
-                    .Select(b => new {K = b.KKK});
+                    .Select(b => new { KKK = b.BlogId })
+                    .Select(b => new { K = b.KKK });
 
                 var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
@@ -183,6 +183,83 @@ group by s0.BlogId";
 
                 TestUtils.AssertStringEqual(expected, sql);
 
+            }
+        }
+
+        [Fact]
+        public void Test_Query_OrderByDateTime()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Items
+                    .OrderBy(x => x.Timer)
+                    ;
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select i0.* from fin.Item i0 order by i0.Timer";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
+        public void Test_Query_EqualsVariable()
+        {
+            using (var db = new TestingContext())
+            {
+                int q = 3;
+                var query = db.Items.Where(x => x.ItemId == q);
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select i0.* from fin.Item i0 where i0.ItemId = 3";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
+        public void Test_Query_EqualsVariable_Null()
+        {
+            using (var db = new TestingContext())
+            {
+                DateTime? q = null;
+                var query = db.Items.Where(x => x.Timer == q);
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select i0.* from fin.Item i0 where i0.Timer is null";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
+        public void Test_Query_ForDateTime()
+        {
+            using (var db = new TestingContext())
+            {
+                var date = new DateTime(2017, 6, 30, 1, 30, 1);
+                var query = db.Items.Where(x => x.Timer == date);
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select i0.* from fin.Item i0 where i0.Timer = '2017-06-30T01:30:01'";
+
+                TestUtils.AssertStringEqual(expected, sql);
             }
         }
 
@@ -275,6 +352,54 @@ group by s0.BlogId";
                 Console.WriteLine(sql);
 
                 const string expected = @"select c0.IsDeleted from Comments c0 where c0.IsDeleted != 1";
+
+                TestUtils.AssertStringEqual(expected, sql);
+
+            }
+        }
+
+        [Fact]
+        public void Test_Query_FilterOnNullableBoolean()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Comments
+                    .Where(x => x.IsDeletedNullable == false)
+                    .Select(c => new
+                    {
+                        c.IsDeletedNullable
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select c0.IsDeletedNullable from Comments c0 where c0.IsDeletedNullable = 0";
+
+                TestUtils.AssertStringEqual(expected, sql);
+
+            }
+        }
+
+        [Fact]
+        public void Test_Query_FilterOnNullableBooleanEqualsNull()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Comments
+                    .Where(x => x.IsDeletedNullable == null)
+                    .Select(c => new
+                    {
+                        c.IsDeletedNullable
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select c0.IsDeletedNullable from Comments c0 where c0.IsDeletedNullable is null";
 
                 TestUtils.AssertStringEqual(expected, sql);
 

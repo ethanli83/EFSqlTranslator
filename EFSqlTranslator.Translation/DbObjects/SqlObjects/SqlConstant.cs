@@ -1,3 +1,6 @@
+using System;
+using System.Globalization;
+
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
     public class SqlConstant : SqlObject, IDbConstant
@@ -16,6 +19,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
             if (Val is bool)
                 return (bool)Val ? "1" : "0";
+
+            if (Val is DateTime)
+                return $"'{((DateTime)Val).ToString("s", CultureInfo.InvariantCulture)}'";
 
             return Val.ToString();
         }
