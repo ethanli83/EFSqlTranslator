@@ -90,7 +90,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 {
                     var toSelect = (IDbSelect)toSelectRef.Referee;
                     toRefCol = _dbFactory.BuildRefColumn(dbRef);
-                    
+
                     toSelect.Selection.Add(toRefCol);
                     dbRef = toSelectRef;
                 }

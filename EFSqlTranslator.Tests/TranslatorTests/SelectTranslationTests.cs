@@ -72,6 +72,35 @@ where u0.UserName is not null";
             }
         }
 
+
+        [Fact]
+        [TranslationReadMe(
+            Index = 0,
+            Title = "Join on custom condition"
+        )]
+        public void Test_Translate_SelectRelations_TablesStartWithSameLetter()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Routes.Select(x => new
+                {
+                    x.RouteId,
+                    x.Domain.Name
+                });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select d0.pk_route_id as 'RouteId', d1.domain_name as 'Name'
+from db_route d0
+left outer join db_domain d1 on d0.fk_domain_id = d1.pk_domain_id";
+
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
         [Fact]
         [TranslationReadMe(
              Index = 2,
