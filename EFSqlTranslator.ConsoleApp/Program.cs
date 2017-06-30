@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using EFSqlTranslator.EFModels;
+using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.DbObjects.PostgresQlObjects;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using EFSqlTranslator.Translation.Extensions;
@@ -32,13 +33,28 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Comments
-                        .Select(c => new {
-                            C = c.User.UserId > 0
-                        });
+                    var query = db.Posts
+                    .GroupBy(x => x.BlogId)
+                    .Select(x => new
+                    {
+                        BlogId = x.Key,
+                        MaxLikes = x.Max(z => z.LikeCount)
+                    });
+
+                var query1 = db.Posts
+                    .Join(
+                        query,
+                        (p, b) => p.BlogId == b.BlogId && p.LikeCount == b.MaxLikes,
+                        (p, b) => new 
+                        {
+                            BlogTitle = p.Blog.Name,
+                            p.Blog.BlogId,
+                            PostWithMaxLikes = p.Title
+                        },
+                        DbJoinType.LeftOuter);
 
                     var result = db.Query(
-                        query,
+                        query1,
                         new EFModelInfoProvider(db),
                         new SqliteObjectFactory(),
                         out sql);

@@ -84,6 +84,8 @@ namespace EFSqlTranslator.ConsoleApp
 
         public int UserId { get; set; }
         
+        public int LikeCount { get; set; }
+        
         public User User { get; set; }
 
         public Blog Blog { get; set; }

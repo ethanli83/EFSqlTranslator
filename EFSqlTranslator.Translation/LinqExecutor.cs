@@ -79,7 +79,7 @@ namespace EFSqlTranslator.Translation
                     var info = properties[i];
                     var val = valDict[info.Name];
 
-                    var valType = valTypes.ContainsKey(i) ? valTypes[i] : valTypes[i] = val.GetType();
+                    var valType = valTypes.ContainsKey(i) ? valTypes[i] : valTypes[i] = (val?.GetType() ?? typeof(object));
                     var infoType = infoTypes.ContainsKey(i) ? infoTypes[i] : infoTypes[i] = info.PropertyType.StripNullable();
                     if (valType != infoType)
                     {

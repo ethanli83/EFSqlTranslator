@@ -60,7 +60,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             if (oRefCol != null)
                 return dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
 
-            return dbFactory.BuildColumn(selectable.Ref, selectable.Alias, typeof(string));
+            return dbFactory.BuildColumn(dbRef, selectable.Alias, typeof(string));
         }
     }
 }

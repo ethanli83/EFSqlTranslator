@@ -35,8 +35,11 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             UpdateSelection(fromSelect, selection, toSelectRef);
 
             // create join to inner select
-            foreach(var joinKey in joinCondition.GetOperands().OfType<IDbColumn>().Where(c => c.Ref.OwnerSelect == toSelect))
+            var joinKeys = joinCondition.GetOperands().OfType<IDbColumn>().Where(c => c.Ref.OwnerSelect == toSelect);
+            foreach(var joinKey in joinKeys)
             {
+                toSelect.Selection.Remove(joinKey);
+
                 var alias = nameGenerator.GenerateAlias(toSelect, joinKey.Name + "_jk", true);
                 var innerCol = _dbFactory.BuildColumn(joinKey);
                 innerCol.Alias = alias;
