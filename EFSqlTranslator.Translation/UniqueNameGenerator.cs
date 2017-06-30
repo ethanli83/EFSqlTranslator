@@ -16,12 +16,14 @@ namespace EFSqlTranslator.Translation
         {
             name = name.StartsWith("#") ? name.Remove(0, 1) : name;
 
+            var alias = fullName ? name : name.Substring(0, 1).ToLower();
+
             int count;
             if (dbSelect == null)
             {
-                count = _globalUniqueAliasNames.ContainsKey(name)
-                    ? ++_globalUniqueAliasNames[name]
-                    : _globalUniqueAliasNames[name] = 0;
+                count = _globalUniqueAliasNames.ContainsKey(alias)
+                    ? ++_globalUniqueAliasNames[alias]
+                    : _globalUniqueAliasNames[alias] = 0;
             }
             else
             {
@@ -29,14 +31,13 @@ namespace EFSqlTranslator.Translation
                     ? _uniqueAliasNames[dbSelect]
                     : _uniqueAliasNames[dbSelect] = new Dictionary<string, int>();
 
-                count = uniqueNames.ContainsKey(name)
-                    ? ++uniqueNames[name]
-                    : uniqueNames[name] = 0;
+                
+                count = uniqueNames.ContainsKey(alias)
+                    ? ++uniqueNames[alias]
+                    : uniqueNames[alias] = 0;
             }
 
-            return !fullName
-                ? $"{name.Substring(0, 1).ToLower()}{count}"
-                : $"{name}{count}";
+            return $"{alias}{count}";
         }
     }
 }

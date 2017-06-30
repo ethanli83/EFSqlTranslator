@@ -27,7 +27,7 @@ create temporary table if not exists Temp_Table_db_domain0 as
     from db_domain d0
     where d0.domain_name like 'day%';
 
-select sq1.pk_domain_id as 'DomainId', sq1.domain_name as 'Name'
+select sq0.pk_domain_id as 'DomainId', sq0.domain_name as 'Name'
 from (
     select d0.*
     from db_domain d0
@@ -37,9 +37,9 @@ from (
         group by t0.pk_domain_id, t0._rowid_
     ) s0 on d0.pk_domain_id = s0.pk_domain_id
     order by s0._rowid_
-) sq1;
+) sq0;
 
-select sq1.pk_route_id as 'RouteId', sq1.fk_domain_id as 'DomainId', sq1.route_name as 'Name'
+select sq0.pk_route_id as 'RouteId', sq0.fk_domain_id as 'DomainId', sq0.route_name as 'Name'
 from (
     select d0.*
     from db_route d0
@@ -49,7 +49,7 @@ from (
         group by t0.pk_domain_id
     ) s0 on d0.fk_domain_id = s0.pk_domain_id
     where d0.route_name like 'ethan%'
-) sq1;
+) sq0;
 
 drop table if exists Temp_Table_db_domain0";
 
