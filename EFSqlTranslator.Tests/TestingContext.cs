@@ -100,6 +100,8 @@ namespace EFSqlTranslator.Tests
 
         public bool IsDeleted { get; set; }
 
+        public bool? IsDeletedNullable { get; set; }
+
         public User User { get; set; }
 
         public Blog Blog { get; set; }
@@ -134,6 +136,8 @@ namespace EFSqlTranslator.Tests
         public decimal? Value { get; set; }
 
         public DateTime? Timer { get; set; }
+
+        public DateTime TimerNotNullable { get; set; }
 
         public Guid CompanyId { get; set; }
 

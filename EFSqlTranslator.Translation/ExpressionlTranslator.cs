@@ -34,7 +34,7 @@ namespace EFSqlTranslator.Translation
             if (methodTranslators == null)
                 return;
 
-            foreach(var translator in methodTranslators)
+            foreach (var translator in methodTranslators)
                 translator.Register(_plugIns);
         }
 
@@ -79,7 +79,7 @@ namespace EFSqlTranslator.Translation
 
                 _state.ResultStack.Push(dbSelect);
             }
-            else
+            else if (!c.Type.IsAnonymouse())
             {
                 var dbConstant = _dbFactory.BuildConstant(c.Value);
                 _state.ResultStack.Push(dbConstant);
@@ -91,7 +91,7 @@ namespace EFSqlTranslator.Translation
         protected override Expression VisitNew(NewExpression n)
         {
             var list = _dbFactory.BuildList<DbKeyValue>();
-            
+
             if (n.Members != null)
             {
                 for (var i = 0; i < n.Members.Count; i++)
@@ -130,7 +130,7 @@ namespace EFSqlTranslator.Translation
             _state.ResultStack.Push(list);
             return ma;
         }
-        
+
         protected override Expression VisitParameter(ParameterExpression p)
         {
             return VisitParameterInteral(p, false);
@@ -187,7 +187,27 @@ namespace EFSqlTranslator.Translation
 
         protected override Expression VisitMember(MemberExpression m)
         {
-            Visit(m.Expression);
+            var expression = Visit(m.Expression);
+            if (expression is ConstantExpression)
+            {
+                object container = ((ConstantExpression)expression).Value;
+                var member = m.Member;
+                object value = null;
+                if (member is FieldInfo)
+                {
+                     value = ((FieldInfo)member).GetValue(container);
+                }
+                if (member is PropertyInfo)
+                {
+                    value = ((PropertyInfo)member).GetValue(container, null);
+                }
+                if (value != null)
+                {
+                    var dbObject = _dbFactory.BuildConstant(value);
+                    _state.ResultStack.Push(dbObject);
+                    return m;
+                }
+            }
 
             var typeInfo = m.Type.GetTypeInfo();
 
@@ -417,7 +437,7 @@ namespace EFSqlTranslator.Translation
             if (args == null)
                 throw new ArgumentNullException(nameof(args));
 
-            foreach(var argExpr in args)
+            foreach (var argExpr in args)
                 Visit(argExpr);
         }
 
@@ -428,7 +448,7 @@ namespace EFSqlTranslator.Translation
             // query that be translated will be at the bottom of the stack, and the query
             // for the last parameter will be at the top
             var results = new Stack<IDbObject>();
-            foreach(var p in l.Parameters.Reverse())
+            foreach (var p in l.Parameters.Reverse())
             {
                 VisitParameterInteral(p, true);
 
@@ -437,7 +457,7 @@ namespace EFSqlTranslator.Translation
 
                 // pop out used select for the parameter just translated
                 // so that the next parameter will be assigned with current select
-                while(_state.ResultStack.Count > 0)
+                while (_state.ResultStack.Count > 0)
                 {
                     var dbObj = _state.ResultStack.Pop();
                     results.Push(dbObj);
@@ -446,7 +466,7 @@ namespace EFSqlTranslator.Translation
                 }
             }
 
-            while(results.Count > 0)
+            while (results.Count > 0)
                 _state.ResultStack.Push(results.Pop());
 
             _state.ParamterStack.Push(pList);
@@ -479,7 +499,7 @@ namespace EFSqlTranslator.Translation
             if (dbOptr == DbOperator.Or)
             {
                 var dbRefs = dbBinary.GetOperands().OfType<IDbSelectable>().Select(s => s.Ref);
-                foreach(var dbRef in dbRefs)
+                foreach (var dbRef in dbRefs)
                     SqlTranslationHelper.UpdateJoinType(dbRef);
             }
 
