@@ -8,7 +8,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
 {
     public class JoinTranslator : AbstractMethodTranslator
     {
-        public JoinTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory) 
+        public JoinTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
             : base(infoProvider, dbFactory)
         {
         }
@@ -24,7 +24,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var joinType = (IDbConstant)state.ResultStack.Pop();
             var selection = state.ResultStack.Pop();
             var joinCondition = (IDbBinary)state.ResultStack.Pop();
-            
+
             var toSelect = (IDbSelect)state.ResultStack.Pop();
             var fromSelect = (IDbSelect)state.ResultStack.Pop();
 
@@ -35,13 +35,13 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             UpdateSelection(fromSelect, selection, toSelectRef);
 
             // create join to inner select
-            foreach(var joinKey in joinCondition.GetOperands().OfType<IDbColumn>().Where(c => c.Ref.OwnerSelect == toSelect))
+            foreach (var joinKey in joinCondition.GetOperands().OfType<IDbColumn>().Where(c => c.Ref?.OwnerSelect == toSelect))
             {
                 var alias = nameGenerator.GenerateAlias(toSelect, joinKey.Name + "_jk", true);
                 var innerCol = _dbFactory.BuildColumn(joinKey);
                 innerCol.Alias = alias;
                 toSelect.Selection.Add(innerCol);
-                
+
                 joinKey.Ref = toSelectRef;
                 joinKey.Name = alias;
                 joinKey.Alias = string.Empty;
@@ -61,14 +61,14 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var dbList = selection as IEnumerable<DbKeyValue>;
             if (dbList != null)
             {
-                foreach(var dbObj in dbList)
+                foreach (var dbObj in dbList)
                     UpdateSelection(fromSelect, dbObj, toSelectRef);
                 return;
             }
 
             var keyValue = selection as DbKeyValue;
-            selection = keyValue != null ? keyValue.Value : selection;             
-            
+            selection = keyValue != null ? keyValue.Value : selection;
+
             var selectable = GetSelectable(fromSelect, selection, toSelectRef);
 
             if (keyValue != null)
@@ -87,14 +87,14 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 {
                     var toSelect = (IDbSelect)toSelectRef.Referee;
                     toRefCol = _dbFactory.BuildRefColumn(dbRef);
-                    
+
                     toSelect.Selection.Add(toRefCol);
                     dbRef = toSelectRef;
                 }
 
                 var refColumn = _dbFactory.BuildRefColumn(dbRef);
                 refColumn.RefTo = toRefCol;
-                return refColumn;   
+                return refColumn;
             }
 
             var column = selection as IDbColumn;
@@ -104,7 +104,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 {
                     var toSelect = (IDbSelect)toSelectRef.Referee;
                     toSelect.Selection.Add(column);
-                    
+
                     column = _dbFactory.BuildColumn(column);
                     column.Ref = toSelectRef;
                 }
