@@ -25,9 +25,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public override string ToSelectionString()
         {
-            return !string.IsNullOrEmpty(Alias) && !Alias.Equals(Name, StringComparison.CurrentCultureIgnoreCase)
+            return !string.IsNullOrEmpty(Alias) && !Alias.Equals(Name, StringComparison.CurrentCulture)
                 ? $"{this} as {QuotationMark}{Alias}{QuotationMark}"
-                : $"{Alias}"; //we later retrieve the value from dictionary using the Alias. If Alias has different casing than the Name retrieving from Dictionary fails
+                : $"{this}";
         }
 
         protected bool Equals(SqlColumn other)
