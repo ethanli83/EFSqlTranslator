@@ -160,7 +160,7 @@ left outer join (
     group by p0.BlogId
 ) sq0 on b0.BlogId = sq0.BlogId_jk0
 where b0.Url like 'ethan.com%'
-order by ifnull(sq0.sum0, 0)";
+order by coalesce(sq0.sum0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

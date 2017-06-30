@@ -152,7 +152,7 @@ group by sq0.BlogId, sq0.Url, u0.UserName";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.count0, 0) as 'Cnt'
+select coalesce(sq0.count0, 0) as 'Cnt'
 from Blogs b0
 left outer join (
     select p0.BlogId as 'BlogId_jk0', count(1) as 'count0'
@@ -160,7 +160,7 @@ left outer join (
     group by p0.BlogId
 ) sq0 on b0.BlogId = sq0.BlogId_jk0
 where b0.Url is not null
-group by ifnull(sq0.count0, 0)";
+group by coalesce(sq0.count0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
@@ -180,7 +180,7 @@ group by ifnull(sq0.count0, 0)";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.count0, 0) as 'Key', sum(b0.CommentCount) as 'Sum'
+select coalesce(sq0.count0, 0) as 'Key', sum(b0.CommentCount) as 'Sum'
 from Blogs b0
 left outer join (
     select p0.BlogId as 'BlogId_jk0', count(1) as 'count0'
@@ -188,7 +188,7 @@ left outer join (
     group by p0.BlogId
 ) sq0 on b0.BlogId = sq0.BlogId_jk0
 where b0.Url is not null
-group by ifnull(sq0.count0, 0)";
+group by coalesce(sq0.count0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
@@ -208,7 +208,7 @@ group by ifnull(sq0.count0, 0)";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.count0, 0) as 'Key', sum(ifnull(sq1.count1, 0)) as 'Sum'
+select coalesce(sq0.count0, 0) as 'Key', sum(coalesce(sq1.count1, 0)) as 'Sum'
 from Blogs b0
 left outer join (
     select p0.BlogId as 'BlogId_jk0', count(1) as 'count0'
@@ -221,7 +221,7 @@ left outer join (
     group by c0.BlogId
 ) sq1 on b0.BlogId = sq1.BlogId_jk0
 where b0.Url is not null
-group by ifnull(sq0.count0, 0)";
+group by coalesce(sq0.count0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
@@ -245,7 +245,7 @@ group by ifnull(sq0.count0, 0)";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.count0, 0) as 'Cnt', ifnull(sq0.avg0, 0) as 'Avg', sum(b0.CommentCount) as 'CommentCount'
+select coalesce(sq0.count0, 0) as 'Cnt', coalesce(sq0.avg0, 0) as 'Avg', sum(b0.CommentCount) as 'CommentCount'
 from Blogs b0
 left outer join (
     select p0.BlogId as 'BlogId_jk0', count(1) as 'count0', avg(p0.LikeCount) as 'avg0'
@@ -253,7 +253,7 @@ left outer join (
     group by p0.BlogId
 ) sq0 on b0.BlogId = sq0.BlogId_jk0
 where b0.Url is not null
-group by ifnull(sq0.count0, 0), ifnull(sq0.avg0, 0)";
+group by coalesce(sq0.count0, 0), coalesce(sq0.avg0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
@@ -282,7 +282,7 @@ group by ifnull(sq0.count0, 0), ifnull(sq0.avg0, 0)";
                 var sql = script.ToString();
 
                 const string expected = @"
-select ifnull(sq0.count0, 0) as 'Cnt', ifnull(sq1.avg0, 0) as 'Avg', sum(b0.CommentCount) as 'CommentCount'
+select coalesce(sq0.count0, 0) as 'Cnt', coalesce(sq1.avg0, 0) as 'Avg', sum(b0.CommentCount) as 'CommentCount'
 from Blogs b0
 left outer join (
     select p0.BlogId as 'BlogId_jk0', count(case
@@ -299,7 +299,7 @@ left outer join (
     group by p0.BlogId
 ) sq1 on b0.BlogId = sq1.BlogId_jk0
 where b0.Url is not null
-group by ifnull(sq0.count0, 0), ifnull(sq1.avg0, 0)";
+group by coalesce(sq0.count0, 0), coalesce(sq1.avg0, 0)";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

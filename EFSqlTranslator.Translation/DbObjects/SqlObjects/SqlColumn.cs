@@ -25,7 +25,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public override string ToSelectionString()
         {
-            return !string.IsNullOrEmpty(Alias) && !Alias.Equals(Name, StringComparison.CurrentCultureIgnoreCase)
+            return !string.IsNullOrEmpty(Alias) && !Alias.Equals(Name, StringComparison.CurrentCulture)
                 ? $"{this} as {QuotationMark}{Alias}{QuotationMark}"
                 : $"{this}";
         }

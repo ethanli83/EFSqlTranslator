@@ -156,7 +156,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public virtual IDbFunc BuildNullCheckFunc(params IDbObject[] parameters)
         {
-            return new SqlFunc("ifnull", parameters);
+            return new SqlFunc("coalesce", parameters);
         }
 
         public IDbCondition BuildCondition(Tuple<IDbBinary, IDbObject>[] conditions, IDbObject dbElse = null)
