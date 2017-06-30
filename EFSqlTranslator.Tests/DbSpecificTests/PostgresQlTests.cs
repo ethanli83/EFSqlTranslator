@@ -37,6 +37,31 @@ where (b0.""Url"" is not null) and (b0.""Name"" like 'Ethan%')";
         }
         
         [Fact]
+        public void TestBooleanType()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Comments
+                    .Where(c => !c.IsDeleted)
+                    .Select(c => new
+                    {
+                        NotDeleted = !c.IsDeleted
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new PostgresQlObjectFactory());
+                var sql = script.ToString();
+                
+                Console.WriteLine(sql);
+
+                const string expected = @"
+select case when c0.""IsDeleted"" != TRUE then TRUE else FALSE end as 'NotDeleted'
+from public.""Comments"" c0 where c0.""IsDeleted"" != TRUE";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+        
+        [Fact]
         public void TestInclude()
         {
             using (var db = new TestingContext())

@@ -39,6 +39,25 @@ where ((b0.Url is not null) and (b0.Name like 'Ethan%')) and ((b0.UserId > 1) or
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
+        
+        [Fact]
+        public void Test_Escape_String()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs.Where(b => b.Url != null && b.Name.StartsWith("Eth'an"));
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select b0.*
+from Blogs b0
+where (b0.Url is not null) and (b0.Name like 'Eth''an%')";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
 
         [Fact]
         public void Test_Translate_Filter_On_Contains()
@@ -273,6 +292,30 @@ group by s0.BlogId";
             using (var db = new TestingContext())
             {
                 var query = db.Comments
+                    .Where(x => x.IsDeleted)
+                    .Select(c => new
+                    {
+                        c.IsDeleted
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select c0.IsDeleted from Comments c0 where c0.IsDeleted = 1";
+
+                TestUtils.AssertStringEqual(expected, sql);
+
+            }
+        }
+        
+        [Fact]
+        public void Test_Query_FilterOnBoolean2()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Comments
                     .Where(x => x.IsDeleted == false)
                     .Select(c => new
                     {
@@ -284,7 +327,31 @@ group by s0.BlogId";
 
                 Console.WriteLine(sql);
 
-                const string expected = @"select c0.IsDeleted from Comments c0 where c0.IsDeleted = '0'";
+                const string expected = @"select c0.IsDeleted from Comments c0 where c0.IsDeleted = 0";
+
+                TestUtils.AssertStringEqual(expected, sql);
+
+            }
+        }
+        
+        [Fact]
+        public void Test_Query_FilterOnBoolean3()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Comments
+                    .Where(x => !x.IsDeleted)
+                    .Select(c => new
+                    {
+                        c.IsDeleted
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqlObjectFactory());
+                var sql = script.ToString();
+
+                Console.WriteLine(sql);
+
+                const string expected = @"select c0.IsDeleted from Comments c0 where c0.IsDeleted != 1";
 
                 TestUtils.AssertStringEqual(expected, sql);
 

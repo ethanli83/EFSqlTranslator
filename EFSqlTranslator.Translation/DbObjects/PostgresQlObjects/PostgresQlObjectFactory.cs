@@ -2,6 +2,7 @@
 using System;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 
 namespace EFSqlTranslator.Translation.DbObjects.PostgresQlObjects
 {
@@ -35,6 +36,15 @@ namespace EFSqlTranslator.Translation.DbObjects.PostgresQlObjects
                 TableName = tableName,
                 SourceSelect = sourceSelect,
                 OutputOption = OutputOption
+            };
+        }
+
+        public override IDbConstant BuildConstant(object val)
+        {
+            return new PostgresQlConstant
+            {
+                ValType = val == null ? null : BuildType(val.GetType()),
+                Val = val
             };
         }
 

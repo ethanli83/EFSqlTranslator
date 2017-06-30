@@ -510,5 +510,23 @@ namespace EFSqlTranslator.Translation
             _state.ResultStack.Push(dbBinary);
             return b;
         }
+
+        protected override Expression VisitUnary(UnaryExpression node)
+        {
+            if (node.NodeType == ExpressionType.Not)
+            {
+                var expression = Visit(node.Operand);
+                var dbElement =  _state.ResultStack.Pop();
+
+                var one = _dbFactory.BuildConstant(true);
+                var dbBinary = _dbFactory.BuildBinary(dbElement, DbOperator.NotEqual, one);
+                
+                _state.ResultStack.Push(dbBinary);
+                
+                return expression;
+            }
+            
+            return base.VisitUnary(node);
+        }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects;
+using Remotion.Linq.Clauses.Expressions;
 
 namespace EFSqlTranslator.Translation
 {
@@ -103,6 +104,22 @@ namespace EFSqlTranslator.Translation
             {
                 var dbRef = obj;
                 return new IDbSelectable[] { factory.BuildRefColumn(dbRef, dbRef.RefColumnAlias) };
+            }
+
+            var dbBinary = dbObj as IDbBinary;
+            if (dbBinary != null && (
+                dbBinary.Operator == DbOperator.Equal ||
+                dbBinary.Operator == DbOperator.NotEqual ||
+                dbBinary.Operator == DbOperator.GreaterThan ||
+                dbBinary.Operator == DbOperator.GreaterThanOrEqual ||
+                dbBinary.Operator == DbOperator.LessThan ||
+                dbBinary.Operator == DbOperator.LessThanOrEqual ||
+                dbBinary.Operator == DbOperator.Is ||
+                dbBinary.Operator == DbOperator.IsNot))
+            {
+                var dbTrue = factory.BuildConstant(true);
+                var tuple = Tuple.Create<IDbBinary, IDbObject>(dbBinary, dbTrue);
+                return new IDbSelectable[] { factory.BuildCondition(new [] { tuple }, factory.BuildConstant(false)) };
             }
 
             var keyValue = dbObj as DbKeyValue;

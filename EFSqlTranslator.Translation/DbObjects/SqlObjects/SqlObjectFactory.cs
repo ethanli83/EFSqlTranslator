@@ -137,7 +137,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
         }
 
-        public IDbConstant BuildConstant(object val)
+        public virtual IDbConstant BuildConstant(object val)
         {
             return new SqlConstant
             {

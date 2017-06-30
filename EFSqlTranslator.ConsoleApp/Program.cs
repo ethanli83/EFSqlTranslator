@@ -4,6 +4,7 @@ using System.Linq;
 using Dapper;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation.DbObjects.PostgresQlObjects;
+using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using EFSqlTranslator.Translation.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -31,15 +32,15 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Blogs
-                        .Where(b => b.Url != null)
-                        .Include(b => b.User)
-                        .ThenInclude(u => u.Posts);
+                    var query = db.Comments
+                        .Select(c => new {
+                            C = c.User.UserId > 0
+                        });
 
                     var result = db.Query(
                         query,
                         new EFModelInfoProvider(db),
-                        new PostgresQlObjectFactory(),
+                        new SqliteObjectFactory(),
                         out sql);
 
                     var json = JsonConvert.SerializeObject(result, new JsonSerializerSettings

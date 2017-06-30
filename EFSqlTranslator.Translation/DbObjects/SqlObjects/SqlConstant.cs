@@ -15,10 +15,10 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
                 return "null";
 
             if (Val is string)
-                return $"'{Val}'";
+                return $"'{Val.ToString().Replace("'", "''")}'";
 
             if (Val is bool)
-                return (bool)Val ? "'1'" : "'0'";
+                return (bool)Val ? "1" : "0";
 
             if (Val is DateTime)
                 return $"'{((DateTime)Val).ToString("s", CultureInfo.InvariantCulture)}'";
