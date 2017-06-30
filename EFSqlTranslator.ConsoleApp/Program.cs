@@ -33,28 +33,12 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Posts
-                    .GroupBy(x => x.BlogId)
-                    .Select(x => new
-                    {
-                        BlogId = x.Key,
-                        MaxLikes = x.Max(z => z.LikeCount)
-                    });
-
-                var query1 = db.Posts
-                    .Join(
-                        query,
-                        (p, b) => p.BlogId == b.BlogId && p.LikeCount == b.MaxLikes,
-                        (p, b) => new 
-                        {
-                            BlogTitle = p.Blog.Name,
-                            p.Blog.BlogId,
-                            PostWithMaxLikes = p.Title
-                        },
-                        DbJoinType.LeftOuter);
+                    var query = db.Comments.
+                        GroupBy(b => b.PostId).
+                        Select(x => new { count = x.Count(c => c.IsDeleted) });
 
                     var result = db.Query(
-                        query1,
+                        query,
                         new EFModelInfoProvider(db),
                         new SqliteObjectFactory(),
                         out sql);

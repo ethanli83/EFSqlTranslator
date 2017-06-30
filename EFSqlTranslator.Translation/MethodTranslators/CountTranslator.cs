@@ -38,7 +38,8 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             if (!m.GetArguments().Any())
                 return countOne;
 
-            var dbBinary = (IDbBinary)state.ResultStack.Pop();
+            var dbElement = state.ResultStack.Pop();
+            var dbBinary = dbElement.ToBinary(_dbFactory);
 
             var tuple = Tuple.Create<IDbBinary, IDbObject>(dbBinary, countOne);
             return _dbFactory.BuildCondition(new [] { tuple }, _dbFactory.BuildConstant(null));

@@ -90,6 +90,18 @@ namespace EFSqlTranslator.Translation
             }
         }
 
+        public static IDbBinary ToBinary(this IDbObject dbElement, IDbObjectFactory dbFactory)
+        {
+            var dbBinary = dbElement as IDbBinary;
+
+            
+            if (dbBinary != null)
+                return dbBinary;
+            
+            var one = dbFactory.BuildConstant(true);
+            return dbFactory.BuildBinary(dbElement, DbOperator.Equal, one);
+        }
+
         public static IDbSelectable[] ProcessSelection(IDbObject dbObj, IDbObjectFactory factory)
         {
             var dbList = dbObj as IDbList<DbKeyValue>;

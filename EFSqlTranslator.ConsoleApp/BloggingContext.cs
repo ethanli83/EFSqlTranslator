@@ -114,7 +114,7 @@ namespace EFSqlTranslator.ConsoleApp
 
         public int? UserId { get; set; }
 
-        public bool IsPrivate { get; set; }
+        public bool IsDeleted { get; set; }
 
         public int PostId { get; set; }
 

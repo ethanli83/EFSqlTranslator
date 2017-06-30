@@ -18,18 +18,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
         public override void Translate(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator)
         {
             var dbElement = state.ResultStack.Pop();
-            var dbBinary = dbElement as IDbBinary;
-
-            IDbBinary whereClause;
-            if (dbBinary != null)
-            {
-                whereClause = dbBinary;
-            }
-            else
-            {
-                var one = _dbFactory.BuildConstant(true);
-                whereClause = _dbFactory.BuildBinary(dbElement, DbOperator.Equal, one);
-            }
+            var whereClause = dbElement.ToBinary(_dbFactory);
                 
             var dbSelect = (IDbSelect)state.ResultStack.Peek();
             dbSelect.UpdateWhereClause(whereClause, _dbFactory);
