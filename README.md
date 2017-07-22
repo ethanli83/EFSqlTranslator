@@ -231,7 +231,7 @@ db.Blogs
 ```
 ```sql
 -- Transalted Sql:
-select ifnull(sq0.count0, 0) as 'Cnt', ifnull(sq0.avg0, 0) as 'Avg', sum(b0.CommentCount) as 'CommentCount'
+select coalesce(sq0.count0, 0) as 'Cnt', coalesce(sq0.avg0, 0) as 'Avg', sum(b0.CommentCount) as 'CommentCount'
 from Blogs b0
 left outer join (
     select p0.BlogId as 'BlogId_jk0', count(1) as 'count0', avg(p0.LikeCount) as 'avg0'
@@ -239,7 +239,7 @@ left outer join (
     group by p0.BlogId
 ) sq0 on b0.BlogId = sq0.BlogId_jk0
 where b0.Url is not null
-group by ifnull(sq0.count0, 0), ifnull(sq0.avg0, 0)
+group by coalesce(sq0.count0, 0), coalesce(sq0.avg0, 0)
 ```
 ## V. Translating Aggregtaions
 In this section, we will give you several examples to show how the aggregation is translated.
@@ -309,7 +309,7 @@ db.Blogs.Where(b => b.Url != null).Select(b => new { Name = b.Name, cnt = b.Post
 ```
 ```sql
 -- Transalted Sql:
-select b0.Name, ifnull(sq0.sum0, 0) as 'cnt'
+select b0.Name, coalesce(sq0.sum0, 0) as 'cnt'
 from Blogs b0
 left outer join (
     select p0.BlogId as 'BlogId_jk0', sum(p0.PostId) as 'sum0'

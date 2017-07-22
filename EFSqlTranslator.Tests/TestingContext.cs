@@ -72,7 +72,7 @@ namespace EFSqlTranslator.Tests
 
         public Blog Blog { get; set; }
 
-        public List<Comment> Comments { get; set; }
+        public HashSet<Comment> Comments { get; set; }
     }
 
     public class User
@@ -81,7 +81,7 @@ namespace EFSqlTranslator.Tests
 
         public string UserName { get; set; }
 
-        public List<Blog> Blogs { get; set; }
+        public HashSet<Blog> Blogs { get; set; }
 
         public List<Post> Posts { get; set; }
 

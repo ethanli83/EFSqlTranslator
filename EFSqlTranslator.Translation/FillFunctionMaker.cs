@@ -129,8 +129,9 @@ namespace EFSqlTranslator.Translation
             {
                 // blog.Posts.AddRange(posts);
                 var fmExpr = Expression.Property(varFromEntity, fromProperty);
-                var toListCall = Expression.Call(typeof(Enumerable), nameof(Enumerable.ToList), new[] { toEntity.Type }, varTs);
-                var arcExpr = Expression.Assign(fmExpr, toListCall);
+                var constructor = fmExpr.Type.GetConstructor(new Type[] {varTs.Type});
+                var cExpr = Expression.New(constructor, varTs);
+                var arcExpr = Expression.Assign(fmExpr, cExpr);
 
                 actions.Add(arcExpr);
             }
