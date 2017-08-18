@@ -25,8 +25,11 @@ namespace EFSqlTranslator.ReadmeGen
                 writer.WriteLine($"{TranslationAttr.Description.Trim()}");
 
             var desc = GetComments(TranslationAttr.ExpressionDescription, "\\");
+            
+            var beforeExpression = TranslationAttr.BeforeExpression;
+            beforeExpression += !string.IsNullOrEmpty(beforeExpression) ? "\n" : "";
 
-            writer.WriteLine($"```csharp\n// Linq expression:\n{desc}{ExpressionString.Trim()}\n```");
+            writer.WriteLine($"```csharp\n// Linq expression:\n{desc}{beforeExpression}{ExpressionString.Trim()}\n```");
 
             if (!string.IsNullOrEmpty(TranslationAttr.SqlDescription))
                 writer.WriteLine(TranslationAttr.SqlDescription.Trim());

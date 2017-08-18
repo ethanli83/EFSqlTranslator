@@ -32,5 +32,6 @@ namespace EFSqlTranslator.Tests
         public string Description { get; set; }
         public string ExpressionDescription { get; set; }
         public string SqlDescription { get; set; }
+        public string BeforeExpression { get; set; }
     }
 }

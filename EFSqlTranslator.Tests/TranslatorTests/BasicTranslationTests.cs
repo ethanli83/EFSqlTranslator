@@ -44,7 +44,8 @@ where ((b0.Url is not null) and (b0.Name like 'Ethan%')) and ((b0.UserId > 1) or
         [Fact]
         [TranslationReadMe(
             Index = 1,
-            Title = "Filter result using list of values")]
+            Title = "Filter result using list of values",
+            BeforeExpression = "var ids = new[] {2, 3, 5};")]
         public void Test_Translate_Filter_On_Simple_Column_With_Values()
         {
             using (var db = new TestingContext())
