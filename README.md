@@ -23,6 +23,7 @@ where ((b0.Url is not null) and (b0.Name like 'Ethan%')) and ((b0.UserId > 1) or
 ### 2. Filter result using list of values
 ```csharp
 // Linq expression:
+var ids = new [] {2, 3, 5};
 db.Blogs.Where(b => b.BlogId.In(new[] { 1, 2, 4 }) && b.BlogId.In(ids))
 ```
 ```sql
