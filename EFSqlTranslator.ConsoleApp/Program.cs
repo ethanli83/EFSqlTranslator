@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
@@ -33,7 +34,9 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Blogs.Where(b => b.Posts.Any());
+                    var ids = new [] {2, 3, 5};
+                    var query = db.Blogs
+                        .Where(b => b.BlogId.In(1, 2, 4) && b.BlogId.In(ids));
 
                     var result = db.Query(
                         query,

@@ -105,10 +105,12 @@ namespace EFSqlTranslator.Translation
 
     public class LinqExecutorMaker
     {
-        public static LinqExecutor<T> Make<T>(IQueryable<T> queryable, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, DbContext dtx)
+        public static LinqExecutor<T> Make<T>(
+            IQueryable<T> queryable, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, 
+            DbContext dtx, IEnumerable<AbstractMethodTranslator> addons = null)
         {
             IncludeGraph includeGraph;
-            var script = QueryTranslator.Translate(queryable.Expression, infoProvider, dbFactory, out includeGraph);
+            var script = QueryTranslator.Translate(queryable.Expression, infoProvider, dbFactory, out includeGraph, addons);
             return new LinqExecutor<T>(includeGraph, script, dtx);
         }
     }

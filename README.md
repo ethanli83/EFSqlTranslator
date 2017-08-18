@@ -19,6 +19,18 @@ select b0.*
 from Blogs b0
 where ((b0.Url is not null) and (b0.Name like 'Ethan%')) and ((b0.UserId > 1) or (b0.UserId < 100))
 ```
+
+### 2. Filter result using list of values
+```csharp
+// Linq expression:
+db.Blogs.Where(b => b.BlogId.In(new[] { 1, 2, 4 }) && b.BlogId.In(ids))
+```
+```sql
+-- Transalted Sql:
+select b0.*
+from Blogs b0
+where (b0.BlogId in (1, 2, 4)) and (b0.BlogId in (2, 3, 5))
+```
 ## II. Translating Relationsheips
 In this section, we will show you how relationships are translated. The basic rules are:
   1. All relations is translated into a inner join be default.

@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Globalization;
+using System.Linq;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
@@ -22,6 +24,10 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
             if (Val is DateTime)
                 return $"'{((DateTime)Val).ToString("s", CultureInfo.InvariantCulture)}'";
+
+            var type = Val.GetType();
+            if (type.IsArray || type.IsEnumerable())
+                return $"({string.Join(", ", ((IEnumerable)Val).Cast<object>())})";;
 
             return Val.ToString();
         }

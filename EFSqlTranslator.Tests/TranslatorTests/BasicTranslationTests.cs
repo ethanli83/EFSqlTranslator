@@ -4,6 +4,7 @@ using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
+using EFSqlTranslator.Translation.Extensions;
 using Xunit;
 
 namespace EFSqlTranslator.Tests.TranslatorTests
@@ -35,6 +36,30 @@ namespace EFSqlTranslator.Tests.TranslatorTests
 select b0.*
 from Blogs b0
 where ((b0.Url is not null) and (b0.Name like 'Ethan%')) and ((b0.UserId > 1) or (b0.UserId < 100))";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+        
+        [Fact]
+        [TranslationReadMe(
+            Index = 1,
+            Title = "Filter result using list of values")]
+        public void Test_Translate_Filter_On_Simple_Column_With_Values()
+        {
+            using (var db = new TestingContext())
+            {
+                var ids = new[] {2, 3, 5};
+                var query = db.Blogs
+                    .Where(b => b.BlogId.In(1, 2, 4) && b.BlogId.In(ids));
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select b0.*
+from Blogs b0
+where (b0.BlogId in (1, 2, 4)) and (b0.BlogId in (2, 3, 5))";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using EFSqlTranslator.Translation.DbObjects;
 using Remotion.Linq.Clauses.Expressions;
 
@@ -50,6 +52,15 @@ namespace EFSqlTranslator.Translation
 
             return type.GenericTypeArguments.Length == 2 &&
                    type == typeof(IGrouping<,>).MakeGenericType(type.GenericTypeArguments);
+        }
+        
+        public static bool IsEnumerable(this Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            return type.IsConstructedGenericType &&
+                   typeof(IEnumerable<>).MakeGenericType(type.GenericTypeArguments).IsAssignableFrom(type);
         }
 
         public static void UpdateWhereClause(this IDbSelect dbSelect, IDbBinary whereClause, IDbObjectFactory dbFactory)
@@ -223,7 +234,6 @@ namespace EFSqlTranslator.Translation
                     return "||";
                 case DbOperator.In:
                     return "in";
-                    break;
                 default:
                     throw new NotSupportedException(optr.ToString());
             }

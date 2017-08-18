@@ -10,6 +10,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AgileObjects.ReadableExpressions" Version="1.9.0" />
-    <PackageReference Include="NLog" Version="5.0.0-beta06" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.4.1" />
   </ItemGroup>
 </Project>

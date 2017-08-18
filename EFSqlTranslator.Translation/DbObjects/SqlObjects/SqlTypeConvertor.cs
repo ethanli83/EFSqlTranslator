@@ -34,6 +34,12 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
             if (type == typeof(DbJoinType))
                 return "<<DbJoinType>>";
+            
+            if (type.IsArray)
+                return "<<Array>>";
+            
+            if (type.IsEnumerable())
+                return "<<Enumerable>>";
 
             throw new NotImplementedException($"{type.Name} not supported.");
         }

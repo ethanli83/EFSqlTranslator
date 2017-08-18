@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>1.2.10</VersionPrefix>
+    <VersionPrefix>1.2.11</VersionPrefix>
     <TargetFrameworks>netstandard1.3</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.4.1" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="Dapper" Version="1.50.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.1" />
-    <PackageReference Include="NLog" Version="5.0.0-beta06" />
   </ItemGroup>
 </Project>

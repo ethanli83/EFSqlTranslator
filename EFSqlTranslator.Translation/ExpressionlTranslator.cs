@@ -49,6 +49,7 @@ namespace EFSqlTranslator.Translation
             new CountTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new AggregationTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new StringStartsEndsContainsTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new InTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         internal IDbSelect GetSelect()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects;
@@ -12,17 +13,21 @@ namespace EFSqlTranslator.Translation
     {
         private static readonly ILogger Logger = LogManager.GetLogger(nameof(QueryTranslator));
 
-        public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
+        public static IDbScript Translate(
+            Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory,
+            IEnumerable<AbstractMethodTranslator> addons = null)
         {
             IncludeGraph graph;
-            return Translate(exp, infoProvider, dbFactory, out graph);
+            return Translate(exp, infoProvider, dbFactory, out graph, addons);
         }
 
-        public static IDbScript Translate(Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, out IncludeGraph includeGraph)
+        public static IDbScript Translate(
+            Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, out IncludeGraph includeGraph, 
+            IEnumerable<AbstractMethodTranslator> addons = null)
         {
             includeGraph = IncludeGraphBuilder.Build(exp);
 
-            var script = TranslateGraph(includeGraph, infoProvider, dbFactory, new UniqueNameGenerator());
+            var script = TranslateGraph(includeGraph, infoProvider, dbFactory, new UniqueNameGenerator(), addons);
 
             if (Logger.IsDebugEnabled)
                 Logger.Debug(Tuple.Create(exp, script.ToString()));
@@ -31,15 +36,17 @@ namespace EFSqlTranslator.Translation
         }
 
         private static IDbScript TranslateGraph(
-            IncludeGraph includeGraph, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)
+            IncludeGraph includeGraph, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, 
+            UniqueNameGenerator nameGenerator, IEnumerable<AbstractMethodTranslator> addons)
         {
-            TranslateGraphNode(includeGraph.Root, infoProvider, dbFactory, nameGenerator);
+            TranslateGraphNode(includeGraph.Root, infoProvider, dbFactory, nameGenerator, addons);
 
             return includeGraph.GetScript(dbFactory);
         }
 
         private static void TranslateGraphNode(
-            IncludeNode graphNode, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)
+            IncludeNode graphNode, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, 
+            UniqueNameGenerator nameGenerator, IEnumerable<AbstractMethodTranslator> addons)
         {
             //TODO: check if there is a chain in the relation and throw exceptions
 
@@ -49,7 +56,7 @@ namespace EFSqlTranslator.Translation
             if (fromSelect != null)
                 state.ResultStack.Push(graphNode.FromNode.Select);
 
-            var translator = new ExpressionlTranslator(infoProvider, dbFactory, state);
+            var translator = new ExpressionlTranslator(infoProvider, dbFactory, state, addons);
 
             // translated current included node
             translator.Visit(graphNode.Expression);
@@ -71,7 +78,7 @@ namespace EFSqlTranslator.Translation
             // so that the child nodes can join to the temp table containing forgien keys
             if (graphNode.ToNodes.Any())
             {
-                UpdateIncludeSelectAndProcessToNodes(graphNode, includedSelect, infoProvider, dbFactory, nameGenerator);
+                UpdateIncludeSelectAndProcessToNodes(graphNode, includedSelect, infoProvider, dbFactory, nameGenerator, addons);
             }
             else
             {
@@ -152,8 +159,8 @@ namespace EFSqlTranslator.Translation
         }
 
         private static void UpdateIncludeSelectAndProcessToNodes(
-            IncludeNode graphNode, IDbSelect includedSelect,
-            IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)
+            IncludeNode graphNode, IDbSelect includedSelect, IModelInfoProvider infoProvider, 
+            IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator, IEnumerable<AbstractMethodTranslator> addons)
         {
             // create temp table
             var entityRef = includedSelect.GetReturnEntityRef();
@@ -197,7 +204,7 @@ namespace EFSqlTranslator.Translation
             graphNode.TempTable = tempTable;
 
             foreach (var toNode in graphNode.ToNodes)
-                TranslateGraphNode(toNode, infoProvider, dbFactory, nameGenerator);
+                TranslateGraphNode(toNode, infoProvider, dbFactory, nameGenerator, addons);
         }
 
         private static IDbJoin MakeJoin(IDbSelect ownerSelect, IDbObject tempSelect, IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)

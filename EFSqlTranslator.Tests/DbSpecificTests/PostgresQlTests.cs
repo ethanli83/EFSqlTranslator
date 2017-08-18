@@ -69,7 +69,7 @@ from public.""Comments"" c0 where c0.""IsDeleted"" != TRUE";
                 var query =  db.Blogs
                     .Where(b => b.Url != null)
                     .Include(b => b.User)
-                    .ThenInclude(u => u.Posts);;
+                    .ThenInclude(u => u.Posts);
 
                 var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new PostgresQlObjectFactory());
                 var sql = script.ToString();
