@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using Dapper;
 using EFSqlTranslator.EFModels;
@@ -34,16 +35,20 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var ids = new [] {2, 3, 5};
-                    var query = db.Blogs
-                        .Where(b => b.BlogId.In(1, 2, 4) && b.BlogId.In(ids));
+                    var query = db.Blogs.Select(x => new
+                    {
+                        UId = x.UserId,
+                        Blog = x,
+                        UName = x.User.UserName,
+                        x.User
+                    });
 
                     var result = db.Query(
                         query,
                         new EFModelInfoProvider(db),
                         new SqliteObjectFactory(),
                         out sql);
-
+                    
                     var json = JsonConvert.SerializeObject(result, new JsonSerializerSettings
                     {
                         ReferenceLoopHandling = ReferenceLoopHandling.Ignore,

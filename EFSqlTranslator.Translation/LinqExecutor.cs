@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using Dapper;
 using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.Extensions;
@@ -40,8 +38,8 @@ namespace EFSqlTranslator.Translation
 
                         if (entityType.IsAnonymouse())
                         {
-                            var result = connection.Query<dynamic>(sql);
-                            node.Result = ConvertDynamicToRealType(entityType, result);
+                            var result = connection.Query(sql);
+                            node.Result = new DynamicDataConvertor(entityType).Convert(result);
                         }
                         else
                         {
@@ -59,47 +57,7 @@ namespace EFSqlTranslator.Translation
 
                 return _graph.Root.Result.Cast<T>();
             }
-
-        public IEnumerable<object> ConvertDynamicToRealType(Type type, IEnumerable<dynamic> data)
-        {
-            var properties = typeof(T).GetProperties();
-            var constructor = type.GetConstructors().Single();
-
-            var fdList = new List<object>();
-            var valTypes = new Dictionary<int, Type>();
-            var infoTypes = new Dictionary<int, Type>();
-            foreach (var row in data)
-            {
-                var objIdx = 0;
-                var objArray = new object[properties.Length];
-
-                var valDict = (IDictionary<string, object>)row;
-                for (var i = 0; i < properties.Length; i ++)
-                {
-                    var info = properties[i];
-                    var val = valDict[info.Name];
-
-                    var valType = valTypes.ContainsKey(i) ? valTypes[i] : valTypes[i] = (val?.GetType() ?? typeof(object));
-                    var infoType = infoTypes.ContainsKey(i) ? infoTypes[i] : infoTypes[i] = info.PropertyType.StripNullable();
-                    if (valType != infoType)
-                    {
-                        objArray[objIdx++] = infoType == typeof(Guid)
-                            ? new Guid((byte[])val)
-                            : Convert.ChangeType(val, infoType);
-                    }
-                    else
-                    {
-                        objArray[objIdx++] = val;
-                    }
-                }
-
-                var obj = constructor.Invoke(objArray);
-                fdList.Add(obj);
-            }
-
-            return fdList;
-        }
-
+        
         public IDbScript Script { get; }
     }
 

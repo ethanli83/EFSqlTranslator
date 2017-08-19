@@ -63,6 +63,11 @@ namespace EFSqlTranslator.Translation
                    typeof(IEnumerable<>).MakeGenericType(type.GenericTypeArguments).IsAssignableFrom(type);
         }
 
+        public static bool IsValueType(this Type type)
+        {
+            return type.GetTypeInfo().IsValueType || type == typeof(string);
+        }
+
         public static void UpdateWhereClause(this IDbSelect dbSelect, IDbBinary whereClause, IDbObjectFactory dbFactory)
         {
             if (whereClause == null)
