@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using EFSqlTranslator.Translation.Extensions;
@@ -48,7 +49,9 @@ namespace EFSqlTranslator.Translation
                 {
                     var eProps = _propertyInfoCache.GetOrAdd(info, () =>
                     {
-                        return info.PropertyType.GetProperties().Where(p => p.PropertyType.IsValueType()).OrderBy(p => p.Name).ToArray();
+                        return info.PropertyType.GetProperties().Where(p => p.PropertyType.IsValueType())
+                            .Where(x => x.GetCustomAttribute<NotMappedAttribute>() == null)
+                            .OrderBy(p => p.Name).ToArray();
                     });
                     
                     var objVals = GetObjArray(vals, eProps.ToArray(), cIndex);
