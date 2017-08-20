@@ -37,10 +37,9 @@ namespace EFSqlTranslator.ConsoleApp
                 {
                     var query = db.Blogs.Select(x => new
                     {
-                        UId = x.UserId,
-                        Blog = x,
-                        UName = x.User.UserName,
-                        x.User
+                        UserName = "Wrong",
+                        x.User,
+                        UId = x.UserId
                     });
 
                     var result = db.Query(

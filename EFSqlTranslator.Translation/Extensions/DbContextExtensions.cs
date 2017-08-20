@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
 using System.Linq;
 using Dapper;
 using EFSqlTranslator.Translation.DbObjects;
@@ -13,8 +15,15 @@ namespace EFSqlTranslator.Translation.Extensions
             IQueryable<T> query, IModelInfoProvider infoProvider, IDbObjectFactory factory,
             IEnumerable<AbstractMethodTranslator> addons = null)
         {
-            var executor = LinqExecutorMaker.Make(query, infoProvider, factory, db, addons);
-            var result = executor.Execute();
+            var executor = LinqExecutorMaker.Make(query, infoProvider, factory, addons);
+            
+            var connection = db.Database.GetDbConnection();
+            if (connection.State != ConnectionState.Open)
+            {
+                connection.Open();
+            }
+            
+            var result = executor.Execute(connection);
 
             return result;
         }
@@ -23,39 +32,51 @@ namespace EFSqlTranslator.Translation.Extensions
             IQueryable query, IModelInfoProvider infoProvider, IDbObjectFactory factory,
             IEnumerable<AbstractMethodTranslator> addons = null)
         {
-            using (var connection = db.Database.GetDbConnection())
+            var connection = db.Database.GetDbConnection();
+            if (connection.State != ConnectionState.Open)
             {
-                var script = QueryTranslator.Translate(query.Expression, infoProvider, factory, addons);
-                var sql = script.ToString();
-
-                var results = connection.Query(sql);
-                return results;
+                connection.Open();
             }
+            var script = QueryTranslator.Translate(query.Expression, infoProvider, factory, addons);
+            var sql = script.ToString();
+
+            var results = connection.Query(sql);
+            return results;
         }
 
         public static IEnumerable<T> Query<T>(this DbContext db,
             IQueryable<T> query, IModelInfoProvider infoProvider, IDbObjectFactory factory, out string sql,
             IEnumerable<AbstractMethodTranslator> addons = null)
         {
-            var executor = LinqExecutorMaker.Make(query, infoProvider, factory, db, addons);
+            var executor = LinqExecutorMaker.Make(query, infoProvider, factory, addons);
             sql = executor.Script.ToString();
             
-            var result = executor.Execute();
+            var connection = db.Database.GetDbConnection();
+            if (connection.State != ConnectionState.Open)
+            {
+                connection.Open();
+            }
+            
+            var result = executor.Execute(connection);
+            
             return result;
         }
 
-        public static IEnumerable<dynamic> QueryDynamic(this DbContext db, 
-            IQueryable query, IModelInfoProvider infoProvider, IDbObjectFactory factory, out string sql, 
+        public static IEnumerable<dynamic> QueryDynamic(this DbContext db,
+            IQueryable query, IModelInfoProvider infoProvider, IDbObjectFactory factory, out string sql,
             IEnumerable<AbstractMethodTranslator> addons = null)
         {
-            using (var connection = db.Database.GetDbConnection())
-            {
-                var script = QueryTranslator.Translate(query.Expression, infoProvider, factory, addons);
-                sql = script.ToString();
+            var script = QueryTranslator.Translate(query.Expression, infoProvider, factory, addons);
+            sql = script.ToString();
 
-                var results = connection.Query(sql);
-                return results;
+            var connection = db.Database.GetDbConnection();
+            if (connection.State != ConnectionState.Open)
+            {
+                connection.Open();
             }
+            
+            var results = connection.Query(sql);
+            return results;
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
-    public class SqlConstant : SqlObject, IDbConstant
+    public class SqlConstant : SqlSelectable, IDbConstant
     {
         public DbType ValType { get; set; }
         public object Val { get; set; }

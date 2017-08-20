@@ -13,9 +13,6 @@ namespace EFSqlTranslator.Translation
         
         private readonly IDictionary<PropertyInfo, PropertyInfo[]> _propertyInfoCache = 
             new ConcurrentDictionary<PropertyInfo, PropertyInfo[]>();
-        
-        private readonly IDictionary<PropertyInfo, Func<object, object>> _convertFuncCache = 
-            new ConcurrentDictionary<PropertyInfo, Func<object, object>>();
 
         public DynamicDataConvertor(Type type)
         {
@@ -30,8 +27,8 @@ namespace EFSqlTranslator.Translation
             var fdList = new List<object>();
             foreach (var row in data)
             {
-                var valDict = (IDictionary<string, object>)row;
-                var objArray = GetObjArray(valDict, properties);
+                var valDict = ((IDictionary<string, object>)row).ToArray();
+                var objArray = GetObjArray(valDict, properties, 0);
                 var obj =  constructor.Invoke(objArray);
                 fdList.Add(obj);
             }
@@ -39,7 +36,8 @@ namespace EFSqlTranslator.Translation
             return fdList;
         }
 
-        private object[] GetObjArray(IDictionary<string, object> valDict, IReadOnlyList<PropertyInfo> properties)
+        private object[] GetObjArray(
+            IReadOnlyList<KeyValuePair<string, object>> vals, IReadOnlyList<PropertyInfo> properties, int cIndex)
         {
             var objArray = new object[properties.Count];
             for (var i = 0; i < properties.Count; i++)
@@ -50,12 +48,10 @@ namespace EFSqlTranslator.Translation
                 {
                     var eProps = _propertyInfoCache.GetOrAdd(info, () =>
                     {
-                        return info.PropertyType.GetProperties()
-                            .Where(p => p.PropertyType.IsValueType() && valDict.ContainsKey(p.Name))
-                            .ToArray();
+                        return info.PropertyType.GetProperties().Where(p => p.PropertyType.IsValueType()).ToArray();
                     });
                     
-                    var objVals = GetObjArray(valDict, eProps.ToArray());
+                    var objVals = GetObjArray(vals, eProps.ToArray(), cIndex);
                     var eObj = Activator.CreateInstance(info.PropertyType);
                     for (var j = 0; j < eProps.Length; j++)
                     {
@@ -64,15 +60,28 @@ namespace EFSqlTranslator.Translation
                     }
 
                     objArray[i] = eObj;
+                    cIndex += objVals.Length;
                 }
                 else
                 {
-                    var val = valDict[info.Name];
-                    var infoType = info.PropertyType.StripNullable();
+                    var kvp = vals[cIndex++];
+                    if (kvp.Key != info.Name)
+                        throw new Exception($"Result column name '{kvp.Key}' is not match property name '{info.Name}'.");
                     
-                    objArray[i] = infoType == typeof(Guid)
-                        ? new Guid((byte[]) val)
-                        : System.Convert.ChangeType(val, infoType);
+                    var val = kvp.Value;
+                    var infoType = info.PropertyType.StripNullable();
+
+                    try
+                    {
+                        objArray[i] = infoType == typeof(Guid)
+                            ? new Guid((byte[]) val)
+                            : val == null ? null : System.Convert.ChangeType(val, infoType);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"{val} {infoType.FullName}");
+                        throw;
+                    }
                 }
             }
             return objArray;
