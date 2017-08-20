@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Linq;
 using Dapper;
 using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.Extensions;
 using EFSqlTranslator.Translation.MethodTranslators;
-using Microsoft.EntityFrameworkCore;
 
 namespace EFSqlTranslator.Translation
 {

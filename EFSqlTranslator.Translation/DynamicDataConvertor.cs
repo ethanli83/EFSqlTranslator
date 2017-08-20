@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using EFSqlTranslator.Translation.Extensions;
@@ -47,11 +46,16 @@ namespace EFSqlTranslator.Translation
 
                 if (!info.PropertyType.IsValueType())
                 {
+                    var ci = cIndex;
                     var eProps = _propertyInfoCache.GetOrAdd(info, () =>
                     {
-                        return info.PropertyType.GetProperties().Where(p => p.PropertyType.IsValueType())
-                            .Where(x => x.GetCustomAttribute<NotMappedAttribute>() == null)
-                            .OrderBy(p => p.Name).ToArray();
+                        var dict = info.PropertyType.GetProperties()
+                            .Where(p => p.PropertyType.IsValueType())
+                            .ToDictionary(p => p.Name);
+
+                        return vals.Skip(ci).Take(dict.Count)
+                            .Select(v => dict[v.Key])
+                            .ToArray();
                     });
                     
                     var objVals = GetObjArray(vals, eProps.ToArray(), cIndex);
@@ -74,17 +78,9 @@ namespace EFSqlTranslator.Translation
                     var val = kvp.Value;
                     var infoType = info.PropertyType.StripNullable();
 
-                    try
-                    {
-                        objArray[i] = infoType == typeof(Guid)
-                            ? new Guid((byte[]) val)
-                            : val == null ? null : System.Convert.ChangeType(val, infoType);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"{val} {infoType.FullName}");
-                        throw;
-                    }
+                    objArray[i] = infoType == typeof(Guid)
+                        ? new Guid((byte[]) val)
+                        : val == null ? null : System.Convert.ChangeType(val, infoType);
                 }
             }
             return objArray;

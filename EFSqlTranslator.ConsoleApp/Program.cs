@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using Dapper;
 using EFSqlTranslator.EFModels;
-using EFSqlTranslator.Translation.DbObjects;
-using EFSqlTranslator.Translation.DbObjects.PostgresQlObjects;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using EFSqlTranslator.Translation.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace EFSqlTranslator.ConsoleApp
@@ -35,11 +30,13 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Blogs.Select(x => new
+                    var query = db.Posts.Select(x => new
                     {
-                        UserName = "Wrong",
-                        x.User,
-                        UId = x.UserId
+                        x.User.UserId,
+                        Title = "No",
+                        Post = x,
+                        x.Blog.BlogId,
+                        x.PostId
                     });
 
                     var result = db.Query(
