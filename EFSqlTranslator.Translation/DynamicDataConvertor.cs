@@ -48,7 +48,7 @@ namespace EFSqlTranslator.Translation
                 {
                     var eProps = _propertyInfoCache.GetOrAdd(info, () =>
                     {
-                        return info.PropertyType.GetProperties().Where(p => p.PropertyType.IsValueType()).ToArray();
+                        return info.PropertyType.GetProperties().Where(p => p.PropertyType.IsValueType()).OrderBy(p => p.Name).ToArray();
                     });
                     
                     var objVals = GetObjArray(vals, eProps.ToArray(), cIndex);
