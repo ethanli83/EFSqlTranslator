@@ -1,21 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.Extensions;
 using EFSqlTranslator.Translation.MethodTranslators;
-using NLog;
+using log4net;
 
 namespace EFSqlTranslator.Translation
 {
     public static class QueryTranslator
     {
-        private static readonly ILogger Logger = LogManager.GetLogger(nameof(QueryTranslator));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(QueryTranslator));
 
         public static IDbScript Translate(
             Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory,
-            IEnumerable<AbstractMethodTranslator> addons = null)
+            AbstractMethodTranslator[] addons = null)
         {
             IncludeGraph graph;
             return Translate(exp, infoProvider, dbFactory, out graph, addons);
@@ -23,21 +22,23 @@ namespace EFSqlTranslator.Translation
 
         public static IDbScript Translate(
             Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, out IncludeGraph includeGraph, 
-            IEnumerable<AbstractMethodTranslator> addons = null)
+            AbstractMethodTranslator[] addons = null)
         {
             includeGraph = IncludeGraphBuilder.Build(exp);
 
             var script = TranslateGraph(includeGraph, infoProvider, dbFactory, new UniqueNameGenerator(), addons);
 
             if (Logger.IsDebugEnabled)
+            {
                 Logger.Debug(Tuple.Create(exp, script.ToString()));
+            }
 
             return script;
         }
 
         private static IDbScript TranslateGraph(
             IncludeGraph includeGraph, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, 
-            UniqueNameGenerator nameGenerator, IEnumerable<AbstractMethodTranslator> addons)
+            UniqueNameGenerator nameGenerator, AbstractMethodTranslator[] addons)
         {
             TranslateGraphNode(includeGraph.Root, infoProvider, dbFactory, nameGenerator, addons);
 
@@ -46,7 +47,7 @@ namespace EFSqlTranslator.Translation
 
         private static void TranslateGraphNode(
             IncludeNode graphNode, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, 
-            UniqueNameGenerator nameGenerator, IEnumerable<AbstractMethodTranslator> addons)
+            UniqueNameGenerator nameGenerator, AbstractMethodTranslator[] addons)
         {
             //TODO: check if there is a chain in the relation and throw exceptions
 
@@ -102,10 +103,9 @@ namespace EFSqlTranslator.Translation
             IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)
         {
             var fromSelect = fromNode.Select;
-            var fromRef = dbObject as DbReference;
 
             var dbJoin = fromSelect.Joins.Single(
-                j => fromRef != null ? ReferenceEquals(j.To, fromRef) : ReferenceEquals(j.To.Referee, dbObject));
+                j => dbObject is DbReference ? ReferenceEquals(j.To, dbObject) : ReferenceEquals(j.To.Referee, dbObject));
 
             // remove the join to included relation from fromSelect
             fromSelect.Joins.Remove(dbJoin);
@@ -123,7 +123,7 @@ namespace EFSqlTranslator.Translation
             var tempTable = fromNode.TempTable;
             var sourceSelect = tempTable.SourceSelect;
 
-            fromRef = sourceSelect.GetReturnEntityRef();
+            var fromRef = sourceSelect.GetReturnEntityRef();
             var returnRef = includedSelect.GetReturnEntityRef();
 
             var tempSelect = dbFactory.BuildSelect(tempTable);
@@ -146,7 +146,8 @@ namespace EFSqlTranslator.Translation
 
                 if (dbObject is IDbSelect)
                 {
-                    toKey = (IDbColumn)includedSelect.Selection.Single(c => c.GetAliasOrName() == toKey.GetNameOrAlias());
+                    var key = toKey;
+                    toKey = (IDbColumn)includedSelect.Selection.Single(c => c.GetAliasOrName() == key.GetNameOrAlias());
                     includedSelect.Selection.Remove(toKey);
                     includedSelect.GroupBys.Remove(toKey);
                 }
@@ -160,7 +161,7 @@ namespace EFSqlTranslator.Translation
 
         private static void UpdateIncludeSelectAndProcessToNodes(
             IncludeNode graphNode, IDbSelect includedSelect, IModelInfoProvider infoProvider, 
-            IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator, IEnumerable<AbstractMethodTranslator> addons)
+            IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator, AbstractMethodTranslator[] addons)
         {
             // create temp table
             var entityRef = includedSelect.GetReturnEntityRef();

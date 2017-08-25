@@ -8,9 +8,12 @@ using System.Text.RegularExpressions;
 using AgileObjects.ReadableExpressions;
 using EFSqlTranslator.Tests;
 using EFSqlTranslator.Translation;
+using log4net;
+using log4net.Appender;
+using log4net.Core;
+using log4net.Layout;
+using log4net.Repository.Hierarchy;
 using Microsoft.EntityFrameworkCore.Query.Internal;
-using NLog;
-using NLog.Config;
 
 namespace EFSqlTranslator.ReadmeGen
 {
@@ -38,23 +41,26 @@ You can now try the translator out on http://linqrunner.daydreamer.io/.";
 
         public static void Main(string[] args)
         {
-            var config = new LoggingConfiguration();
+            var hierarchy = (Hierarchy)LogManager.GetRepository(typeof(QueryTranslator).Assembly);
+            
+            var patternLayout = new PatternLayout
+            {
+                ConversionPattern = "%date [%thread] %-5level %logger - %message%newline"
+            };
+            patternLayout.ActivateOptions();
 
-            // Step 2. Create targets and add them to the configuration
-            var consoleTarget = new MyFirstTarget();
-            config.AddTarget(nameof(QueryTranslator), consoleTarget);
+            var memoryAppender = new MemoryAppender
+            {
+                Layout = patternLayout
+            };
+            
+            memoryAppender.ActivateOptions();
+            hierarchy.Root.AddAppender(memoryAppender);
 
-            // Step 3. Set target properties
-            consoleTarget.Layout = @"${date:format=HH\:mm\:ss} ${logger} ${message}";
+            hierarchy.Root.Level = Level.Debug;
+            hierarchy.Configured = true;
 
-            // Step 4. Define rules
-            var rule1 = new LoggingRule("*", LogLevel.Debug, consoleTarget);
-            config.LoggingRules.Add(rule1);
-
-            // Step 5. Activate the configuration
-            LogManager.Configuration = config;
-
-            var categories = GetCategories(consoleTarget);
+            var categories = GetCategories(memoryAppender);
 
             const string path = @"../README.md";
             if (File.Exists(path))
@@ -74,7 +80,7 @@ You can now try the translator out on http://linqrunner.daydreamer.io/.";
             }
         }
 
-        private static IEnumerable<ReadMeCategory> GetCategories(MyFirstTarget consoleTarget)
+        private static IEnumerable<ReadMeCategory> GetCategories(MemoryAppender appender)
         {
             var assambly = Assembly.Load(new AssemblyName("EFSqlTranslator.Tests"));
             var classes = assambly.GetTypes();
@@ -98,7 +104,7 @@ You can now try the translator out on http://linqrunner.daydreamer.io/.";
                 var methods = type.GetMethods();
                 foreach (var methodInfo in methods)
                 {
-                    var translationEntry = GetTranslationEntry(consoleTarget, methodInfo, type);
+                    var translationEntry = GetTranslationEntry(appender, methodInfo, type);
                     if (translationEntry == null)
                         continue;
 
@@ -109,7 +115,7 @@ You can now try the translator out on http://linqrunner.daydreamer.io/.";
             return categories;
         }
 
-        private static ReadMeTranslationEntry GetTranslationEntry(MyFirstTarget consoleTarget, MethodBase methodInfo,
+        private static ReadMeTranslationEntry GetTranslationEntry(MemoryAppender appender, MethodBase methodInfo,
             Type type)
         {
             var tAttr = methodInfo.GetCustomAttribute<TranslationReadMeAttribute>();
@@ -119,9 +125,13 @@ You can now try the translator out on http://linqrunner.daydreamer.io/.";
             var test = Activator.CreateInstance(type);
             methodInfo.Invoke(test, new object[0]);
 
-            var record = consoleTarget.Records.OfType<Tuple<Expression, string>>().Single();
-            consoleTarget.Records.Clear();
-
+            var record = appender.GetEvents()
+                .Select(e => e.MessageObject)
+                .OfType<Tuple<Expression, string>>()
+                .Single();
+            
+            appender.Clear();
+            
             var expression = record.Item1;
             var sql = record.Item2;
 

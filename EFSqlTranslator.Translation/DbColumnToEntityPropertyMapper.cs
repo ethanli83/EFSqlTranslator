@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using EFSqlTranslator.Translation.DbObjects;
-using Microsoft.AspNetCore.Builder;
 
 namespace EFSqlTranslator.Translation
 {

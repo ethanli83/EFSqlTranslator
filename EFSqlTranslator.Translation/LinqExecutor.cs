@@ -58,7 +58,7 @@ namespace EFSqlTranslator.Translation
     {
         public static LinqExecutor<T> Make<T>(
             IQueryable<T> queryable, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, 
-            IEnumerable<AbstractMethodTranslator> addons = null)
+            AbstractMethodTranslator[] addons = null)
         {
             IncludeGraph includeGraph;
             var script = QueryTranslator.Translate(queryable.Expression, infoProvider, dbFactory, out includeGraph, addons);
