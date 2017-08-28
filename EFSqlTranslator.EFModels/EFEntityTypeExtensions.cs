@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using EFSqlTranslator.Translation;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -40,7 +41,7 @@ namespace EFSqlTranslator.EFModels
 
             var info = new EntityFieldInfo
             {
-                ClrProperty = p.PropertyInfo,
+                ClrProperty = p.PropertyInfo ?? (MemberInfo)p.FieldInfo,
                 PropertyName = p.Name,
                 DbName = annotation != null ? annotation.Value.ToString() : p.Name,
                 ValType = p.ClrType,

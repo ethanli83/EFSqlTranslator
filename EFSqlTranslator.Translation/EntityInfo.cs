@@ -65,7 +65,7 @@ namespace EFSqlTranslator.Translation
 
         public bool IsPrimaryKey { get; set; }
 
-        public PropertyInfo ClrProperty { get; set; }
+        public MemberInfo ClrProperty { get; set; }
 
         public bool RequirePropertyNameMapping()
         {

@@ -112,7 +112,7 @@ namespace EFSqlTranslator.Translation
              * blog.Posts.AddRange(posts);
              */
             var toEnumType = typeof(IEnumerable<>).MakeGenericType(toEntity.Type);
-            var fkExpr = Expression.Property(varFromEntity, fromKey.ClrProperty);
+            var fkExpr = Expression.MakeMemberAccess(varFromEntity, fromKey.ClrProperty);
 
             // var posts = dicts[blog.BlogId];
             var varTs = Expression.Variable(toEnumType, "rts");
@@ -162,7 +162,7 @@ namespace EFSqlTranslator.Translation
         {
             //  GroupBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
             var gParam = Expression.Parameter(toEntity.Type, "t");
-            var gBody = Expression.Property(gParam, toKey.ClrProperty);
+            var gBody = Expression.MakeMemberAccess(gParam, toKey.ClrProperty);
             var gLambda = Expression.Lambda(gBody, gParam);
             var gCall = Expression.Call(typeof(Enumerable), nameof(Enumerable.GroupBy), new[] {gParam.Type, gBody.Type}, toParam, gLambda);
 
