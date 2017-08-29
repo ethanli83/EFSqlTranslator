@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using EFSqlTranslator.Translation;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -41,13 +40,25 @@ namespace EFSqlTranslator.EFModels
 
             var info = new EntityFieldInfo
             {
-                ClrProperty = p.PropertyInfo ?? (MemberInfo)p.FieldInfo,
+                ClrProperty = p.PropertyInfo,
                 PropertyName = p.Name,
                 DbName = annotation != null ? annotation.Value.ToString() : p.Name,
                 ValType = p.ClrType,
                 IsPrimaryKey = isPk,
                 Entity = e
             };
+
+            if (info.ClrProperty == null)
+            {
+                var columnName = info.DbName != info.PropertyName
+                    ? $" (column {e.EntityName}.{info.DbName})"
+                    : string.Empty;
+                
+                var msg = $@"Property '{e.Type.Name}.{info.PropertyName}'{columnName} does not have meta data 'PropertyInfo'.
+Please check if it is setup correctly in the data context. EF may generate this column by convention if it is associated with relations.";
+
+                throw new Exception(msg);
+            }
 
             return info;
         }
