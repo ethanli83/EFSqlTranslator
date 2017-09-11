@@ -51,7 +51,7 @@ namespace EFSqlTranslator.Translation
                     {
                         var dict = info.PropertyType.GetProperties()
                             .Where(p => p.PropertyType.IsValueType())
-                            .ToDictionary(p => p.Name);
+                            .ToDictionary(p => p.Name, StringComparer.InvariantCultureIgnoreCase);
 
                         return vals.Skip(ci).Take(dict.Count)
                             .Select(v => dict[v.Key])
@@ -72,7 +72,7 @@ namespace EFSqlTranslator.Translation
                 else
                 {
                     var kvp = vals[cIndex++];
-                    if (kvp.Key != info.Name)
+                    if (!kvp.Key.Equals(info.Name, StringComparison.InvariantCultureIgnoreCase))
                         throw new Exception($"Result column name '{kvp.Key}' is not match property name '{info.Name}'.");
                     
                     var val = kvp.Value;

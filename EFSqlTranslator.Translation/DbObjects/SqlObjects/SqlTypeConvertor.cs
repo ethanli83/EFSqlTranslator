@@ -17,7 +17,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             if (type == typeof(bool))
                 return "bit";
 
-            if (type == typeof(int))
+            if (type == typeof(int) || type == typeof(short) || type == typeof(long))
                 return "int";
 
             if (type == typeof(string))
