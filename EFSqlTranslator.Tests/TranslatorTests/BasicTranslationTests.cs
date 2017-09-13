@@ -65,7 +65,33 @@ where (b0.BlogId in (1, 2, 4)) and (b0.BlogId in (2, 3, 5))";
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
-        
+
+
+        [Fact]
+        [TranslationReadMe(
+            Index = 1,
+            Title = "Filter result using list of values when the list is empty",
+            BeforeExpression = "var ids = new int[] { };")]
+        public void Test_Translate_Filter_On_Simple_Column_With_Values_EmptyList()
+        {
+            using (var db = new TestingContext())
+            {
+                var ids = new int[] { };
+                var query = db.Blogs
+                    .Where(b => b.BlogId.In(ids));
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select b0.*
+from Blogs b0
+where 0 = 1";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
         [Fact]
         public void Test_Escape_String()
         {
