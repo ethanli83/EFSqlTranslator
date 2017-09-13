@@ -34,17 +34,10 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 vals.Insert(0, dbConstants.Val);
             }
 
-
-            IDbBinary dbBinary;
             var dbExpression = (IDbSelectable)state.ResultStack.Pop();
-            if (vals.Count == 0)
-            {
-                dbBinary = _dbFactory.BuildBinary(_dbFactory.BuildConstant(0), DbOperator.Equal, _dbFactory.BuildConstant(1));
-            }
-            else
-            {
-                dbBinary = _dbFactory.BuildBinary(dbExpression, DbOperator.In, _dbFactory.BuildConstant(vals));
-            }
+            var dbBinary = vals.Count == 0
+                ? _dbFactory.BuildBinary(_dbFactory.BuildConstant(0), DbOperator.Equal, _dbFactory.BuildConstant(1))
+                : _dbFactory.BuildBinary(dbExpression, DbOperator.In, _dbFactory.BuildConstant(vals));
 
             state.ResultStack.Push(dbBinary);
         }
