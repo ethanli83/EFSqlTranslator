@@ -3,15 +3,15 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using EFSqlTranslator.EFModels;
-using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
+using EFSqlTranslator.Translation.DbObjects.MySqlObjects;
 using EFSqlTranslator.Translation.Extensions;
 using Newtonsoft.Json;
 
 namespace EFSqlTranslator.ConsoleApp
 {
-    public class Program
+    public static class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             Console.WriteLine("Hello World!");
 
@@ -30,19 +30,13 @@ namespace EFSqlTranslator.ConsoleApp
                 var sql = "";
                 try
                 {
-                    var query = db.Posts.Select(x => new
-                    {
-                        x.User.UserId,
-                        Title = "No",
-                        Post = x,
-                        x.Blog.BlogId,
-                        x.PostId
-                    });
+                    var query = db.Blogs
+                        .Where(b => b.BlogId > 0);
 
                     var result = db.Query(
                         query,
                         new EFModelInfoProvider(db),
-                        new SqliteObjectFactory(),
+                        new MySqlObjectFactory(),
                         out sql);
                     
                     var json = JsonConvert.SerializeObject(result, new JsonSerializerSettings
@@ -62,7 +56,7 @@ namespace EFSqlTranslator.ConsoleApp
             }
         }
 
-        public static void UpdateData(BloggingContext db)
+        private static void UpdateData(BloggingContext db)
         {
             db.Users.Add(new User
             {
@@ -210,12 +204,5 @@ namespace EFSqlTranslator.ConsoleApp
             byte[] outVal = { inVal[3], inVal[2], inVal[1], inVal[0], inVal[5], inVal[4], inVal[7], inVal[6], inVal[8], inVal[9], inVal[10], inVal[11], inVal[12], inVal[13], inVal[14], inVal[15] };
             parameter.Value = outVal;
         }
-    }
-
-    public class MyClass
-    {
-        public int Id { get; set; }
-
-        public decimal? Val { get; set; }
     }
 }

@@ -7,23 +7,32 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
     public class SqlConstant : SqlSelectable, IDbConstant
     {
-        public DbType ValType { get; set; }
+        public DbValType ValType { get; set; }
         public object Val { get; set; }
         public bool AsParam { get; set; }
+        public string ParamName { get; set; }
 
         public override string ToString()
         {
-            if (Val == null)
-                return "null";
-
-            if (Val is string)
-                return $"'{Val.ToString().Replace("'", "''")}'";
-
-            if (Val is bool)
-                return (bool)Val ? "1" : "0";
-
-            if (Val is DateTime)
-                return $"'{((DateTime)Val).ToString("s", CultureInfo.InvariantCulture)}'";
+            if (AsParam && !string.IsNullOrEmpty(ParamName))
+            {
+                return ParamName;
+            }
+            
+            switch (Val)
+            {
+                case null:
+                    return "null";
+                    
+                case string _:
+                    return $"'{Val.ToString().Replace("'", "''")}'";
+                    
+                case bool _:
+                    return (bool)Val ? "1" : "0";
+                    
+                case DateTime _:
+                    return $"'{((DateTime)Val).ToString("s", CultureInfo.InvariantCulture)}'";
+            }
 
             var type = Val.GetType();
             if (type.IsArray || type.IsEnumerable())

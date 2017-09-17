@@ -1,4 +1,5 @@
-﻿using EFSqlTranslator.Translation.DbObjects;
+﻿using System.Data;
+using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using Xunit;
 
@@ -12,10 +13,9 @@ namespace EFSqlTranslator.Tests.SqlObjectsTests
             var s1 = new SqlColumn
             {
                 Name = "a",
-                ValType = new DbType
+                ValType = new DbValType(typeof(int))
                 {
-                    DotNetType = typeof(int),
-                    TypeName = "int"
+                    DbType = DbType.Int32
                 },
                 Alias = "aaa"
             };
@@ -23,10 +23,9 @@ namespace EFSqlTranslator.Tests.SqlObjectsTests
             var s2 = new SqlColumn
             {
                 Name = "a",
-                ValType = new DbType
+                ValType = new DbValType(typeof(int))
                 {
-                    DotNetType = typeof(int),
-                    TypeName = "int"
+                    DbType = DbType.Int32
                 },
                 Alias = "aaa"
             };
@@ -34,10 +33,9 @@ namespace EFSqlTranslator.Tests.SqlObjectsTests
             var s3 = new SqlColumn
             {
                 Name = "a",
-                ValType = new DbType
+                ValType = new DbValType(typeof(int))
                 {
-                    DotNetType = typeof(int),
-                    TypeName = "int"
+                    DbType = DbType.Int32
                 },
                 Alias = "aaaa"
             };

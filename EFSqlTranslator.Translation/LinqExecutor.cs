@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Dapper;
 using EFSqlTranslator.Translation.DbObjects;
 using EFSqlTranslator.Translation.Extensions;
@@ -22,6 +23,14 @@ namespace EFSqlTranslator.Translation
         {
             foreach (var statement in Script.Scripts)
             {
+                var constants = statement.Parameterise();
+                
+                var dParams = new DynamicParameters();
+                foreach (var dbConstant in constants)
+                {
+                    dParams.Add(dbConstant.ParamName, dbConstant.Val, dbConstant.ValType.DbType);
+                }
+                
                 var sql = statement.ToString();
 
                 if (statement is IDbSelect)
@@ -31,12 +40,12 @@ namespace EFSqlTranslator.Translation
 
                     if (entityType.IsAnonymouse())
                     {
-                        var result = connection.Query(sql);
+                        var result = connection.Query(sql, dParams);
                         node.Result = new DynamicDataConvertor(entityType).Convert(result);
                     }
                     else
                     {
-                        node.Result = connection.Query(entityType, sql);
+                        node.Result = connection.Query(entityType, sql, dParams);
                     }
 
                     if (node.FromNode != null)
@@ -44,7 +53,7 @@ namespace EFSqlTranslator.Translation
                 }
                 else
                 {
-                    connection.Execute(sql);
+                    connection.Execute(sql, dParams);
                 }
             }
 
@@ -54,14 +63,13 @@ namespace EFSqlTranslator.Translation
         public IDbScript Script { get; }
     }
 
-    public class LinqExecutorMaker
+    public static class LinqExecutorMaker
     {
         public static LinqExecutor<T> Make<T>(
             IQueryable<T> queryable, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory, 
             AbstractMethodTranslator[] addons = null)
         {
-            IncludeGraph includeGraph;
-            var script = QueryTranslator.Translate(queryable.Expression, infoProvider, dbFactory, out includeGraph, addons);
+            var script = QueryTranslator.Translate(queryable.Expression, infoProvider, dbFactory, out var includeGraph, addons);
             return new LinqExecutor<T>(includeGraph, script);
         }
     }

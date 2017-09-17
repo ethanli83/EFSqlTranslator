@@ -52,7 +52,7 @@ namespace EFSqlTranslator.Translation.Extensions
         /// the selectable to RefTo ref columns
         /// </summary>
         public static void AddToReferedSelect(
-            this IDbRefColumn refCol, IDbObjectFactory factory, string colName, DbType colType, string alias = null)
+            this IDbRefColumn refCol, IDbObjectFactory factory, string colName, DbValType colType, string alias = null)
         {
             if (refCol.RefTo != null)
             {

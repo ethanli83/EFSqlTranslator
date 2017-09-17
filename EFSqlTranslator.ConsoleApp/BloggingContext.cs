@@ -86,6 +86,12 @@ namespace EFSqlTranslator.ConsoleApp
         
         public int LikeCount { get; set; }
         
+        public short LikeCountShort { get; set; }
+        
+        public long LikeCountLong { get; set; }
+        
+        public decimal LikeCountDecimal { get; set; }
+        
         public User User { get; set; }
 
         public Blog Blog { get; set; }

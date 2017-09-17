@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using EFSqlTranslator.Translation.DbObjects;
 
@@ -9,42 +10,97 @@ namespace EFSqlTranslator.Translation.Extensions
         public static T[] GetDbObjects<T>(this IDbObject dbObject)
         {
             var result = new List<T>();
-            if (dbObject is T)
-                result.Add((T)dbObject);
+            if (dbObject is T variable)
+                result.Add(variable);
 
-            var dbFunc = dbObject as IDbFunc;
-            if (dbFunc != null)
+            switch (dbObject)
             {
-                result.AddRange(dbFunc.Parameters.SelectMany(p => GetDbObjects<T>(p)));
+                case IDbScript dbScript:
+                    result.AddRange(dbScript.PreScripts.SelectMany(GetDbObjects<T>));
+                    result.AddRange(dbScript.Scripts.SelectMany(GetDbObjects<T>));
+                    result.AddRange(dbScript.PostScripts.SelectMany(GetDbObjects<T>));
+                    break;
+                
+                case IDbSelect dbSelect:
+                    result.AddRange(dbSelect.Selection.SelectMany(GetDbObjects<T>));
+                    result.AddRange(dbSelect.From.GetDbObjects<T>());
+                    result.AddRange(dbSelect.Joins.SelectMany(GetDbObjects<T>));
+                    result.AddRange(dbSelect.Where.GetDbObjects<T>());
+                    result.AddRange(dbSelect.GroupBys.SelectMany(GetDbObjects<T>));
+                    result.AddRange(dbSelect.OrderBys.SelectMany(GetDbObjects<T>));
+                    break;
+                    
+                case IDbColumn dbColumn:
+                    result.AddRange(dbColumn.Ref.GetDbObjects<T>());
+                    break;
+                    
+                case IDbJoin dbJoin:
+                    result.AddRange(dbJoin.Condition.GetDbObjects<T>());
+                    result.AddRange(dbJoin.To.GetDbObjects<T>());
+                    break;
+                    
+                case IDbFunc dbFunc:
+                    result.AddRange(dbFunc.Parameters.SelectMany(GetDbObjects<T>));
+                    break;
+                    
+                case IDbBinary dbBinary:
+                    result.AddRange(dbBinary.Left.GetDbObjects<T>());
+                    result.AddRange(dbBinary.Right.GetDbObjects<T>());
+                    break;
+                    
+                case IDbCondition dbCondition:
+                    var conditions = dbCondition.Conditions.
+                        SelectMany(c => c.Item1.GetDbObjects<T>().Concat(c.Item2.GetDbObjects<T>()));
+
+                    result.AddRange(conditions);
+                    result.AddRange(dbCondition.Else.GetDbObjects<T>());
+                    break;
+                    
+                case IDbSelectable dbSelectable:
+                    result.AddRange(dbSelectable.Ref.GetDbObjects<T>());
+                    break;
             }
 
-            var dbBinary = dbObject as IDbBinary;
-            if (dbBinary != null)
-            {
-                result.AddRange(dbBinary.Left.GetDbObjects<T>());
-                result.AddRange(dbBinary.Right.GetDbObjects<T>());
-            }
-
-            var dbCondition = dbObject as IDbCondition;
-            if (dbCondition != null)
-            {
-                var conditions = dbCondition.Conditions.
-                    SelectMany(c => c.Item1.GetDbObjects<T>().Concat(c.Item2.GetDbObjects<T>()));
-
-                result.AddRange(conditions);
-                result.AddRange(dbCondition.Else.GetDbObjects<T>());
-            }
-            
             return result.ToArray();
         }
-    }
-
-    public static class DbSelectExtensions
-    {
-        public static DbReference GetReturnEntityRef(this IDbSelect dbSelect)
+        
+        /// <summary>
+        /// Parameterise all the constants so that the query can be cached by ORM
+        /// </summary>
+        /// <param name="dbObj"></param>
+        /// <param name="ignoreEnumerable">Set to true if does not want to parameterise array.
+        /// This is required if ORM does not support passing array as parameter.</param>
+        /// <returns></returns>
+        public static IDbConstant[] Parameterise(this IDbObject dbObj, bool ignoreEnumerable = false)
         {
-            var entityRefCol = dbSelect.Selection.SingleOrDefault(c => c is IDbRefColumn);
-            return entityRefCol != null ? entityRefCol.Ref : dbSelect.From;
+            var constants = dbObj.GetDbObjects<IDbConstant>().Where(c => c.AsParam).ToArray();
+            if (ignoreEnumerable)
+            {
+                constants = constants.Where(c => !c.ValType.DotNetType.IsEnumerable()).ToArray();
+            }
+            
+            var dict = new Dictionary<object, List<IDbConstant>>();
+            foreach (var c in constants)
+            {
+                if (dict.ContainsKey(c.Val))
+                {
+                    dict[c.Val].Add(c);
+                    continue;
+                }
+                
+                dict[c.Val] = new List<IDbConstant>() { c };
+            }
+            
+            var parameters = dict.Values.ToArray();
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                foreach (var c in parameters[i])
+                {
+                    c.ParamName = $"@param{i}";
+                }
+            }
+
+            return parameters.Select(p => p.First()).ToArray();
         }
     }
 }

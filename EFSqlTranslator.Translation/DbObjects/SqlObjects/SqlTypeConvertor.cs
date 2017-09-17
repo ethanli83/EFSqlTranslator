@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 
@@ -6,7 +7,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
     public class SqlTypeConvertor
     {
-        public string Convert(Type type)
+        public DbType Convert(Type type)
         {
             if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
@@ -15,32 +16,35 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             }
 
             if (type == typeof(bool))
-                return "bit";
+                return DbType.Boolean;
 
-            if (type == typeof(int) || type == typeof(short) || type == typeof(long))
-                return "int";
+            if (type == typeof(short))
+                return DbType.Int16;
+            
+            if (type == typeof(int))
+                return DbType.Int32;
+            
+            if (type == typeof(long))
+                return DbType.Int64;
 
             if (type == typeof(string))
-                return "nvarchar";
+                return DbType.String;
 
-            if (type == typeof(double) || type == typeof(decimal) || type == typeof(float))
-                return "decimal";
+            if (type == typeof(double))
+                return DbType.Double;
+            
+            if (type == typeof(decimal) || type == typeof(float))
+                return DbType.Decimal;
 
             if (type == typeof(Guid))
-                return "uniqueidentifier";
+                return DbType.Guid;
 
             if (type == typeof(DateTime))
-                return "datetime";
+                return DbType.DateTime;
 
-            if (type == typeof(DbJoinType))
-                return "<<DbJoinType>>";
+            if (type == typeof(DbJoinType) || type.IsEnumerable() || type.IsArray)
+                return DbType.Object;
             
-            if (type.IsArray)
-                return "<<Array>>";
-            
-            if (type.IsEnumerable())
-                return "<<Enumerable>>";
-
             throw new NotImplementedException($"{type.Name} not supported.");
         }
     }

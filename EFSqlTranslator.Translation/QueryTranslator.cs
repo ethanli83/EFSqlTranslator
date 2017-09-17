@@ -16,8 +16,7 @@ namespace EFSqlTranslator.Translation
             Expression exp, IModelInfoProvider infoProvider, IDbObjectFactory dbFactory,
             AbstractMethodTranslator[] addons = null)
         {
-            IncludeGraph graph;
-            return Translate(exp, infoProvider, dbFactory, out graph, addons);
+            return Translate(exp, infoProvider, dbFactory, out _, addons);
         }
 
         public static IDbScript Translate(
@@ -57,7 +56,7 @@ namespace EFSqlTranslator.Translation
             if (fromSelect != null)
                 state.ResultStack.Push(graphNode.FromNode.Select);
 
-            var translator = new ExpressionlTranslator(infoProvider, dbFactory, state, addons);
+            var translator = new ExpressionTranslator(infoProvider, dbFactory, state, addons);
 
             // translated current included node
             translator.Visit(graphNode.Expression);

@@ -6,7 +6,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
     public class SqlColumn : SqlSelectable, IDbColumn
     {
-        public DbType ValType { get; set; }
+        public DbValType ValType { get; set; }
         
         public string Name { get; set; }
 

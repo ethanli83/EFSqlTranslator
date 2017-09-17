@@ -36,10 +36,18 @@ namespace EFSqlTranslator.Translation.Extensions
             {
                 connection.Open();
             }
+            
             var script = QueryTranslator.Translate(query.Expression, infoProvider, factory, addons);
+            
+            var constants = script.Parameterise();
+            var dParams = new DynamicParameters();
+            foreach (var dbConstant in constants)
+            {
+                dParams.Add(dbConstant.ParamName, dbConstant.Val, dbConstant.ValType.DbType);
+            }
+            
             var sql = script.ToString();
-
-            var results = connection.Query(sql);
+            var results = connection.Query(sql, dParams);
             return results;
         }
 
@@ -65,16 +73,23 @@ namespace EFSqlTranslator.Translation.Extensions
             IQueryable query, IModelInfoProvider infoProvider, IDbObjectFactory factory, out string sql,
             AbstractMethodTranslator[] addons = null)
         {
-            var script = QueryTranslator.Translate(query.Expression, infoProvider, factory, addons);
-            sql = script.ToString();
-
             var connection = db.Database.GetDbConnection();
             if (connection.State != ConnectionState.Open)
             {
                 connection.Open();
             }
             
-            var results = connection.Query(sql);
+            var script = QueryTranslator.Translate(query.Expression, infoProvider, factory, addons);
+            
+            var constants = script.Parameterise();
+            var dParams = new DynamicParameters();
+            foreach (var dbConstant in constants)
+            {
+                dParams.Add(dbConstant.ParamName, dbConstant.Val, dbConstant.ValType.DbType);
+            }
+            
+            sql = script.ToString();
+            var results = connection.Query(sql, dParams);
             return results;
         }
     }

@@ -43,7 +43,7 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         }
 
         public virtual IDbColumn BuildColumn(
-            DbReference dbRef, string colName, DbType type, string alias = null, bool isJoinKey = false)
+            DbReference dbRef, string colName, DbValType type, string alias = null, bool isJoinKey = false)
         {
             return new SqlColumn
             {
@@ -99,17 +99,16 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
         }
 
-        public DbType BuildType(Type type, params object[] parameters)
+        public DbValType BuildType(Type type, params object[] parameters)
         {
-            return new DbType
+            return new DbValType (type)
             {
-                DotNetType = type,
-                TypeName = _typeConvertor.Convert(type),
+                DbType = _typeConvertor.Convert(type),
                 Parameters = parameters
             };
         }
 
-        public DbType BuildType<T>(params object[] parameters)
+        public DbValType BuildType<T>(params object[] parameters)
         {
             return BuildType(typeof(T), parameters);
         }
@@ -119,12 +118,10 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             var ls = (left as IDbSelectable)?.IsAggregation;
             var rs = (right as IDbSelectable)?.IsAggregation;
 
-            var lb = (left as IDbBinary);
-            if (lb != null)
+            if (left is IDbBinary lb)
                 lb.UseParentheses = true;
-
-            var rb = (right as IDbBinary);
-            if (rb != null)
+            
+            if (right is IDbBinary rb)
                 rb.UseParentheses = true;
 
             return new SqlBinary
@@ -137,10 +134,11 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
         }
 
-        public virtual IDbConstant BuildConstant(object val)
+        public virtual IDbConstant BuildConstant(object val, bool asParams = false)
         {
             return new SqlConstant
             {
+                AsParam = asParams,
                 ValType = val == null ? null : BuildType(val.GetType()),
                 Val = val
             };

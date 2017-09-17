@@ -25,8 +25,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             while (state.ResultStack.Peek() is IDbConstant)
             {
                 var dbConstants = (IDbConstant)state.ResultStack.Pop();
-                var val = dbConstants.Val as IEnumerable;
-                if (val != null)
+                if (dbConstants.Val is IEnumerable val)
                 {
                     vals = val.Cast<object>().ToList();
                     break;
@@ -37,7 +36,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var dbExpression = (IDbSelectable)state.ResultStack.Pop();
             var dbBinary = vals.Count == 0
                 ? _dbFactory.BuildBinary(_dbFactory.BuildConstant(0), DbOperator.Equal, _dbFactory.BuildConstant(1))
-                : _dbFactory.BuildBinary(dbExpression, DbOperator.In, _dbFactory.BuildConstant(vals));
+                : _dbFactory.BuildBinary(dbExpression, DbOperator.In, _dbFactory.BuildConstant(vals, true));
 
             state.ResultStack.Push(dbBinary);
         }

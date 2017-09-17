@@ -4,21 +4,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using EFSqlTranslator.Translation.DbObjects;
-using Remotion.Linq.Clauses.Expressions;
 
 namespace EFSqlTranslator.Translation
 {
     internal static class SqlTranslationHelper
     {
-        public static string GetSqlOperator(ExpressionType type)
-        {
-            return GetSqlOperator(GetDbOperator(type));
-        }
-
         public static bool IsNullVal(this IDbObject obj)
         {
-            var dbConst = obj as IDbConstant;
-            if (dbConst == null)
+            if (!(obj is IDbConstant dbConst))
                 return false;
 
             return dbConst.Val == null;
@@ -30,14 +23,6 @@ namespace EFSqlTranslator.Translation
                 throw new ArgumentNullException(nameof(type));
 
             return type.Name.StartsWith("<>") || type.Name.StartsWith("VB$");
-        }
-
-        public static bool IsNullable(this Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-
-            return Nullable.GetUnderlyingType(type) != null;
         }
 
         public static Type StripNullable(this Type type)
@@ -108,52 +93,45 @@ namespace EFSqlTranslator.Translation
 
         public static IDbBinary ToBinary(this IDbObject dbElement, IDbObjectFactory dbFactory)
         {
-            if (dbElement == null)
-                return null;
+            switch (dbElement)
+            {
+                case null:
+                    return null;
+                case IDbBinary dbBinary:
+                    return dbBinary;
+            }
 
-            var dbBinary = dbElement as IDbBinary;
-
-            if (dbBinary != null)
-                return dbBinary;
-            
             var one = dbFactory.BuildConstant(true);
             return dbFactory.BuildBinary(dbElement, DbOperator.Equal, one);
         }
 
         public static IDbSelectable[] ProcessSelection(IDbObject dbObj, IDbObjectFactory factory)
         {
-            var dbList = dbObj as IDbList<DbKeyValue>;
-            if (dbList != null)
+            switch (dbObj)
             {
-                var keyVals = dbList;
-                return keyVals.SelectMany(kv => ProcessSelection(kv, factory)).ToArray();
+                case IDbList<DbKeyValue> dbList:
+                    var keyVals = dbList;
+                    return keyVals.SelectMany(kv => ProcessSelection(kv, factory)).ToArray();
+                    
+                case DbReference obj:
+                    var dbRef = obj;
+                    return new IDbSelectable[] { factory.BuildRefColumn(dbRef, dbRef.RefColumnAlias) };
+                    
+                case IDbBinary dbBinary when (
+                    dbBinary.Operator == DbOperator.Equal ||
+                    dbBinary.Operator == DbOperator.NotEqual ||
+                    dbBinary.Operator == DbOperator.GreaterThan ||
+                    dbBinary.Operator == DbOperator.GreaterThanOrEqual ||
+                    dbBinary.Operator == DbOperator.LessThan ||
+                    dbBinary.Operator == DbOperator.LessThanOrEqual ||
+                    dbBinary.Operator == DbOperator.Is ||
+                    dbBinary.Operator == DbOperator.IsNot):
+                    var dbTrue = factory.BuildConstant(true);
+                    var tuple = Tuple.Create<IDbBinary, IDbObject>(dbBinary, dbTrue);
+                    return new IDbSelectable[] { factory.BuildCondition(new [] { tuple }, factory.BuildConstant(false)) };
             }
 
-            var obj = dbObj as DbReference;
-            if (obj != null)
-            {
-                var dbRef = obj;
-                return new IDbSelectable[] { factory.BuildRefColumn(dbRef, dbRef.RefColumnAlias) };
-            }
-
-            var dbBinary = dbObj as IDbBinary;
-            if (dbBinary != null && (
-                dbBinary.Operator == DbOperator.Equal ||
-                dbBinary.Operator == DbOperator.NotEqual ||
-                dbBinary.Operator == DbOperator.GreaterThan ||
-                dbBinary.Operator == DbOperator.GreaterThanOrEqual ||
-                dbBinary.Operator == DbOperator.LessThan ||
-                dbBinary.Operator == DbOperator.LessThanOrEqual ||
-                dbBinary.Operator == DbOperator.Is ||
-                dbBinary.Operator == DbOperator.IsNot))
-            {
-                var dbTrue = factory.BuildConstant(true);
-                var tuple = Tuple.Create<IDbBinary, IDbObject>(dbBinary, dbTrue);
-                return new IDbSelectable[] { factory.BuildCondition(new [] { tuple }, factory.BuildConstant(false)) };
-            }
-
-            var keyValue = dbObj as DbKeyValue;
-            if (keyValue == null)
+            if (!(dbObj is DbKeyValue keyValue))
                 return new[] {(IDbSelectable) dbObj};
 
             var selectables = ProcessSelection(keyValue.Value, factory);

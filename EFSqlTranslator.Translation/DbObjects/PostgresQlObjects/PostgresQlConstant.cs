@@ -1,11 +1,18 @@
-namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
+using EFSqlTranslator.Translation.DbObjects.SqlObjects;
+
+namespace EFSqlTranslator.Translation.DbObjects.PostgresQlObjects
 {
     public class PostgresQlConstant : SqlConstant
     {
         public override string ToString()
         {
-            if (Val is bool)
-                return (bool)Val ? "TRUE" : "FALSE";
+            if (AsParam && !string.IsNullOrEmpty(ParamName))
+            {
+                return ParamName;
+            }
+            
+            if (Val is bool b)
+                return b ? "TRUE" : "FALSE";
             
             return base.ToString();
         }

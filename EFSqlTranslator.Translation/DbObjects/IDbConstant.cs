@@ -2,8 +2,9 @@ namespace EFSqlTranslator.Translation.DbObjects
 {
     public interface IDbConstant : IDbSelectable
     {
-        DbType ValType { get; set; }
+        DbValType ValType { get; }
         object Val { get; set; }
-        bool AsParam { get; set; }
+        bool AsParam { get; }
+        string ParamName { get; set; }
     }
 }

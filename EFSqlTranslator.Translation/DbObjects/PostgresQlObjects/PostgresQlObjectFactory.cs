@@ -39,10 +39,11 @@ namespace EFSqlTranslator.Translation.DbObjects.PostgresQlObjects
             };
         }
 
-        public override IDbConstant BuildConstant(object val)
+        public override IDbConstant BuildConstant(object val, bool asParams = false)
         {
             return new PostgresQlConstant
             {
+                AsParam = asParams,
                 ValType = val == null ? null : BuildType(val.GetType()),
                 Val = val
             };

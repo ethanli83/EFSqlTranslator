@@ -9,7 +9,7 @@ using EFSqlTranslator.Translation.MethodTranslators;
 
 namespace EFSqlTranslator.Translation
 {
-    public class ExpressionlTranslator : ExpressionVisitor
+    public class ExpressionTranslator : ExpressionVisitor
     {
         private readonly IModelInfoProvider _infoProvider;
 
@@ -21,7 +21,7 @@ namespace EFSqlTranslator.Translation
 
         private readonly TranslationPlugIns _plugIns = new TranslationPlugIns();
 
-        public ExpressionlTranslator(
+        public ExpressionTranslator(
             IModelInfoProvider infoProvider, IDbObjectFactory dbFactory,
             TranslationState state = null, IEnumerable<AbstractMethodTranslator> methodTranslators = null)
         {
@@ -52,11 +52,6 @@ namespace EFSqlTranslator.Translation
             new InTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
-        internal IDbSelect GetSelect()
-        {
-            return _state.GetLastSelect();
-        }
-
         internal IDbObject GetElement()
         {
             return _state.ResultStack.Peek();
@@ -82,7 +77,7 @@ namespace EFSqlTranslator.Translation
             }
             else if (!c.Type.IsAnonymouse())
             {
-                var dbConstant = _dbFactory.BuildConstant(c.Value);
+                var dbConstant = _dbFactory.BuildConstant(c.Value, true);
                 _state.ResultStack.Push(dbConstant);
             }
 
@@ -189,26 +184,28 @@ namespace EFSqlTranslator.Translation
         protected override Expression VisitMember(MemberExpression m)
         {
             var expression = Visit(m.Expression);
-            if (expression is ConstantExpression)
+            if (expression is ConstantExpression constExpr)
             {
-                var container = ((ConstantExpression)expression).Value;
+                var container = constExpr.Value;
                 var member = m.Member;
+                
                 object value = null;
                 var valueRetrieved = false;
-                if (member is FieldInfo)
+                switch (member)
                 {
-                    value = ((FieldInfo)member).GetValue(container);
-                    valueRetrieved = true;
-                }
-                if (member is PropertyInfo)
-                {
-                    value = ((PropertyInfo)member).GetValue(container, null);
-                    valueRetrieved = true;
+                    case FieldInfo field:
+                        value = field.GetValue(container);
+                        valueRetrieved = true;
+                        break;
+                    case PropertyInfo prop:
+                        value = prop.GetValue(container, null);
+                        valueRetrieved = true;
+                        break;
                 }
 
                 if (valueRetrieved)
                 {
-                    var dbObject = _dbFactory.BuildConstant(value);
+                    var dbObject = _dbFactory.BuildConstant(value, true);
                     _state.ResultStack.Push(dbObject);
                     return m;
                 }
@@ -271,8 +268,7 @@ namespace EFSqlTranslator.Translation
                 {
                     refCol = _dbFactory.BuildRefColumn(dbJoin.To, m.Member.Name);
 
-                    var subSelect = dbJoin.To.Referee as IDbSelect;
-                    if (subSelect != null)
+                    if (dbJoin.To.Referee is IDbSelect subSelect)
                         refCol.RefTo = subSelect.Selection.OfType<IDbRefColumn>().Single();
 
                     _state.ResultStack.Push(refCol);
@@ -389,8 +385,7 @@ namespace EFSqlTranslator.Translation
                 // it means the from key of the join is not on a table but a derived select.
                 // In this case, we need to add the from key into the derived select, as we will
                 // be using it in the join
-                var fromSelect = fromRef.Referee as IDbSelect;
-                if (fromSelect != null)
+                if (fromRef.Referee is IDbSelect)
                 {
                     var alias = _nameGenerator.GenerateAlias(dbSelect, toKey.DbName + TranslationConstants.JoinKeySuffix, true);
                     fromColumn.Name = alias;
