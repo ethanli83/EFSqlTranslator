@@ -34,7 +34,7 @@ where (b0.BlogId in (1, 2, 4)) and (b0.BlogId in (2, 3, 5))
 ```
 ## II. Translating Relationsheips
 In this section, we will show you how relationships are translated. The basic rules are:
-  1. All relations is translated into a inner join be default.
+  1. All relations is translated into a inner join by default.
   2. If a relation is used in a Or binary expression, Select, or Group By then join type will be changed to Left Outer Join.
   3. Parent relation will be a join to the parent entity.
   4. Child relation will be converted into a sub-select, which then got joined to.
