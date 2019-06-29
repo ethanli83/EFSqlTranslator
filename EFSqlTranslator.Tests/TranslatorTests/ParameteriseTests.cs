@@ -19,7 +19,7 @@ namespace EFSqlTranslator.Tests.TranslatorTests
                 var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
 
                 var constants = script.Parameterise();
-                Assert.Equal(1, constants.Length);
+                Assert.Single(constants);
                 Assert.Equal("@param0", constants[0].ParamName);
                 
                 var sql = script.ToString();
@@ -43,7 +43,7 @@ where b0.Url = @param0";
                 var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
 
                 var constants = script.Parameterise();
-                Assert.Equal(1, constants.Length);
+                Assert.Single(constants);
                 Assert.Equal("@param0", constants[0].ParamName);
                 
                 var sql = script.ToString();
@@ -68,7 +68,7 @@ where (b0.Url = @param0) or (u0.UserName = @param0)";
                 var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
 
                 var constants = script.Parameterise();
-                Assert.Equal(1, constants.Length);
+                Assert.Single(constants);
                 Assert.Equal("@param0", constants[0].ParamName);
                 Assert.Equal(new [] {1, 2, 3}, constants[0].Val);
                 
@@ -93,7 +93,7 @@ where b0.BlogId in @param0";
                 var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
 
                 var constants = script.Parameterise(true);
-                Assert.Equal(0, constants.Length);
+                Assert.Empty(constants);
                 
                 var sql = script.ToString();
 
