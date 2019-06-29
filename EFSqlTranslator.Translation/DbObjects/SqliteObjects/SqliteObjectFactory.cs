@@ -34,5 +34,10 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
                 IsAggregation = isAggregation
             };
         }
+        
+        public override DbLimit BuildLimit(int fetch, int offset = 0)
+        {
+            return new SqliteLimit(offset, fetch);
+        }
     }
 }

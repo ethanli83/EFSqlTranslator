@@ -23,5 +23,10 @@ namespace EFSqlTranslator.Translation.DbObjects.MySqlObjects
 
             return sqlTable;
         }
+
+        public override DbLimit BuildLimit(int fetch, int offset = 0)
+        {
+            return new MySqlLimit(offset, fetch);
+        }
     }
 }

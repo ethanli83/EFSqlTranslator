@@ -1,9 +1,15 @@
 namespace EFSqlTranslator.Translation.DbObjects
 {
-    public class DbLimit
+    public class DbLimit : DbObject
     {
-        public int PageNumber { get; set; }
+        public DbLimit(int offset, int fetch)
+        {
+            Offset = offset;
+            Fetch = fetch;
+        }
+
+        public int Offset { get; set; }
         
-        public int PageSize { get; set; }
+        public int Fetch { get; set; }
     }
 }

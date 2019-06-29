@@ -455,7 +455,6 @@ group by s0.BlogId";
                 const string expected = @"select c0.IsDeletedNullable from Comments c0 where c0.IsDeletedNullable = 0";
 
                 TestUtils.AssertStringEqual(expected, sql);
-
             }
         }
 

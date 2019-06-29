@@ -1,15 +1,20 @@
-﻿namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
+﻿using System.Text;
+
+namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
-    public class SqlLimit : DbObject, IDbLimit
+    public class SqlLimit : DbLimit
     {
-        public SqlLimit(int pageNumber, int pageSize)
+        public SqlLimit(int offset, int fetch) : base(offset, fetch)
         {
-            PageNumber = pageNumber;
-            PageSize = pageSize;
         }
 
-        public int PageNumber { get; set; }
-        
-        public int PageSize { get; set; }
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"offest {Offset} rows");
+            sb.Append($"fetch next {Fetch} rows only");
+
+            return sb.ToString();
+        }
     }
 }

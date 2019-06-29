@@ -17,6 +17,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         public DbReference From { get; set; }
         
         public IDbBinary Where { get; set; }
+        
+        public DbLimit Limit { get; set; }
 
         public IList<IDbJoin> Joins { get; } = new List<IDbJoin>();
 
@@ -40,8 +42,14 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             var sb = new StringBuilder();
 
+            var offset = Limit?.Offset ?? 0;
+            var fetch = Limit?.Fetch ?? 0;
+
             if (includeSelection)
-                sb.Append($"select {Selection}");
+            {
+                var topStr = offset == 0 && fetch > 0 ? $"top({fetch}) " : "";
+                sb.Append($"select {topStr}{Selection}");
+            }
 
             if (From != null)
             {
@@ -71,6 +79,12 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             {
                 sb.AppendLine();
                 sb.Append($"order by {string.Join(", ", OrderBys)}");
+            }
+
+            if (Limit != null && Limit.Offset > 0)
+            {
+                sb.AppendLine();
+                sb.Append($"{Limit}");
             }
 
             sb.AppendLine();

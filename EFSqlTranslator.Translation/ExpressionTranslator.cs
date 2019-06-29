@@ -50,6 +50,7 @@ namespace EFSqlTranslator.Translation
             new AggregationTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new StringStartsEndsContainsTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new InTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new LimitTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         internal IDbObject GetElement()

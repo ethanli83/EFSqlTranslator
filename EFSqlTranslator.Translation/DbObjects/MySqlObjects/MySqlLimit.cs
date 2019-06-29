@@ -1,21 +1,17 @@
-﻿namespace EFSqlTranslator.Translation.DbObjects.MySqlObjects
+﻿using System.Text;
+
+namespace EFSqlTranslator.Translation.DbObjects.MySqlObjects
 {
-    public class MySqlLimit : DbObject, IDbLimit
+    public class MySqlLimit : DbLimit
     {
-        public MySqlLimit(int offset, int fetch)
+        public MySqlLimit(int offset, int fetch) : base(offset, fetch)
         {
-            Offset = offset;
-            Fetch = fetch;
         }
-    
-        public int Offset { get; set; }
-            
-        public int Fetch { get; set; }
             
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append($"limit {Fetch} offset {Offset}");
+            sb.Append($"limit {Offset}, {Fetch}");
     
             return sb.ToString();
         }

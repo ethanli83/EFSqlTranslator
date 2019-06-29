@@ -1,17 +1,13 @@
-﻿namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
+﻿using System.Text;
+
+namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
 {
-    public class SqliteLimit : DbObject, IDbLimit
+    public class SqliteLimit : DbLimit
     {
-        public SqliteLimit(int offset, int fetch)
+        public SqliteLimit(int offset, int fetch) : base(offset, fetch)
         {
-            Offset = offset;
-            Fetch = fetch;
         }
-    
-        public int Offset { get; set; }
-            
-        public int Fetch { get; set; }
-            
+       
         public override string ToString()
         {
             var sb = new StringBuilder();

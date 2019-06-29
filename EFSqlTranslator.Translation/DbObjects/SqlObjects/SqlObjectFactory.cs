@@ -177,6 +177,11 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             return new SqlStatement(script);
         }
 
+        public virtual DbLimit BuildLimit(int fetch, int offset = 0)
+        {
+            return new SqlLimit(offset, fetch);
+        }
+
         public virtual DbOperator GetDbOperator(ExpressionType eType, Type tl, Type tr)
         {
             return SqlTranslationHelper.GetDbOperator(eType);

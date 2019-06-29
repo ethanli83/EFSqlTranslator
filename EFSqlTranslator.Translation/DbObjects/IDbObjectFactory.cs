@@ -29,6 +29,7 @@ namespace EFSqlTranslator.Translation.DbObjects
         IDbCondition BuildCondition(Tuple<IDbBinary, IDbObject>[] conditions, IDbObject dbElse = null);
         IDbTempTable BuildTempTable(string tableName, IDbSelect sourceSelect = null);
         IDbStatment BuildStatement(IDbObject script);
+        DbLimit BuildLimit(int fetch, int offset = 0);
         DbOperator GetDbOperator(ExpressionType eType, Type tl, Type tr);
         IDbScript BuildScript();
     }

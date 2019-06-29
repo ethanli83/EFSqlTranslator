@@ -2,7 +2,6 @@
 using System;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
-using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 
 namespace EFSqlTranslator.Translation.DbObjects.PostgresQlObjects
 {
@@ -47,6 +46,11 @@ namespace EFSqlTranslator.Translation.DbObjects.PostgresQlObjects
                 ValType = val == null ? null : BuildType(val.GetType()),
                 Val = val
             };
+        }
+
+        public override DbLimit BuildLimit(int fetch, int offset = 0)
+        {
+            return new PostgresQlLimit(offset, fetch);
         }
 
         public override DbOperator GetDbOperator(ExpressionType eType, Type tl, Type tr)
