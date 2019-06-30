@@ -12,3 +12,7 @@ git push --tags
 dotnet ef migrations add testPG
 dotnet ef database update
 dotnet test EFSqlTranslator.Tests/EFSqlTranslator.Tests.csproj
+
+commands to run ConsoleApp:
+open postgresql
+docker run -p 5432:5432 --name pqsql -e POSTGRES_PASSWORD=mysecretpassword -d postgres
