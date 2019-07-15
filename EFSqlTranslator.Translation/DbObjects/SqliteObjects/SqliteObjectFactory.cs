@@ -31,7 +31,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
         {
             return new SqliteFunc(name, parameters)
             {
-                IsAggregation = isAggregation
+                IsAggregation = isAggregation,
+                OutputOption = OutputOption
             };
         }
         
