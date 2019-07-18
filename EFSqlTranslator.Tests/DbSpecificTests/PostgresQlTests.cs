@@ -124,5 +124,35 @@ drop table if exists ""Temp_Table_Blogs0""";
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
+
+        [Fact]
+        public void TestNestedQuery()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs
+                    .Where(b => b.Url != null && b.Name.StartsWith("Ethan"))
+                    .GroupBy(b => b.User.UserName)
+                    .Select(g => new
+                    {
+                        User = g.Key,
+                        Count = g.Count()
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new PostgresQlObjectFactory());
+                var sql = script.ToString();
+                
+                Console.WriteLine(sql);
+
+                const string expected = @"
+select u0.""UserName"" as ""User"", count(1) as ""Count""
+from public.""Blogs"" b0
+left outer join public.""Users"" u0 on b0.""UserId"" = u0.""UserId""
+where (b0.""Url"" is not null) and (b0.""Name"" like 'Ethan%')
+group by u0.""UserName""";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
     }
 }
