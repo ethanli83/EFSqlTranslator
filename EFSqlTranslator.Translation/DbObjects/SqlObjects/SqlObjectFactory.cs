@@ -29,7 +29,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             var dbSelect = new SqlSelect
             {
-                From = dbReference
+                From = dbReference,
+                OutputOption = dbReference.OutputOption
             };
 
             dbReference.OwnerSelect = dbSelect;
@@ -196,7 +197,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             return new DbReference(dbObj)
             {
-                Alias = alias
+                Alias = alias,
+                OutputOption = OutputOption
             };
         }
 

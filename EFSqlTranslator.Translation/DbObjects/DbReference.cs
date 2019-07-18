@@ -9,6 +9,8 @@ namespace EFSqlTranslator.Translation.DbObjects
         public DbReference(IDbObject dbObject)
         {
             Referee = dbObject;
+
+            OutputOption = dbObject?.OutputOption;
         }
 
         public IDbObject Referee { get; }

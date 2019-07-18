@@ -6,6 +6,8 @@ namespace EFSqlTranslator.Translation.DbObjects
         {
             Key = key;
             Value = val;
+
+            OutputOption = val?.OutputOption;
         }
 
         public string Key { get; private set; }
