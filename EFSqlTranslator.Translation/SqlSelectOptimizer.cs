@@ -46,6 +46,8 @@ namespace EFSqlTranslator.Translation
                     unwrapedSelect.Selection.Add(innnerCol);
                 }
 
+                unwrapedSelect.Selection.IsDistinct = dbSelect.Selection.IsDistinct;
+
                 dbSelect = unwrapedSelect;
             }
         }

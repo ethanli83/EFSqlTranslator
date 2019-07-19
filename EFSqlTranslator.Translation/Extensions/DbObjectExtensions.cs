@@ -73,7 +73,7 @@ namespace EFSqlTranslator.Translation.Extensions
         /// <returns></returns>
         public static IDbConstant[] Parameterise(this IDbObject dbObj, bool ignoreEnumerable = false)
         {
-            var constants = dbObj.GetDbObjects<IDbConstant>().Where(c => c.AsParam).ToArray();
+            var constants = dbObj.GetDbObjects<IDbConstant>().Where(c => c.Val != null && c.AsParam).ToArray();
             if (ignoreEnumerable)
             {
                 constants = constants.Where(c => !c.ValType.DotNetType.IsEnumerable()).ToArray();

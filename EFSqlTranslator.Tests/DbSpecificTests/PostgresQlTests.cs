@@ -54,7 +54,7 @@ where (b0.""Url"" is not null) and (b0.""Name"" like 'Ethan%')";
                 Console.WriteLine(sql);
 
                 const string expected = @"
-select case when c0.""IsDeleted"" != TRUE then TRUE else FALSE end as 'NotDeleted'
+select case when c0.""IsDeleted"" != TRUE then TRUE else FALSE end as ""NotDeleted""
 from public.""Comments"" c0 where c0.""IsDeleted"" != TRUE";
 
                 TestUtils.AssertStringEqual(expected, sql);
@@ -150,6 +150,39 @@ from public.""Blogs"" b0
 left outer join public.""Users"" u0 on b0.""UserId"" = u0.""UserId""
 where (b0.""Url"" is not null) and (b0.""Name"" like 'Ethan%')
 group by u0.""UserName""";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
+        public void TestDistinct()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs
+                    .Where(b => b.Url != null && b.Name.StartsWith("Ethan"))
+                    .Select(g => new
+                    {
+                        User = g.User.UserName,
+                        Count = g.Posts.Distinct().Count()
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new PostgresQlObjectFactory());
+                var sql = script.ToString();
+                
+                Console.WriteLine(sql);
+
+                const string expected = @"
+select u0.""UserName"" as ""User"", coalesce(sq0.""count0"", 0) as ""Count""
+from public.""Blogs"" b0
+left outer join public.""Users"" u0 on b0.""UserId"" = u0.""UserId""
+left outer join (
+    select distinct p0.""BlogId"" as ""BlogId_jk0"", p0.""PostId"", count(1) as ""count0""
+    from public.""Posts"" p0
+    group by p0.""BlogId"", p0.""PostId""
+) sq0 on b0.""BlogId"" = sq0.""BlogId_jk0""
+where (b0.""Url"" is not null) and (b0.""Name"" like 'Ethan%')";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

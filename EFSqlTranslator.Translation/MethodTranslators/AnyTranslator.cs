@@ -34,7 +34,6 @@ namespace EFSqlTranslator.Translation.MethodTranslators
 
             IDbBinary whereClause = null;
 
-            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach(var joinKey in dbJoin.Condition.GetOperands().OfType<IDbColumn>().Where(c => ReferenceEquals(c.Ref, dbJoin.To)))
             {
                 var pkColumn = _dbFactory.BuildColumn(dbJoin.To, joinKey.Name, joinKey.ValType.DotNetType, joinKey.Alias);

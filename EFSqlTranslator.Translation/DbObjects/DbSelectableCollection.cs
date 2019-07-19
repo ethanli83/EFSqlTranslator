@@ -15,6 +15,8 @@ namespace EFSqlTranslator.Translation.DbObjects
             _owner = owner;
         }        
 
+        public bool IsDistinct { get; set; }
+
         public void Add(IDbSelectable selectable)
         {
             if (_selectables.Contains(selectable))
@@ -42,13 +44,21 @@ namespace EFSqlTranslator.Translation.DbObjects
 
         public override string ToString()
         {
+            var selection = string.Empty;
             if (!_selectables.Any())
-                return $"{_owner.From.Alias}.*";
+            {
+                selection = $"{_owner.From.Alias}.*";
+            }
+            else 
+            {
+                var selections = 
+                    from s in _selectables
+                    select s.ToSelectionString();
 
-            var selection = from s in _selectables
-                select s.ToSelectionString();
+                selection = string.Join(", ", selections);  
+            } 
 
-            return string.Join(", ", selection);
+            return IsDistinct ? $"distinct {selection}" : selection;
         }
 
         public IEnumerator<IDbSelectable> GetEnumerator()

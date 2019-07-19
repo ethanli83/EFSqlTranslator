@@ -149,18 +149,25 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
         {
             return new SqlFunc(name, parameters)
             {
-                IsAggregation = isAggregation
+                IsAggregation = isAggregation,
+                OutputOption = OutputOption
             };
         }
 
         public virtual IDbFunc BuildNullCheckFunc(params IDbObject[] parameters)
         {
-            return new SqlFunc("coalesce", parameters);
+            return new SqlFunc("coalesce", parameters) 
+            {
+                OutputOption = OutputOption
+            };
         }
 
         public IDbCondition BuildCondition(Tuple<IDbBinary, IDbObject>[] conditions, IDbObject dbElse = null)
         {
-            return new SqlCondition(conditions, dbElse);
+            return new SqlCondition(conditions, dbElse)
+            {
+                OutputOption = OutputOption
+            };
         }
 
         public virtual IDbTempTable BuildTempTable(string tableName, IDbSelect sourceSelect = null)
@@ -175,12 +182,18 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public virtual IDbStatment BuildStatement(IDbObject script)
         {
-            return new SqlStatement(script);
+            return new SqlStatement(script) 
+            {
+                OutputOption = OutputOption
+            };
         }
 
         public virtual DbLimit BuildLimit(int fetch, int offset = 0)
         {
-            return new SqlLimit(offset, fetch);
+            return new SqlLimit(offset, fetch) 
+            {
+                OutputOption = OutputOption
+            };
         }
 
         public virtual DbOperator GetDbOperator(ExpressionType eType, Type tl, Type tr)
@@ -190,7 +203,10 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public virtual IDbScript BuildScript()
         {
-            return new SqlScript();
+            return new SqlScript() 
+            {
+                OutputOption = OutputOption
+            };
         }
 
         public DbReference BuildRef(IDbObject dbObj, string alias = null)
@@ -210,7 +226,8 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             {
                 To = joinTo,
                 Condition = condition,
-                Type = dbJoinType
+                Type = dbJoinType,
+                OutputOption = OutputOption
             };
 
             joinTo.OwnerSelect = dbSelect;
@@ -221,14 +238,18 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 
         public IDbList<T> BuildList<T>(params T[] objs) where T : IDbObject
         {
-            return new SqlList<T>(objs);
+            return new SqlList<T>(objs) 
+            {
+                OutputOption = OutputOption
+            };
         }
 
         public IDbKeyWord BuildKeyWord(string keyWord)
         {
             return new SqlKeyWord
             {
-                KeyWord = keyWord
+                KeyWord = keyWord,
+                OutputOption = OutputOption
             };
         }
 
