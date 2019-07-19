@@ -3,7 +3,7 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using EFSqlTranslator.EFModels;
-using EFSqlTranslator.Translation.DbObjects.MySqlObjects;
+using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using EFSqlTranslator.Translation.Extensions;
 using Newtonsoft.Json;
 
@@ -31,12 +31,13 @@ namespace EFSqlTranslator.ConsoleApp
                 try
                 {
                     var query = db.Blogs
-                        .Where(b => b.BlogId > 0);
+                        .Where(b => b.BlogId > 0)
+                        .Distinct();
 
                     var result = db.Query(
                         query,
                         new EFModelInfoProvider(db),
-                        new MySqlObjectFactory(),
+                        new SqliteObjectFactory(),
                         out sql);
                     
                     var json = JsonConvert.SerializeObject(result, new JsonSerializerSettings
