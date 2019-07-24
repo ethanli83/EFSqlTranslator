@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace EFSqlTranslator.Translation.DbObjects
 {
-    public class DbSelectableCollection : DbObject, IEnumerable<IDbSelectable>
+    public class DbSelectableCollection : DbObject, IEnumerable<IDbSelectable>, IDistinctable
     {
         private readonly IDbSelect _owner;
         
