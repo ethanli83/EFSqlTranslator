@@ -4,15 +4,17 @@ using EFSqlTranslator.Translation.Extensions;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
 {
-    public class SqlColumn : SqlSelectable, IDbColumn
+    public class SqlColumn : SqlSelectable, IDbColumn, IDistinctable
     {
         public DbValType ValType { get; set; }
         
         public string Name { get; set; }
 
+        public bool IsDistinct { get; set; }
+
         public override string ToString()
         {
-            var sb = new StringBuilder();
+            var sb = new StringBuilder(IsDistinct ? "distinct " : "");
             
             if (!string.IsNullOrEmpty(Ref?.Alias))
                 sb.Append($"{Ref.Alias}.");

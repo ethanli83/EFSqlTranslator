@@ -52,6 +52,7 @@ namespace EFSqlTranslator.Translation
             new InTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new LimitTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new DistinctTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new DistinctCountTranslator(_infoProvider, _dbFactory).Register(_plugIns);
         }
 
         internal IDbObject GetElement()
