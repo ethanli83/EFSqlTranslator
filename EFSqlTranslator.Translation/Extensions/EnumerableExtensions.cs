@@ -12,7 +12,7 @@ namespace EFSqlTranslator.Translation.Extensions
         /// <param name="source"> A sequence that contains elements to be counted </param>
         /// <param name="selector"> A function to test each element for a condition </param>
         /// <returns> A number that represents how many distinct elements in the sequence satisfy the condition in the predicate function </returns>
-        public static int DistinctCount<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
+        public static int DistinctCount<TSource, TOut>(this IEnumerable<TSource> source, Func<TSource, TOut> selector)
         {
             return source.Select(selector).Distinct().Count();
         }

@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using EFSqlTranslator.EFModels;
 using EFSqlTranslator.Translation;
+using EFSqlTranslator.Translation.Extensions;
 using EFSqlTranslator.Translation.DbObjects.SqliteObjects;
 using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 using Xunit;
@@ -261,6 +263,32 @@ from (
 ) sq0
 left outer join Users u0 on sq0.UserId_jk0 = u0.UserId
 group by sq0.BlogId, sq0.Url, u0.UserName";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
+        public void Test_Distinc_count()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Posts.
+                    Where(p => p.Content != null).
+                    Select(g => new
+                    {
+                        g.BlogId,
+                        cnt = g.Comments.DistinctCount(c => c.User.UserName)
+                    });
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select p0.BlogId, count(distinct u0.UserName) as 'cnt', c0.PostId as 'PostId_jk0'
+from Comments c0
+inner join Users u0 on c0.UserId = u0.UserId
+group by c0.PostId, p0.BlogId";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }
