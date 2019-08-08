@@ -37,22 +37,26 @@ group by p0.BlogId";
         {
             using (var db = new TestingContext())
             {
-                var query = db.Posts.
-                    Where(p => p.Content != null).
-                    Select(g => new
+                var query = db.Blogs.
+                    Where(b => b.Url != null).
+                    Select(b => new
                     {
-                        g.BlogId,
-                        cnt = g.Comments.DistinctCount(c => c.User.UserName)
+                        b.Name,
+                        cnt = b.Posts.DistinctCount(p => p.PostId)
                     });
 
                 var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
                 var sql = script.ToString();
 
                 const string expected = @"
-select p0.BlogId, count(distinct u0.UserName) as 'cnt', c0.PostId as 'PostId_jk0'
-from Comments c0
-inner join Users u0 on c0.UserId = u0.UserId
-group by c0.PostId, p0.BlogId";
+select b0.Name, coalesce(sq0.count0, 0) as 'cnt'
+from Blogs b0
+left outer join (
+    select p0.BlogId as 'BlogId_jk0', count(distinct p0.PostId) as 'count0'
+    from Posts p0
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+where b0.Url is not null";
 
                 TestUtils.AssertStringEqual(expected, sql);
             }

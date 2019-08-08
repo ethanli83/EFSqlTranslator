@@ -55,15 +55,6 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             CreateAggregation(m, state, nameGenerator, childSelect, dbCountFunc);
         }
 
-        private static IDbSelectable GetAggregationTarget(MethodCallExpression m, TranslationState state)
-        {
-            if (!m.GetArguments().Any())
-                return null;
-
-            var dbObj = state.ResultStack.Pop();
-            return (IDbSelectable)dbObj;
-        }
-
         private static string GetSqlMethodName(string methodName)
         {
             methodName = methodName.ToLower();
