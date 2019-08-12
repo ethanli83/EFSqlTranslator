@@ -3,9 +3,9 @@ using EFSqlTranslator.Translation.DbObjects;
 
 namespace EFSqlTranslator.Translation.MethodTranslators
 {
-    public class StringStartsEndsContainsTranslator : AbstractMethodTranslator
+    public class StringStartsEndsTranslator : AbstractMethodTranslator
     {
-        public StringStartsEndsContainsTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
+        public StringStartsEndsTranslator(IModelInfoProvider infoProvider, IDbObjectFactory dbFactory)
             : base(infoProvider, dbFactory)
         {
         }
@@ -14,7 +14,6 @@ namespace EFSqlTranslator.Translation.MethodTranslators
         {
             plugIns.RegisterMethodTranslator("startswith", this);
             plugIns.RegisterMethodTranslator("endswith", this);
-            plugIns.RegisterMethodTranslator("contains", this);
         }
 
         public override void Translate(MethodCallExpression m, TranslationState state, UniqueNameGenerator nameGenerator)
@@ -22,9 +21,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var dbContants = (IDbConstant)state.ResultStack.Pop();
             dbContants.Val = m.Method.Name == "StartsWith"
                     ? $"{dbContants.Val}%"
-                    : m.Method.Name == "EndsWith"
-                        ? $"%{dbContants.Val}"
-                        : $"%{dbContants.Val}%";
+                    : $"%{dbContants.Val}";
 
             var dbExpression = (IDbSelectable)state.ResultStack.Pop();
             var dbBinary = _dbFactory.BuildBinary(dbExpression, DbOperator.Like, dbContants);
