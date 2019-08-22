@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Numerics;
 using System.Reflection;
 using EFSqlTranslator.Translation.DbObjects;
 
@@ -23,6 +24,22 @@ namespace EFSqlTranslator.Translation
                 throw new ArgumentNullException(nameof(type));
 
             return type.Name.StartsWith("<>") || type.Name.StartsWith("VB$");
+        }
+
+        public static bool IsNumeric(this Type type)
+        {
+            return (type == typeof(Byte) ||
+                    type == typeof(Int16) ||
+                    type == typeof(Int32) ||
+                    type == typeof(Int64) ||
+                    type == typeof(SByte) ||
+                    type == typeof(UInt16) ||
+                    type == typeof(UInt32) ||
+                    type == typeof(UInt64) ||
+                    type == typeof(BigInteger) ||
+                    type == typeof(Decimal) ||
+                    type == typeof(Double) ||
+                    type == typeof(Single));
         }
 
         public static Type StripNullable(this Type type)

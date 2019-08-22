@@ -320,5 +320,52 @@ from Comments c0";
                 TestUtils.AssertStringEqual(expected, sql);
             }
         }
+
+        [Fact]
+        public void Test_Select_Return_Single_Value()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs
+                    .Where(b => b.BlogId > 0)
+                    .Select(b => b.BlogId);
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select b0.BlogId
+from Blogs b0
+where b0.BlogId > 0";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
+
+        [Fact]
+        public void Test_Select_Return_Single_Value_With_Aggregation2()
+        {
+            using (var db = new TestingContext())
+            {
+                var query = db.Blogs
+                    .Where(b => b.BlogId > 0)
+                    .Select(b => b.Posts.Sum(p => p.PostId));
+
+                var script = QueryTranslator.Translate(query.Expression, new EFModelInfoProvider(db), new SqliteObjectFactory());
+                var sql = script.ToString();
+
+                const string expected = @"
+select coalesce(sq0.sum0, 0) as 'coalesce0'
+from Blogs b0
+left outer join (
+    select p0.BlogId as 'BlogId_jk0', sum(p0.PostId) * 1.0 as 'sum0'
+    from Posts p0
+    group by p0.BlogId
+) sq0 on b0.BlogId = sq0.BlogId_jk0
+where b0.BlogId > 0";
+
+                TestUtils.AssertStringEqual(expected, sql);
+            }
+        }
     }
 }

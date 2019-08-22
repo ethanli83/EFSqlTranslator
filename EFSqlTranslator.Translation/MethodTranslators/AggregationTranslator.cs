@@ -50,7 +50,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             if (dbExpression == null)
                 throw new NotSupportedException("Can not aggregate.");
 
-            var dbCountFunc = _dbFactory.BuildFunc(GetSqlMethodName(m.Method.Name), true, dbExpression);
+            var dbCountFunc = _dbFactory.BuildFunc(GetSqlMethodName(m.Method.Name), true, m.Method.ReturnType, dbExpression);
 
             CreateAggregation(m, state, nameGenerator, childSelect, dbCountFunc);
         }

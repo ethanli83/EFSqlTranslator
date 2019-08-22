@@ -53,7 +53,7 @@ where MyFunc(b0.BlogId, 1) = 1";
         {
             var dbConstants = (IDbConstant)state.ResultStack.Pop();
             var dbExpression = (IDbSelectable)state.ResultStack.Pop();
-            var dbBinary = _dbFactory.BuildFunc("MyFunc", false, dbExpression, dbConstants);
+            var dbBinary = _dbFactory.BuildFunc("MyFunc", false, m.Method.ReturnType, dbExpression, dbConstants);
 
             state.ResultStack.Push(dbBinary);
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -46,6 +47,14 @@ namespace EFSqlTranslator.Translation
                     else
                     {
                         node.Result = connection.Query(entityType, sql, dParams);
+
+                        // Dapper will always use Int64 for default value '0', 
+                        // so we need to convert it to the correct type
+                        if (entityType.IsNumeric())
+                        {
+                            node.Result = node.Result
+                               .Select(v => Convert.ChangeType(v, entityType)).ToArray();
+                        }
                     }
 
                     if (node.FromNode != null)

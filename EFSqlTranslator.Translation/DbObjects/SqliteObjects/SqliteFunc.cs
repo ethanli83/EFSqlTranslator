@@ -1,10 +1,11 @@
-﻿using EFSqlTranslator.Translation.DbObjects.SqlObjects;
+﻿using System;
+using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
 {
     public class SqliteFunc : SqlFunc
     {
-        public SqliteFunc(string name, IDbObject[] parameters) : base(name, parameters)
+        public SqliteFunc(string name, Type type, IDbObject[] parameters) : base(name, type, parameters)
         {
         }
 

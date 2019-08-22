@@ -60,7 +60,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var distinctable = (IDistinctable)dbExpression;
             distinctable.IsDistinct = true;
 
-            var dbFunc = _dbFactory.BuildFunc("count", true, dbExpression);
+            var dbFunc = _dbFactory.BuildFunc("count", true, m.Method.ReturnType, dbExpression);
 
             CreateAggregation(m, state, nameGenerator, childSelect, dbFunc);
         }

@@ -32,7 +32,7 @@ namespace EFSqlTranslator.ConsoleApp
                 {
                     var query = db.Blogs
                         .Where(b => b.BlogId > 0)
-                        .Distinct();
+                        .Select(b => b.BlogId);
 
                     var result = db.Query(
                         query,

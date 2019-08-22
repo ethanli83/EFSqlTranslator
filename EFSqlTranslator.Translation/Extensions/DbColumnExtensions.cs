@@ -9,7 +9,7 @@ namespace EFSqlTranslator.Translation.Extensions
         public static string GetAliasOrName(this IDbSelectable selectable)
         {
             var column = selectable as IDbColumn;
-            return column != null ?  column.Alias ?? column.Name : selectable.Alias;
+            return column != null ? column.Alias ?? column.Name : selectable.Alias;
         }
 
         public static string GetNameOrAlias(this IDbSelectable selectable)

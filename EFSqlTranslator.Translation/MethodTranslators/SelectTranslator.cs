@@ -38,7 +38,8 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             selections = selections.Concat(dbSelect.Selection.Where(s => s.IsJoinKey)).ToArray();
             foreach(var selectable in selections)
             {
-                var newSelectable = CreateNewSelectableForWrappingSelect(selectable, newSelectRef, _dbFactory);
+                var newSelectable = CreateNewSelectableForWrappingSelect(
+                    dbSelect, selectable, newSelectRef, m, _dbFactory, nameGenerator);
 
                 newSelect.Selection.Add(newSelectable);
             }
@@ -47,7 +48,8 @@ namespace EFSqlTranslator.Translation.MethodTranslators
         }
 
         private static IDbSelectable CreateNewSelectableForWrappingSelect(
-            IDbSelectable selectable, DbReference dbRef, IDbObjectFactory dbFactory)
+            IDbSelect dbSelect, IDbSelectable selectable, DbReference dbRef, Expression m, 
+            IDbObjectFactory dbFactory, UniqueNameGenerator nameGenerator)
         {
             if (dbRef == null)
                 return selectable;
@@ -59,6 +61,14 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var oRefCol = selectable as IDbRefColumn;
             if (oRefCol != null)
                 return dbFactory.BuildRefColumn(dbRef, oRefCol.Alias, oRefCol);
+
+            if (selectable is IDbFunc oDbFunc)
+            {
+                if (string.IsNullOrEmpty(oDbFunc.Alias)) 
+                    oDbFunc.Alias = nameGenerator.GenerateAlias(dbSelect, oDbFunc.Name, true);
+                    
+                return dbFactory.BuildColumn(dbRef, oDbFunc.Alias, oDbFunc.ReturnType);
+            }
 
             return dbFactory.BuildColumn(dbRef, selectable.Alias, typeof(string));
         }

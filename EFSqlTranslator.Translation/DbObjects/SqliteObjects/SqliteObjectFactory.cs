@@ -1,4 +1,5 @@
-﻿using EFSqlTranslator.Translation.DbObjects.SqlObjects;
+﻿using System;
+using EFSqlTranslator.Translation.DbObjects.SqlObjects;
 
 namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
 {
@@ -27,9 +28,9 @@ namespace EFSqlTranslator.Translation.DbObjects.SqliteObjects
             };
         }
 
-        public override IDbFunc BuildFunc(string name, bool isAggregation, params IDbObject[] parameters)
+        public override IDbFunc BuildFunc(string name, bool isAggregation, Type type, params IDbObject[] parameters)
         {
-            return new SqliteFunc(name, parameters)
+            return new SqliteFunc(name, type, parameters)
             {
                 IsAggregation = isAggregation,
                 OutputOption = OutputOption

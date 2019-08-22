@@ -145,18 +145,18 @@ namespace EFSqlTranslator.Translation.DbObjects.SqlObjects
             };
         }
 
-        public virtual IDbFunc BuildFunc(string name, bool isAggregation, params IDbObject[] parameters)
+        public virtual IDbFunc BuildFunc(string name, bool isAggregation, Type type, params IDbObject[] parameters)
         {
-            return new SqlFunc(name, parameters)
+            return new SqlFunc(name, type, parameters)
             {
                 IsAggregation = isAggregation,
                 OutputOption = OutputOption
             };
         }
 
-        public virtual IDbFunc BuildNullCheckFunc(params IDbObject[] parameters)
+        public virtual IDbFunc BuildNullCheckFunc(Type type, params IDbObject[] parameters)
         {
-            return new SqlFunc("coalesce", parameters) 
+            return new SqlFunc("coalesce", type, parameters) 
             {
                 OutputOption = OutputOption
             };

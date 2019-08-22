@@ -27,7 +27,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             if (!m.GetCaller().Type.IsGrouping())
                 childSelect = state.ResultStack.Pop() as IDbSelect;
 
-            var dbCountFunc = _dbFactory.BuildFunc(m.Method.Name.ToLower(), true, predicate);
+            var dbCountFunc = _dbFactory.BuildFunc(m.Method.Name.ToLower(), true, m.Method.ReturnType, predicate);
 
             CreateAggregation(m, state, nameGenerator, childSelect, dbCountFunc);
         }

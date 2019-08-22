@@ -52,7 +52,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var column = _dbFactory.BuildColumn(cRef, alias, m.Method.ReturnType);
 
             var dbDefaultVal = _dbFactory.BuildConstant(Activator.CreateInstance(m.Method.ReturnType));
-            var dbIsNullFunc = _dbFactory.BuildNullCheckFunc(column, dbDefaultVal);
+            var dbIsNullFunc = _dbFactory.BuildNullCheckFunc(m.Method.ReturnType, column, dbDefaultVal);
 
             state.ResultStack.Push(dbIsNullFunc);
         }
