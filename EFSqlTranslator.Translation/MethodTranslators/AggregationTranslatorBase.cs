@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using EFSqlTranslator.Translation.DbObjects;
+using EFSqlTranslator.Translation.Extensions;
 
 namespace EFSqlTranslator.Translation.MethodTranslators
 {
@@ -54,6 +55,15 @@ namespace EFSqlTranslator.Translation.MethodTranslators
             var dbIsNullFunc = _dbFactory.BuildNullCheckFunc(column, dbDefaultVal);
 
             state.ResultStack.Push(dbIsNullFunc);
+        }
+
+        protected static IDbSelectable GetAggregationTarget(MethodCallExpression m, TranslationState state)
+        {
+            if (!m.GetArguments().Any())
+                return null;
+
+            var dbObj = state.ResultStack.Pop();
+            return (IDbSelectable)dbObj;
         }
 
         private void ReLinkToChildSelect(IDbSelect dbSelect, IDbSelect childSelect) 
