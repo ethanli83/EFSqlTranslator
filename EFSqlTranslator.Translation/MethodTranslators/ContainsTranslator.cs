@@ -34,7 +34,7 @@ namespace EFSqlTranslator.Translation.MethodTranslators
                 var dbConstants = (IDbConstant)state.ResultStack.Pop();
 
                 var dbExpression = (IDbSelectable)state.ResultStack.Pop();
-                var dbFunc = _dbFactory.BuildFunc(SqlTranslationHelper.GetSqlOperator(DbOperator.Any), false, dbExpression);
+                var dbFunc = _dbFactory.BuildFunc(SqlTranslationHelper.GetSqlOperator(DbOperator.Any), false, m.Method.ReturnType, dbExpression);
                 dbBinary = _dbFactory.BuildBinary(dbConstants, DbOperator.Equal, dbFunc);
             }
             else
