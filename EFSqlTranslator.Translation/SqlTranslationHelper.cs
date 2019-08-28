@@ -234,6 +234,8 @@ namespace EFSqlTranslator.Translation
                     return "||";
                 case DbOperator.In:
                     return "in";
+                case DbOperator.Any:
+                    return "any";
                 default:
                     throw new NotSupportedException(optr.ToString());
             }

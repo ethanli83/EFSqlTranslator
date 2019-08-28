@@ -48,7 +48,8 @@ namespace EFSqlTranslator.Translation
             new SelectTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new CountTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new AggregationTranslator(_infoProvider, _dbFactory).Register(_plugIns);
-            new StringStartsEndsContainsTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new StringStartsEndsTranslator(_infoProvider, _dbFactory).Register(_plugIns);
+            new ContainsTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new InTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new LimitTranslator(_infoProvider, _dbFactory).Register(_plugIns);
             new DistinctTranslator(_infoProvider, _dbFactory).Register(_plugIns);
