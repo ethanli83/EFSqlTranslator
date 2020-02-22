@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../EFSqlTranslator.Translation/EFSqlTranslator.Translation.csproj" />
-    <ProjectReference Include="../EFSqlTranslator.EFModels/EFSqlTranslator.EFModels.csproj" />
-    <ProjectReference Include="../EFSqlTranslator.Tests/EFSqlTranslator.Tests.csproj" />
+    <ProjectReference Include="../EFSqlTranslator.Translation/EFSqlTranslator.Translation.csproj"/>
+    <ProjectReference Include="../EFSqlTranslator.EFModels/EFSqlTranslator.EFModels.csproj"/>
+    <ProjectReference Include="../EFSqlTranslator.Tests/EFSqlTranslator.Tests.csproj"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AgileObjects.ReadableExpressions" Version="1.9.2" />
-    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="AgileObjects.ReadableExpressions" Version="2.3.2"/>
+    <PackageReference Include="log4net" Version="2.0.8"/>
   </ItemGroup>
 </Project>
