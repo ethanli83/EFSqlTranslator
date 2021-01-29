@@ -10,6 +10,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AgileObjects.ReadableExpressions" Version="2.3.2"/>
-    <PackageReference Include="log4net" Version="2.0.8"/>
+    <PackageReference Include="log4net" Version="2.0.10"/>
   </ItemGroup>
 </Project>
